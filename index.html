@@ -47,14 +47,15 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;hei
 .hdiv{height:1px;background:var(--border);margin:14px 0}
 
 /* ── Image Upload Zone ── */
-.upload-zone{border:1.5px dashed var(--border);border-radius:10px;padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;position:relative;transition:all .2s;background:var(--bg);text-align:center}
+.upload-zone{border:1.5px dashed var(--border);border-radius:9px;padding:9px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;position:relative;transition:all .2s;background:var(--bg)}
 .upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:rgba(124,107,255,.05)}
 .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
-.uz-icon{font-size:24px}
-.uz-title{font-size:12px;font-weight:700;color:var(--text)}
-.uz-sub{font-size:10px;color:var(--muted);line-height:1.5}
-.uz-spec{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted);margin-top:2px;cursor:default}
-.uz-spec .iico{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--muted);display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0;position:relative}
+.uz-icon{font-size:20px;flex-shrink:0}
+.uz-texts{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.uz-title{font-size:11px;font-weight:700;color:var(--text)}
+.uz-sub{font-size:9px;color:var(--muted);line-height:1.4}
+.uz-spec{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--muted);margin-top:2px;cursor:default}
+.uz-spec .iico{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--muted);display:inline-flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;flex-shrink:0;position:relative}
 .uz-spec .iico:hover .tooltip{display:block}
 .tooltip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1e1e35;border:1px solid var(--border);border-radius:8px;padding:10px 12px;width:200px;font-size:10px;color:var(--text);line-height:1.7;z-index:100;white-space:normal;text-align:left;box-shadow:0 8px 24px rgba(0,0,0,.5)}
 .tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1e1e35}
@@ -131,9 +132,13 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
 .prog-bar{width:200px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
 .prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;width:0%;transition:width .1s}
 .prog-sub{font-size:11px;color:var(--muted)}
-.tslider-row{display:flex;align-items:center;gap:8px}
-.tslider-row label{font-size:10px;color:var(--muted)}
-.tval{font-size:11px;color:var(--text);min-width:30px}
+/* playbar row */
+.playbar{display:flex;align-items:center;gap:8px;width:100%;max-width:600px;padding:0 4px}
+.play-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);background:var(--panel2);color:var(--text);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0}
+.play-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(124,107,255,.1)}
+.play-btn.playing{border-color:var(--accent);background:var(--accent);color:#fff}
+.playbar .slider{flex:1}
+.tval{font-size:11px;color:var(--text);min-width:30px;text-align:right}
 
 /* ── RIGHT ── */
 .right{border-left:1px solid var(--border);background:var(--panel);overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:12px}
@@ -167,7 +172,6 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
   <div class="spec-badge">1920×1080 · <b>16:9</b></div>
   <div class="spec-badge"><b>15초</b> · 24FPS</div>
   <div class="topbar-right">
-    <button class="btn" id="prevBtn" onclick="togglePreview()">▶ 미리보기</button>
     <button class="btn" id="genBtn" onclick="generateVideo()">🎬 영상 생성</button>
     <button class="btn primary" id="dlBtn" onclick="downloadVideo()" disabled>⬇ 다운로드</button>
   </div>
@@ -208,8 +212,24 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
            ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
         <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" multiple onchange="onFileInput(this)">
         <div class="uz-icon">📁</div>
-        <div class="uz-title">클릭 또는 드래그 앤 드롭</div>
-        <div class="uz-sub">JPG · PNG · WEBP · 최대 3장<br>한 번에 여러 장 선택 가능</div>
+        <div class="uz-texts">
+          <div class="uz-title">클릭 또는 드래그 앤 드롭</div>
+          <div class="uz-sub">JPG · PNG · WEBP · 최대 3장</div>
+          <div class="uz-spec">
+            <div class="iico">i
+              <div class="tooltip">
+                <b>이미지 업로드 규격</b><br>
+                • 권장 크기: 800×800px 이상<br>
+                • 비율: 1:1 또는 4:3 권장<br>
+                • 최대 용량: 10MB / 장<br>
+                • 형식: JPG, PNG, WEBP<br>
+                • 최대 3장까지 업로드<br><br>
+                <span style="color:#7c6bff">Tip: 고화질일수록 영상 품질↑</span>
+              </div>
+            </div>
+            업로드 규격 보기
+          </div>
+        </div>
       </div>
 
       <!-- Slide Cards -->
@@ -223,29 +243,66 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
 
     <!-- STYLE TAB -->
     <div class="ltab-panel" id="tp-style">
-      <div class="sh" style="margin-top:0">배경 & 색상</div>
+      <div class="sh" style="margin-top:0">색상 설정</div>
+
+      <!-- Auto color button -->
+      <button class="btn" style="width:100%;justify-content:center;font-size:11px;margin-bottom:12px" onclick="autoColor()">
+        🎨 이미지 색상으로 자동 설정
+      </button>
+
       <div class="cgrid">
         <div class="ci"><label>우측 배경</label>
           <div class="crow"><input type="color" id="cBg" value="#0d1b4b" oninput="updateC(this,'cBgL')"><span id="cBgL">#0d1b4b</span></div></div>
-        <div class="ci"><label>강조 색상</label>
-          <div class="crow"><input type="color" id="cHighlight" value="#00e5a0" oninput="updateC(this,'cHL')"><span id="cHL">#00e5a0</span></div></div>
+        <div class="ci"><label>강조 / 구분선</label>
+          <div class="crow"><input type="color" id="cHighlight" value="#3a4a8a" oninput="updateC(this,'cHL')"><span id="cHL">#3a4a8a</span></div></div>
         <div class="ci"><label>가격 색상</label>
           <div class="crow"><input type="color" id="cPrice" value="#ffffff" oninput="updateC(this,'cPL')"><span id="cPL">#ffffff</span></div></div>
-        <div class="ci"><label>구분선</label>
-          <div class="crow"><input type="color" id="cLine" value="#3a4a8a" oninput="updateC(this,'cLL')"><span id="cLL">#3a4a8a</span></div></div>
-      </div>
-      <div class="hdiv"></div>
-      <div class="sh" style="margin-top:0">텍스트 색상</div>
-      <div class="cgrid">
-        <div class="ci"><label>브랜드명</label>
-          <div class="crow"><input type="color" id="cBrand" value="#ffffff" oninput="updateC(this,'cBrL')"><span id="cBrL">#ffffff</span></div></div>
-        <div class="ci"><label>제품명</label>
-          <div class="crow"><input type="color" id="cProduct" value="#ffffff" oninput="updateC(this,'cPrL')"><span id="cPrL">#ffffff</span></div></div>
-        <div class="ci"><label>설명 문구</label>
-          <div class="crow"><input type="color" id="cDesc" value="#c8d0e8" oninput="updateC(this,'cDL')"><span id="cDL">#c8d0e8</span></div></div>
         <div class="ci"><label>강조 문구</label>
           <div class="crow"><input type="color" id="cHText" value="#00e5a0" oninput="updateC(this,'cHTL')"><span id="cHTL">#00e5a0</span></div></div>
       </div>
+
+      <div class="hdiv"></div>
+      <div class="sh" style="margin-top:0">텍스트 색상</div>
+      <div class="cgrid">
+        <div class="ci"><label>브랜드명 · 제품명</label>
+          <div class="crow"><input type="color" id="cBrand" value="#ffffff" oninput="updateC(this,'cBrL');document.getElementById('cProduct').value=this.value;render()"><span id="cBrL">#ffffff</span></div></div>
+        <div class="ci"><label>설명 문구</label>
+          <div class="crow"><input type="color" id="cDesc" value="#c8d0e8" oninput="updateC(this,'cDL')"><span id="cDL">#c8d0e8</span></div></div>
+      </div>
+      <!-- hidden product color synced with brand -->
+      <input type="color" id="cProduct" value="#ffffff" style="display:none">
+      <!-- hidden line color synced with highlight -->
+
+      <div class="hdiv"></div>
+      <div class="sh" style="margin-top:0">텍스트 크기</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="vrow" style="margin-top:0">
+          <label style="min-width:52px">브랜드명</label>
+          <input type="range" class="slider" id="brandSizeS" min="20" max="72" value="36" oninput="document.getElementById('brandSizeV').textContent=this.value+'px';render()">
+          <span class="vval" id="brandSizeV">36px</span>
+        </div>
+        <div class="vrow" style="margin-top:0">
+          <label style="min-width:52px">제품명</label>
+          <input type="range" class="slider" id="prodSizeS" min="28" max="88" value="54" oninput="document.getElementById('prodSizeV').textContent=this.value+'px';render()">
+          <span class="vval" id="prodSizeV">54px</span>
+        </div>
+        <div class="vrow" style="margin-top:0">
+          <label style="min-width:52px">설명 문구</label>
+          <input type="range" class="slider" id="descSizeS" min="16" max="48" value="27" oninput="document.getElementById('descSizeV').textContent=this.value+'px';render()">
+          <span class="vval" id="descSizeV">27px</span>
+        </div>
+        <div class="vrow" style="margin-top:0">
+          <label style="min-width:52px">가격</label>
+          <input type="range" class="slider" id="priceSizeS" min="48" max="140" value="100" oninput="document.getElementById('priceSizeV').textContent=this.value+'px';render()">
+          <span class="vval" id="priceSizeV">100px</span>
+        </div>
+        <div class="vrow" style="margin-top:0">
+          <label style="min-width:52px">강조 문구</label>
+          <input type="range" class="slider" id="hlSizeS" min="18" max="56" value="33" oninput="document.getElementById('hlSizeV').textContent=this.value+'px';render()">
+          <span class="vval" id="hlSizeV">33px</span>
+        </div>
+      </div>
+
     </div>
 
     <!-- MUSIC TAB -->
@@ -253,19 +310,25 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
       <div class="sh" style="margin-top:0">배경음악</div>
       <div class="mlist">
         <div class="mitem on" data-m="upbeat" onclick="pickMusic(this,'upbeat')">
-          <span class="mi">🎵</span><span><span class="mn">Bright & Upbeat</span><span class="md">밝고 경쾌 · 소비재/패션</span></span><span class="dot"></span>
+          <span class="mi">🎵</span><span><span class="mn">Bright & Upbeat</span><span class="md">밝고 경쾌한 팝 비트 · 소비재/패션</span></span><span class="dot"></span>
         </div>
         <div class="mitem" data-m="electronic" onclick="pickMusic(this,'electronic')">
-          <span class="mi">🎹</span><span><span class="mn">Modern Electronic</span><span class="md">세련된 신스 · IT/테크</span></span><span class="dot"></span>
+          <span class="mi">🎹</span><span><span class="mn">Modern Electronic</span><span class="md">세련된 일렉 신스 · IT/테크</span></span><span class="dot"></span>
         </div>
         <div class="mitem" data-m="acoustic" onclick="pickMusic(this,'acoustic')">
           <span class="mi">🎸</span><span><span class="mn">Warm Acoustic</span><span class="md">따뜻한 어쿠스틱 · 라이프스타일</span></span><span class="dot"></span>
         </div>
         <div class="mitem" data-m="cinematic" onclick="pickMusic(this,'cinematic')">
-          <span class="mi">🎼</span><span><span class="mn">Cinematic Rise</span><span class="md">웅장한 빌드업 · 브랜드</span></span><span class="dot"></span>
+          <span class="mi">🎼</span><span><span class="mn">Cinematic Rise</span><span class="md">웅장한 오케스트라 빌드업 · 브랜드</span></span><span class="dot"></span>
         </div>
-        <div class="mitem" data-m="none" onclick="pickMusic(this,'none')">
-          <span class="mi">🔇</span><span><span class="mn">음악 없음</span><span class="md">무음 출력</span></span><span class="dot"></span>
+        <div class="mitem" data-m="lofi" onclick="pickMusic(this,'lofi')">
+          <span class="mi">☕</span><span><span class="mn">Lo-Fi Chill</span><span class="md">잔잔한 로파이 힙합 · 감성/일상</span></span><span class="dot"></span>
+        </div>
+        <div class="mitem" data-m="jazz" onclick="pickMusic(this,'jazz')">
+          <span class="mi">🎷</span><span><span class="mn">Smooth Jazz</span><span class="md">부드러운 재즈 · 프리미엄/식음료</span></span><span class="dot"></span>
+        </div>
+        <div class="mitem" data-m="hiphop" onclick="pickMusic(this,'hiphop')">
+          <span class="mi">🔥</span><span><span class="mn">Hip-Hop Beat</span><span class="md">강렬한 힙합 비트 · 스포츠/스트릿</span></span><span class="dot"></span>
         </div>
       </div>
       <div class="hdiv"></div>
@@ -303,9 +366,10 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
         <div class="prog-sub" id="progSub">프레임 렌더링 중...</div>
       </div>
     </div>
-    <div class="tslider-row">
-      <label>시점</label>
-      <input type="range" class="slider" style="width:160px" id="ts" min="0" max="100" value="20" oninput="onTS(this.value)">
+    <!-- Playbar: ▶ button + scrub slider + time -->
+    <div class="playbar">
+      <button class="play-btn" id="prevBtn" onclick="togglePreview()" title="미리보기 재생">▶</button>
+      <input type="range" class="slider" id="ts" min="0" max="100" value="20" oninput="onTS(this.value)">
       <span class="tval" id="tv">3.0s</span>
     </div>
   </div>
@@ -338,7 +402,7 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
       <b>글자수 가이드</b><br>
       • 브랜드명: 최대 12자<br>
       • 제품명: 최대 30자 (2줄)<br>
-      • 설명 문구: 최대 30자<br>
+      • 설명 문구: 최대 45자 (2줄)<br>
       • 가격: 숫자 입력 시 자동 콤마<br>
       • 강조 문구: 최대 22자
     </div>
@@ -360,10 +424,10 @@ const TOTAL = FPS * DUR; // 360
 
 const IMG_RATIO  = 0.595;
 const IMG_PAD    = 0.022;
-const IMG_ROUND  = 18;
+const IMG_ROUND  = 40;
 
 // Per-field limits
-const LIMITS = { brand:12, product:30, desc:30, price:12, highlight:22 };
+const LIMITS = { brand:12, product:30, desc:45, price:12, highlight:22 };
 
 // ═══════════════════════════════════════════════════
 // STATE
@@ -504,7 +568,7 @@ function buildFieldsHTML(i, sl) {
   <div class="fstack">
     ${fieldHTML(i,'brand','브랜드명', sl.brand, LIMITS.brand, '예: 앳센셜', false)}
     ${fieldHTML(i,'product','제품명', sl.product, LIMITS.product, '예: KBO 치어 모먼트\n배트 키링', true)}
-    ${fieldHTML(i,'desc','제품 설명 문구', sl.desc, LIMITS.desc, '예: 어디에서도 볼 수 없는 유니크한 디자인', false)}
+    ${fieldHTML(i,'desc','제품 설명 문구', sl.desc, LIMITS.desc, '예: 어디에서도 볼 수 없는 유니크한 디자인', true)}
     ${priceFieldHTML(i, sl.price)}
     ${fieldHTML(i,'highlight','강조 문구', sl.highlight, LIMITS.highlight, '예: 우리 팀 굿즈, 품절 전 선점 필수!', false)}
   </div>`;
@@ -596,15 +660,29 @@ function renderExport(t) {
 }
 
 function getColors() {
+  const highlight = document.getElementById('cHighlight').value;
   return {
     bg:       document.getElementById('cBg').value,
-    highlight:document.getElementById('cHighlight').value,
+    highlight,
     price:    document.getElementById('cPrice').value,
-    line:     document.getElementById('cLine').value,
+    line:     highlight, // synced
     brand:    document.getElementById('cBrand').value,
-    product:  document.getElementById('cProduct').value,
+    product:  document.getElementById('cBrand').value, // synced with brand
     desc:     document.getElementById('cDesc').value,
     htext:    document.getElementById('cHText').value,
+  };
+}
+
+function getBrandFS(scale) {
+  return parseInt(document.getElementById('brandSizeS').value || 36) * scale;
+}
+function getSizes(scale) {
+  return {
+    brand: parseInt(document.getElementById('brandSizeS').value  || 36)  * scale,
+    prod:  parseInt(document.getElementById('prodSizeS').value   || 54)  * scale,
+    desc:  parseInt(document.getElementById('descSizeS').value   || 27)  * scale,
+    price: parseInt(document.getElementById('priceSizeS').value  || 100) * scale,
+    hl:    parseInt(document.getElementById('hlSizeS').value     || 33)  * scale,
   };
 }
 
@@ -668,14 +746,15 @@ function drawFrame(ctx, sw, sh, t) {
 
   // Dots
   if (n > 1) {
-    const dotR = sw * 0.006;
-    const totalDotW = n * dotR * 2 + (n-1) * dotR * 2.5;
-    const dotBaseX = imgX + imgW/2 - totalDotW/2;
-    const dotY = imgY + imgH - pad * 0.85;
+    const dotR = Math.max(2, sw * 0.006);
+    const gap = dotR * 2.5;
+    const totalDotW = n * dotR * 2 + (n - 1) * gap;
+    const dotBaseX = imgX + imgW / 2 - totalDotW / 2;
+    const dotY = imgY + imgH - Math.max(pad * 0.85, dotR * 2);
     for (let i = 0; i < n; i++) {
-      const dx = dotBaseX + i * (dotR * 2 + dotR * 2.5) + dotR;
+      const dx = dotBaseX + i * (dotR * 2 + gap) + dotR;
       ctx.beginPath();
-      ctx.arc(dx, dotY, dotR, 0, Math.PI*2);
+      ctx.arc(dx, dotY, dotR, 0, Math.PI * 2);
       ctx.fillStyle = i === curIdx ? '#ffffff' : 'rgba(255,255,255,0.32)';
       ctx.fill();
     }
@@ -703,6 +782,7 @@ function drawFrame(ctx, sw, sh, t) {
 function drawTextPanel(ctx, sl, c, sw, sh, cx2, textW, alpha, slideInProgress) {
   const scale = sw / EW;
   const slideOffY = (1 - easeOut(slideInProgress)) * sh * 0.025;
+  const sz = getSizes(scale);
 
   ctx.save();
   ctx.globalAlpha = alpha;
@@ -710,109 +790,99 @@ function drawTextPanel(ctx, sl, c, sw, sh, cx2, textW, alpha, slideInProgress) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
-  // ── Font sizes ──
-  const brandFS   = 36  * scale;
-  const prodFS    = 54  * scale;
-  const descFS    = 28  * scale;
-  const priceFS   = 100 * scale;
-  const hlFS      = 34  * scale;
-  const lineH     = 2   * scale; // divider height
-  const maxPW     = textW * 0.82;
+  const maxPW = textW * 0.82;
 
-  // ── Measure product lines (max 2) ──
-  ctx.font = `900 ${prodFS}px "Noto Sans KR",sans-serif`;
-  const prodLines = wrapText(ctx, (sl.product || ''), maxPW, 2);
-  const prodBlockH = prodLines.length * prodFS * 1.25;
+  // Measure wrapped lines using current sizes
+  ctx.font = `900 ${sz.prod}px "Noto Sans KR",sans-serif`;
+  const prodLines = wrapText(ctx, sl.product || '', maxPW, 2);
+  const prodBlockH = prodLines.length * sz.prod * 1.28;
 
-  // ── Desc is single line ──
-  const descText = (sl.desc || '');
-  const descBlockH = descText ? descFS * 1.4 : 0;
+  ctx.font = `400 ${sz.desc}px "Noto Sans KR",sans-serif`;
+  const descRaw = sl.desc || '';
+  const descLines = descRaw ? wrapText(ctx, descRaw, maxPW, 2) : [];
+  const descBlockH = descLines.length > 0 ? descLines.length * sz.desc * 1.4 : 0;
 
-  // ── Price block ──
-  const priceBlockH = sl.price ? priceFS * 1.1 : 0;
+  const divH   = sh * 0.002;
+  const divGap = sh * 0.032;
+  const priceBlockH = sl.price     ? sz.price * 1.0 : 0;
+  const hlBlockH    = sl.highlight ? sz.hl    * 1.0 : 0;
 
-  // ── Divider + gap ──
-  const dividerGap = sh * 0.025;
-  const dividerBlockH = lineH + dividerGap * 2;
+  // Generous gaps between blocks
+  const G1 = sz.brand * 1.2;
+  const G2 = sz.prod  * 0.65;
+  const G3 = descBlockH > 0 ? sz.desc * 0.7 : 0;
+  const G4 = divGap;
+  const G5 = priceBlockH > 0 && hlBlockH > 0 ? sh * 0.052 : 0;
 
-  // ── Highlight ──
-  const hlBlockH = sl.highlight ? hlFS * 1.4 : 0;
-
-  // ── Spacing between blocks ──
-  const gapBrandProd  = brandFS * 0.7;
-  const gapProdDesc   = prodFS  * 0.55;
-  const gapDescPrice  = descText ? descFS * 0.9 : prodFS * 0.55;
-  const gapPriceLine  = priceBlockH ? sh * 0.025 : 0;
-  const gapLineHL     = hlBlockH ? dividerGap : 0;
-
-  // ── Total content height ──
   const totalH =
-    brandFS +
-    gapBrandProd +
-    prodBlockH +
-    (descBlockH ? gapProdDesc + descBlockH : 0) +
-    (priceBlockH ? gapDescPrice + priceBlockH : 0) +
-    (hlBlockH ? gapPriceLine + dividerBlockH + gapLineHL + hlBlockH : 0);
+    sz.brand +
+    G1 + prodBlockH +
+    (descBlockH > 0 ? G2 + descBlockH : 0) +
+    G3 + divH + G4 +
+    (priceBlockH > 0 ? priceBlockH : 0) +
+    (hlBlockH > 0 ? G5 + hlBlockH : 0);
 
-  // ── Start Y so content is vertically centered ──
-  let y = (sh - totalH) / 2 + brandFS / 2;
+  let y = (sh - totalH) / 2 + sz.brand / 2;
 
   // Brand
-  ctx.font = `700 ${brandFS}px "Noto Sans KR",sans-serif`;
+  ctx.font = `700 ${sz.brand}px "Noto Sans KR",sans-serif`;
   ctx.fillStyle = c.brand;
   ctx.fillText(sl.brand || '', cx2, y);
-  y += brandFS / 2 + gapBrandProd + prodFS * 0.625;
+  y += sz.brand / 2 + G1;
 
   // Product (up to 2 lines)
-  ctx.font = `900 ${prodFS}px "Noto Sans KR",sans-serif`;
+  ctx.font = `900 ${sz.prod}px "Noto Sans KR",sans-serif`;
   ctx.fillStyle = c.product;
   prodLines.forEach((line, idx) => {
-    ctx.fillText(line, cx2, y + idx * prodFS * 1.25);
+    ctx.fillText(line, cx2, y + sz.prod * 0.64 + idx * sz.prod * 1.28);
   });
-  y += prodBlockH - prodFS * 0.625;
+  y += prodBlockH + G2;
 
-  // Desc
-  if (descText) {
-    y += gapProdDesc + descFS / 2;
-    ctx.font = `400 ${descFS}px "Noto Sans KR",sans-serif`;
+  // Desc (up to 2 lines)
+  if (descLines.length > 0) {
+    ctx.font = `400 ${sz.desc}px "Noto Sans KR",sans-serif`;
     ctx.fillStyle = c.desc;
-    ctx.fillText(truncateText(ctx, descText, maxPW), cx2, y);
-    y += descFS / 2;
+    descLines.forEach((line, idx) => {
+      ctx.fillText(line, cx2, y + sz.desc * 0.5 + idx * sz.desc * 1.4);
+    });
+    y += descBlockH + G3;
   }
+
+  // Divider (always between desc/product and price)
+  ctx.strokeStyle = c.line;
+  ctx.lineWidth = 1.5 * scale;
+  ctx.globalAlpha = alpha * 0.5;
+  ctx.beginPath();
+  ctx.moveTo(cx2 - textW * 0.3, y);
+  ctx.lineTo(cx2 + textW * 0.3, y);
+  ctx.stroke();
+  ctx.globalAlpha = alpha;
+  y += G4;
 
   // Price
   if (sl.price) {
-    y += gapDescPrice + priceFS / 2;
     const priceText = formatPrice(sl.price);
     const unitText  = '원';
-    ctx.font = `900 ${priceFS}px "Noto Sans KR",sans-serif`;
+    ctx.font = `900 ${sz.price}px "Noto Sans KR",sans-serif`;
     ctx.fillStyle = c.price;
     const pW = ctx.measureText(priceText).width;
-    ctx.font = `700 ${priceFS * 0.52}px "Noto Sans KR",sans-serif`;
+    ctx.font = `700 ${sz.price * 0.52}px "Noto Sans KR",sans-serif`;
     const uW = ctx.measureText(unitText).width;
-    const totalPriceW = pW + priceFS * 0.08 + uW;
-    ctx.font = `900 ${priceFS}px "Noto Sans KR",sans-serif`;
+    const totalPW = pW + sz.price * 0.08 + uW;
+    ctx.font = `900 ${sz.price}px "Noto Sans KR",sans-serif`;
     ctx.textAlign = 'left';
-    ctx.fillText(priceText, cx2 - totalPriceW / 2, y);
-    ctx.font = `700 ${priceFS * 0.52}px "Noto Sans KR",sans-serif`;
-    ctx.fillText(unitText, cx2 - totalPriceW / 2 + pW + priceFS * 0.08, y);
+    ctx.fillText(priceText, cx2 - totalPW / 2, y + sz.price * 0.5);
+    ctx.font = `700 ${sz.price * 0.52}px "Noto Sans KR",sans-serif`;
+    ctx.fillText(unitText, cx2 - totalPW / 2 + pW + sz.price * 0.08, y + sz.price * 0.5);
     ctx.textAlign = 'center';
-    y += priceFS / 2;
+    y += priceBlockH + G5;
   }
 
-  // Divider + Highlight
+  // Highlight
   if (sl.highlight) {
-    y += gapPriceLine + dividerGap;
-    ctx.strokeStyle = c.line;
-    ctx.lineWidth = 1.5 * scale;
-    ctx.beginPath();
-    ctx.moveTo(cx2 - textW * 0.32, y);
-    ctx.lineTo(cx2 + textW * 0.32, y);
-    ctx.stroke();
-    y += dividerGap + hlFS / 2;
-    ctx.font = `900 ${hlFS}px "Noto Sans KR",sans-serif`;
+    ctx.font = `900 ${sz.hl}px "Noto Sans KR",sans-serif`;
     ctx.fillStyle = c.htext;
-    ctx.fillText(truncateText(ctx, sl.highlight, maxPW), cx2, y);
+    ctx.fillText(truncateText(ctx, sl.highlight, maxPW), cx2, y + sz.hl * 0.5);
   }
 
   ctx.restore();
@@ -878,12 +948,18 @@ function togglePreview() {
   if (isPlaying) {
     isPlaying = false;
     cancelAnimationFrame(animFrame);
-    btn.textContent = '▶ 미리보기';
+    btn.textContent = '▶';
+    btn.classList.remove('playing');
     stopMusic(); render(curT); return;
   }
+  // Always restart from t=0
+  curT = 0;
+  document.getElementById('ts').value = 0;
+  document.getElementById('tv').textContent = '0.0s';
   isPlaying = true;
-  btn.textContent = '■ 정지';
-  playStart = performance.now() - curT * DUR * 1000;
+  btn.textContent = '■';
+  btn.classList.add('playing');
+  playStart = performance.now();
   prevMusic();
 
   function loop(now) {
@@ -893,7 +969,12 @@ function togglePreview() {
     document.getElementById('tv').textContent = (t * DUR).toFixed(1) + 's';
     render(t);
     if (t < 1 && isPlaying) animFrame = requestAnimationFrame(loop);
-    else { isPlaying = false; btn.textContent = '▶ 미리보기'; stopMusic(); }
+    else {
+      isPlaying = false;
+      btn.textContent = '▶';
+      btn.classList.remove('playing');
+      stopMusic();
+    }
   }
   animFrame = requestAnimationFrame(loop);
 }
@@ -945,7 +1026,7 @@ function stopMusic() {
   document.querySelectorAll('.mitem').forEach(b => b.classList.remove('playing'));
 }
 function buildMusic(name, ac, dest, st, dur) {
-  const bpm={upbeat:128,electronic:120,acoustic:96,cinematic:80}[name]||120;
+  const bpm={upbeat:128,electronic:120,acoustic:96,cinematic:80,lofi:75,jazz:110,hiphop:90}[name]||120;
   const beat=60/bpm, bars=Math.ceil(dur/(beat*4));
   for(let b=0;b<bars;b++){
     const bs=st+b*beat*4;
@@ -972,9 +1053,73 @@ function buildMusic(name, ac, dest, st, dur) {
         [root,root*1.5,root*2].forEach(f=>sPad(ac,dest,f,t2,dur/4+.2,.03+i*.025));
       });
       if(b>=2){sKick(ac,dest,bs,.35);sKick(ac,dest,bs+beat*2,.3);sSnare(ac,dest,bs+beat,.22);sSnare(ac,dest,bs+beat*3,.22);}
+    }else if(name==='lofi'){
+      // Lo-fi: slow swing beat, dusty feel
+      sKick(ac,dest,bs,.3); sKick(ac,dest,bs+beat*2.5,.22);
+      sSnare(ac,dest,bs+beat*1.5,.18); sSnare(ac,dest,bs+beat*3,.18);
+      for(let h=0;h<6;h++) sHat(ac,dest,bs+h*beat*.67,.08);
+      const sc=[261,293,329,349,392,440];
+      [0,2,4,3,1,5].forEach((n,i)=>{const t2=bs+i*beat*.67;if(t2<st+dur)sSynth(ac,dest,sc[n]*0.5,t2,beat*.6,.07);});
+      sBass(ac,dest,65,bs,beat*1.8,.15); sBass(ac,dest,73,bs+beat*2,beat*1.8,.12);
+    }else if(name==='jazz'){
+      // Jazz: swing ride, walking bass, chord stabs
+      const swing=beat*0.67;
+      for(let h=0;h<6;h++) sHat(ac,dest,bs+h*swing,h%2===0?.14:.08);
+      [1,3].forEach(k=>sSnare(ac,dest,bs+k*beat,.12));
+      sKick(ac,dest,bs,.25); sKick(ac,dest,bs+beat*2.5,.18);
+      const bass=[98,110,130,123];
+      bass.forEach((f,i)=>{const t2=bs+i*beat;if(t2<st+dur)sBass(ac,dest,f,t2,beat*.7,.16);});
+      // Chord voicings
+      [[261,329,392,493],[246,311,369,466]].forEach((chord,ci)=>{
+        chord.forEach(f=>{const t2=bs+ci*beat*2;if(t2<st+dur)sSynth(ac,dest,f,t2,beat*1.8,.045);});
+      });
+    }else if(name==='hiphop'){
+      // Hip-hop: hard kick pattern, clap, 808 bass
+      sKick(ac,dest,bs,.65); sKick(ac,dest,bs+beat*.75,.4); sKick(ac,dest,bs+beat*2,.55); sKick(ac,dest,bs+beat*3.25,.38);
+      [1,3].forEach(k=>sSnare(ac,dest,bs+k*beat,.45));
+      for(let h=0;h<8;h++) sHat(ac,dest,bs+h*beat*.5,h%4===0?.22:.1);
+      sBass(ac,dest,55,bs,beat*1.2,.28); sBass(ac,dest,49,bs+beat*2,beat*1.0,.24);
+      // Synth stab
+      const sc=[220,246,261,220];
+      sc.forEach((f,i)=>{const t2=bs+i*beat;if(t2<st+dur)sSaw(ac,dest,f,t2,beat*.25,.07);});
     }
   }
 }
+
+// ── Auto Color from first uploaded image ──────────
+function autoColor() {
+  const firstImg = slides.find(s => s.img)?.img;
+  if (!firstImg) { notify('이미지를 먼저 업로드해 주세요.'); return; }
+
+  const tmpCanvas = document.createElement('canvas');
+  const tmpCtx = tmpCanvas.getContext('2d');
+  tmpCanvas.width = 80; tmpCanvas.height = 45;
+  tmpCtx.drawImage(firstImg, 0, 0, 80, 45);
+
+  // Sample pixels from different zones
+  const data = tmpCtx.getImageData(0, 0, 80, 45).data;
+  let rSum=0,gSum=0,bSum=0,cnt=0;
+  // Sample every 4th pixel
+  for(let i=0;i<data.length;i+=16){
+    rSum+=data[i]; gSum+=data[i+1]; bSum+=data[i+2]; cnt++;
+  }
+  const avgR=rSum/cnt, avgG=gSum/cnt, avgB=bSum/cnt;
+
+  // Dominant: darken for background, shift hue for accent
+  const bgR=Math.round(avgR*0.25), bgG=Math.round(avgG*0.25), bgB=Math.round(avgB*0.35);
+  const acR=Math.min(255,Math.round(avgR*0.5+100)), acG=Math.min(255,Math.round(avgG*0.6+80)), acB=Math.min(255,Math.round(avgB*0.4+120));
+
+  const bgHex = `#${toHex(bgR)}${toHex(bgG)}${toHex(bgB)}`;
+  const acHex = `#${toHex(acR)}${toHex(acG)}${toHex(acB)}`;
+
+  document.getElementById('cBg').value = bgHex;
+  document.getElementById('cBgL').textContent = bgHex;
+  document.getElementById('cHighlight').value = acHex;
+  document.getElementById('cHL').textContent = acHex;
+  render();
+  notify('🎨 이미지 색상 기반으로 자동 설정했어요!');
+}
+function toHex(n) { return Math.max(0,Math.min(255,Math.round(n))).toString(16).padStart(2,'0'); }
 function sKick(ac,d,t,v){if(t>ac.currentTime+DUR+.1)return;const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(d);o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(.01,t+.3);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+.3);o.start(t);o.stop(t+.35);}
 function sSnare(ac,d,t,v){if(t>ac.currentTime+DUR+.1)return;const b=ac.createBuffer(1,Math.floor(ac.sampleRate*.1),ac.sampleRate),da=b.getChannelData(0);for(let i=0;i<da.length;i++)da[i]=(Math.random()*2-1)*Math.pow(1-i/da.length,2);const s=ac.createBufferSource(),g=ac.createGain(),f=ac.createBiquadFilter();f.type='highpass';f.frequency.value=1000;s.buffer=b;s.connect(f);f.connect(g);g.connect(d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+.15);s.start(t);s.stop(t+.2);}
 function sHat(ac,d,t,v){if(t>ac.currentTime+DUR+.1)return;const b=ac.createBuffer(1,Math.floor(ac.sampleRate*.04),ac.sampleRate),da=b.getChannelData(0);for(let i=0;i<da.length;i++)da[i]=(Math.random()*2-1)*Math.pow(1-i/da.length,3);const s=ac.createBufferSource(),g=ac.createGain(),f=ac.createBiquadFilter();f.type='highpass';f.frequency.value=7000;s.buffer=b;s.connect(f);f.connect(g);g.connect(d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+.04);s.start(t);s.stop(t+.05);}
