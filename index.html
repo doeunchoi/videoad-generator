@@ -79,6 +79,16 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;hei
 .slide-card.open .sc-body{display:block}
 .sc-duration{font-size:9px;color:var(--accent);font-weight:700;margin-left:auto}
 
+/* Joystick */
+.joystick-wrap{border-radius:8px;overflow:hidden;border:1.5px solid var(--border);cursor:crosshair;margin-top:2px}
+.joystick-canvas{display:block;width:100%;height:80px}
+
+/* Motion buttons */
+.motion-row{display:flex;gap:3px;flex-wrap:wrap;margin-top:3px}
+.motion-btn{padding:4px 7px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);color:var(--muted);font-size:9px;font-weight:600;cursor:pointer;transition:all .18s;font-family:'DM Sans',sans-serif}
+.motion-btn:hover{border-color:var(--accent);color:var(--accent)}
+.motion-btn.on{border-color:var(--accent);background:rgba(124,107,255,.15);color:var(--accent)}
+
 /* ── Fields ── */
 .fstack{display:flex;flex-direction:column;gap:8px;margin-top:10px}
 .f{display:flex;flex-direction:column;gap:3px}
@@ -506,7 +516,7 @@ function processFiles(files) {
     reader.onload = e2 => {
       const img = new Image();
       img.onload = () => {
-        slides.push({ img, src: e2.target.result, brand:'', product:'', desc:'', price:'', highlight:'' });
+        slides.push({ img, src: e2.target.result, brand:'', product:'', desc:'', price:'', highlight:'', fit:'cover', posX:50, posY:50, priceMotion:'countup', hlMotion:'popin' });
         rebuildCards();
         updateTimeline();
         updateInfo();
@@ -556,6 +566,8 @@ function rebuildCards() {
     `;
     container.appendChild(card);
   });
+  // Draw joysticks after DOM is updated
+  requestAnimationFrame(() => drawAllJoysticks());
 }
 
 function toggleCard(i) {
@@ -564,14 +576,121 @@ function toggleCard(i) {
 }
 
 function buildFieldsHTML(i, sl) {
+  const posX = sl.posX !== undefined ? sl.posX : 50;
+  const posY = sl.posY !== undefined ? sl.posY : 50;
+  const priceMotion = sl.priceMotion || 'countup';
+  const hlMotion    = sl.hlMotion    || 'popin';
   return `
   <div class="fstack">
+    <div class="f">
+      <div class="f-header"><span class="f-label">이미지 포커스 위치</span><span class="f-guide">드래그로 조정</span></div>
+      <div class="joystick-wrap" id="jw_${i}">
+        <canvas class="joystick-canvas" id="jc_${i}" width="236" height="100"
+          onmousedown="jwDown(event,${i})" onmousemove="jwMove(event,${i})" onmouseup="jwUp(event,${i})" onmouseleave="jwUp(event,${i})"
+          ontouchstart="jwTDown(event,${i})" ontouchmove="jwTMove(event,${i})" ontouchend="jwUp(event,${i})"></canvas>
+      </div>
+    </div>
+    <div class="f">
+      <div class="f-header"><span class="f-label">가격 모션</span></div>
+      <div class="motion-row">
+        ${['countup','popin','bounce','glow','slide'].map(m=>`<button class="motion-btn ${priceMotion===m?'on':''}" onclick="setMotion(${i},'price','${m}',this)">${motionLabel(m)}</button>`).join('')}
+      </div>
+    </div>
+    <div class="f">
+      <div class="f-header"><span class="f-label">강조 문구 모션</span></div>
+      <div class="motion-row">
+        ${['popin','bounce','glow','slide','typewriter'].map(m=>`<button class="motion-btn ${hlMotion===m?'on':''}" onclick="setMotion(${i},'hl','${m}',this)">${motionLabel(m)}</button>`).join('')}
+      </div>
+    </div>
     ${fieldHTML(i,'brand','브랜드명', sl.brand, LIMITS.brand, '예: 앳센셜', false)}
     ${fieldHTML(i,'product','제품명', sl.product, LIMITS.product, '예: KBO 치어 모먼트\n배트 키링', true)}
     ${fieldHTML(i,'desc','제품 설명 문구', sl.desc, LIMITS.desc, '예: 어디에서도 볼 수 없는 유니크한 디자인', true)}
     ${priceFieldHTML(i, sl.price)}
     ${fieldHTML(i,'highlight','강조 문구', sl.highlight, LIMITS.highlight, '예: 우리 팀 굿즈, 품절 전 선점 필수!', false)}
   </div>`;
+}
+
+function motionLabel(m) {
+  return {countup:'카운트업',popin:'팝인',bounce:'바운스',glow:'글로우',slide:'슬라이드',typewriter:'타이핑'}[m] || m;
+}
+
+function setMotion(i, field, val, btn) {
+  if (field === 'price') slides[i].priceMotion = val;
+  else                   slides[i].hlMotion    = val;
+  rebuildCards(); render();
+}
+
+function setFit(i, val) { slides[i].fit = val; rebuildCards(); render(); }
+function setPos(i, val) { slides[i].pos = val; rebuildCards(); render(); }
+
+// ── Joystick (2D focus point) ──────────────────────
+let jwDragging = {};
+function jwDown(e, i) { jwDragging[i] = true; jwApply(e, i); }
+function jwUp(e, i)   { jwDragging[i] = false; }
+function jwMove(e, i) { if (jwDragging[i]) jwApply(e, i); }
+function jwTDown(e, i){ e.preventDefault(); jwDragging[i] = true; jwApplyT(e, i); }
+function jwTMove(e, i){ e.preventDefault(); if (jwDragging[i]) jwApplyT(e, i); }
+function jwApplyT(e, i){ const t = e.touches[0]; jwApplyXY(i, t.clientX, t.clientY); }
+function jwApply(e, i) { jwApplyXY(i, e.clientX, e.clientY); }
+function jwApplyXY(i, cx, cy) {
+  const canvas = document.getElementById(`jc_${i}`);
+  if (!canvas) return;
+  const r = canvas.getBoundingClientRect();
+  const px = clamp((cx - r.left) / r.width * 100, 0, 100);
+  const py = clamp((cy - r.top)  / r.height * 100, 0, 100);
+  slides[i].posX = px;
+  slides[i].posY = py;
+  drawJoystick(i);
+  render();
+}
+
+function drawJoystick(i) {
+  const canvas = document.getElementById(`jc_${i}`);
+  if (!canvas) return;
+  const sl = slides[i];
+  const ctx2 = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const posX = sl.posX !== undefined ? sl.posX : 50;
+  const posY = sl.posY !== undefined ? sl.posY : 50;
+
+  ctx2.clearRect(0, 0, W, H);
+
+  // Background: mini image preview if available
+  if (sl.img) {
+    ctx2.save();
+    ctx2.globalAlpha = 0.5;
+    ctx2.drawImage(sl.img, 0, 0, W, H);
+    ctx2.restore();
+  } else {
+    ctx2.fillStyle = '#1a1a2e';
+    ctx2.fillRect(0, 0, W, H);
+  }
+
+  // Grid lines
+  ctx2.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx2.lineWidth = 1;
+  [33, 66].forEach(pct => {
+    ctx2.beginPath(); ctx2.moveTo(pct/100*W, 0); ctx2.lineTo(pct/100*W, H); ctx2.stroke();
+    ctx2.beginPath(); ctx2.moveTo(0, pct/100*H); ctx2.lineTo(W, pct/100*H); ctx2.stroke();
+  });
+
+  // Crosshair cursor
+  const cx = posX / 100 * W;
+  const cy = posY / 100 * H;
+  ctx2.strokeStyle = '#fff';
+  ctx2.lineWidth = 1.5;
+  ctx2.beginPath(); ctx2.moveTo(cx - 10, cy); ctx2.lineTo(cx + 10, cy); ctx2.stroke();
+  ctx2.beginPath(); ctx2.moveTo(cx, cy - 10); ctx2.lineTo(cx, cy + 10); ctx2.stroke();
+  ctx2.beginPath(); ctx2.arc(cx, cy, 6, 0, Math.PI*2);
+  ctx2.strokeStyle = '#7c6bff'; ctx2.lineWidth = 2; ctx2.stroke();
+  ctx2.fillStyle = 'rgba(124,107,255,0.3)'; ctx2.fill();
+}
+
+// Draw all joysticks after card build
+function drawAllJoysticks() {
+  slides.forEach((sl, i) => {
+    if (document.getElementById(`jc_${i}`)) drawJoystick(i);
+  });
 }
 
 function fieldHTML(i, key, label, val, max, placeholder, isTextarea) {
@@ -692,23 +811,20 @@ function drawFrame(ctx, sw, sh, t) {
   const imgDur = n > 0 ? DUR / n : DUR;
 
   ctx.clearRect(0, 0, sw, sh);
-
-  // Background
   ctx.fillStyle = c.bg;
   ctx.fillRect(0, 0, sw, sh);
 
-  // Which slide is active
   const tSec = t * DUR;
   let curIdx = n > 0 ? Math.min(Math.floor(tSec / imgDur), n - 1) : 0;
   const localT = n > 0 ? (tSec - curIdx * imgDur) / imgDur : t;
 
-  // Swipe transition: last 8% of each segment
-  const SWIPE_DUR = 0.08;
+  // Transition window: last 10% of each slide segment
+  const SWIPE_DUR = 0.10;
   const isTransitioning = localT > (1 - SWIPE_DUR) && curIdx < n - 1;
-  const swipeProgress = isTransitioning ? (localT - (1 - SWIPE_DUR)) / SWIPE_DUR : 0;
-  const swipeEase = easeInOut(swipeProgress);
+  const rawProgress = isTransitioning ? (localT - (1 - SWIPE_DUR)) / SWIPE_DUR : 0;
+  const ease = easeInOut(rawProgress); // 0→1 during transition
 
-  // Left image panel
+  // Image panel dimensions
   const imgPanelW = sw * IMG_RATIO;
   const pad = sw * IMG_PAD;
   const imgX = pad, imgY = pad;
@@ -716,6 +832,7 @@ function drawFrame(ctx, sw, sh, t) {
   const imgH = sh - pad * 2;
   const rr = IMG_ROUND * (sw / EW);
 
+  // ── IMAGE PANEL: horizontal swipe ──────────────────
   ctx.save();
   roundRectClip(ctx, imgX, imgY, imgW, imgH, rr);
 
@@ -728,15 +845,18 @@ function drawFrame(ctx, sw, sh, t) {
     ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.fillText('이미지를 추가하세요', imgX+imgW/2, imgY+imgH/2);
   } else {
-    const offsetY = -swipeEase * imgH;
-    drawImgCover(ctx, slides[curIdx].img, imgX, imgY + offsetY, imgW, imgH);
+    // Current image slides out to the left
+    const curOffX = -ease * imgW;
+    drawImgFit(ctx, slides[curIdx], imgX + curOffX, imgY, imgW, imgH);
+    // Next image comes in from the right
     if (isTransitioning && curIdx + 1 < n) {
-      drawImgCover(ctx, slides[curIdx+1].img, imgX, imgY + imgH + offsetY, imgW, imgH);
+      const nxtOffX = (1 - ease) * imgW;
+      drawImgFit(ctx, slides[curIdx + 1], imgX + nxtOffX, imgY, imgW, imgH);
     }
   }
   ctx.restore();
 
-  // Bottom vignette on image
+  // Bottom vignette
   const vignette = ctx.createLinearGradient(imgX, imgY + imgH * 0.72, imgX, imgY + imgH);
   vignette.addColorStop(0, 'rgba(0,0,0,0)');
   vignette.addColorStop(1, 'rgba(0,0,0,0.12)');
@@ -744,7 +864,7 @@ function drawFrame(ctx, sw, sh, t) {
   ctx.fillStyle = vignette; ctx.fillRect(imgX, imgY + imgH * 0.72, imgW, imgH * 0.28);
   ctx.restore();
 
-  // Dots
+  // Slide dots
   if (n > 1) {
     const dotR = Math.max(2, sw * 0.006);
     const gap = dotR * 2.5;
@@ -753,46 +873,80 @@ function drawFrame(ctx, sw, sh, t) {
     const dotY = imgY + imgH - Math.max(pad * 0.85, dotR * 2);
     for (let i = 0; i < n; i++) {
       const dx = dotBaseX + i * (dotR * 2 + gap) + dotR;
+      // Blend dot during transition
+      const activeFrac = i === curIdx ? (1 - ease) : i === curIdx + 1 ? ease : 0;
+      const alpha = activeFrac > 0 ? 1 : 0.32;
       ctx.beginPath();
       ctx.arc(dx, dotY, dotR, 0, Math.PI * 2);
-      ctx.fillStyle = i === curIdx ? '#ffffff' : 'rgba(255,255,255,0.32)';
+      ctx.fillStyle = activeFrac > 0 ? `rgba(255,255,255,${0.32 + activeFrac * 0.68})` : 'rgba(255,255,255,0.32)';
       ctx.fill();
     }
   }
 
-  // Right text panel
-  const textX  = imgPanelW;
-  const textW  = sw - textX;
-  const cx2    = textX + textW / 2;
+  // ── TEXT PANEL ─────────────────────────────────────
+  const textX = imgPanelW;
+  const textW = sw - textX;
+  const cx2   = textX + textW / 2;
 
-  // Get active slide data (text transitions too)
-  const sl = n > 0 ? slides[curIdx] : null;
-  const nextSl = (isTransitioning && curIdx+1 < n) ? slides[curIdx+1] : null;
-
-  // Text fade: fade out current, fade in next during transition
-  const textAlphaMain = isTransitioning ? (1 - swipeEase) : clamp(t / 0.12, 0, 1);
-  const textAlphaNext = isTransitioning ? swipeEase : 0;
-
-  // Draw current slide text
-  if (sl) drawTextPanel(ctx, sl, c, sw, sh, cx2, textW, textAlphaMain, isTransitioning ? 0 : clamp(t/0.12,0,1));
-  // Draw next slide text overlaid
-  if (nextSl && textAlphaNext > 0) drawTextPanel(ctx, nextSl, c, sw, sh, cx2, textW, textAlphaNext, 1);
+  if (n === 0) {
+    // nothing
+  } else if (isTransitioning) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(imgPanelW, 0, sw - imgPanelW, sh);
+    ctx.clip();
+    const curTextX = -ease * textW * 0.5;
+    const nxtTextX = (1 - ease) * textW * 0.5;
+    const curAlpha = easeOut(1 - ease);
+    const nxtAlpha = easeOut(ease);
+    if (curAlpha > 0.01)
+      drawTextPanel(ctx, slides[curIdx], c, sw, sh, cx2 + curTextX, textW, curAlpha, 1.0, localT);
+    if (nxtAlpha > 0.01 && curIdx + 1 < n)
+      drawTextPanel(ctx, slides[curIdx + 1], c, sw, sh, cx2 + nxtTextX, textW, nxtAlpha, 0, 0);
+    ctx.restore();
+  } else {
+    // Show text immediately (no fade-in delay)
+    drawTextPanel(ctx, slides[curIdx], c, sw, sh, cx2, textW, 1, 1.0, localT);
+  }
 }
 
-function drawTextPanel(ctx, sl, c, sw, sh, cx2, textW, alpha, slideInProgress) {
+// Draw image with cover crop + 2D focus point (posX, posY: 0-100)
+function drawImgFit(ctx, sl, x, y, w, h) {
+  const img = sl.img;
+  if (!img) return;
+  const posX = sl.posX !== undefined ? sl.posX : 50;
+  const posY = sl.posY !== undefined ? sl.posY : 50;
+
+  const ar  = img.width / img.height;
+  const tr  = w / h;
+  let sw2, sh2, sx, sy;
+
+  if (ar > tr) {
+    // Wider than slot → crop horizontally
+    sh2 = img.height; sw2 = sh2 * tr;
+    sy  = 0;
+    sx  = (img.width - sw2) * (posX / 100);
+  } else {
+    // Taller than slot → crop vertically
+    sw2 = img.width; sh2 = sw2 / tr;
+    sx  = 0;
+    sy  = (img.height - sh2) * (posY / 100);
+  }
+  ctx.drawImage(img, sx, sy, sw2, sh2, x, y, w, h);
+}
+
+function drawTextPanel(ctx, sl, c, sw, sh, cx2, textW, alpha, slideInProgress, localT) {
   const scale = sw / EW;
-  const slideOffY = (1 - easeOut(slideInProgress)) * sh * 0.025;
   const sz = getSizes(scale);
+  if (localT === undefined) localT = 1;
 
   ctx.save();
   ctx.globalAlpha = alpha;
-  ctx.translate(0, slideOffY);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
   const maxPW = textW * 0.82;
 
-  // Measure wrapped lines using current sizes
   ctx.font = `900 ${sz.prod}px "Noto Sans KR",sans-serif`;
   const prodLines = wrapText(ctx, sl.product || '', maxPW, 2);
   const prodBlockH = prodLines.length * sz.prod * 1.28;
@@ -802,23 +956,19 @@ function drawTextPanel(ctx, sl, c, sw, sh, cx2, textW, alpha, slideInProgress) {
   const descLines = descRaw ? wrapText(ctx, descRaw, maxPW, 2) : [];
   const descBlockH = descLines.length > 0 ? descLines.length * sz.desc * 1.4 : 0;
 
-  const divH   = sh * 0.002;
   const divGap = sh * 0.032;
   const priceBlockH = sl.price     ? sz.price * 1.0 : 0;
   const hlBlockH    = sl.highlight ? sz.hl    * 1.0 : 0;
 
-  // Generous gaps between blocks
   const G1 = sz.brand * 1.2;
   const G2 = sz.prod  * 0.65;
   const G3 = descBlockH > 0 ? sz.desc * 0.7 : 0;
   const G4 = divGap;
   const G5 = priceBlockH > 0 && hlBlockH > 0 ? sh * 0.052 : 0;
 
-  const totalH =
-    sz.brand +
-    G1 + prodBlockH +
+  const totalH = sz.brand + G1 + prodBlockH +
     (descBlockH > 0 ? G2 + descBlockH : 0) +
-    G3 + divH + G4 +
+    G3 + sh * 0.002 + G4 +
     (priceBlockH > 0 ? priceBlockH : 0) +
     (hlBlockH > 0 ? G5 + hlBlockH : 0);
 
@@ -830,7 +980,7 @@ function drawTextPanel(ctx, sl, c, sw, sh, cx2, textW, alpha, slideInProgress) {
   ctx.fillText(sl.brand || '', cx2, y);
   y += sz.brand / 2 + G1;
 
-  // Product (up to 2 lines)
+  // Product
   ctx.font = `900 ${sz.prod}px "Noto Sans KR",sans-serif`;
   ctx.fillStyle = c.product;
   prodLines.forEach((line, idx) => {
@@ -838,7 +988,7 @@ function drawTextPanel(ctx, sl, c, sw, sh, cx2, textW, alpha, slideInProgress) {
   });
   y += prodBlockH + G2;
 
-  // Desc (up to 2 lines)
+  // Desc
   if (descLines.length > 0) {
     ctx.font = `400 ${sz.desc}px "Noto Sans KR",sans-serif`;
     ctx.fillStyle = c.desc;
@@ -848,7 +998,7 @@ function drawTextPanel(ctx, sl, c, sw, sh, cx2, textW, alpha, slideInProgress) {
     y += descBlockH + G3;
   }
 
-  // Divider (always between desc/product and price)
+  // Divider
   ctx.strokeStyle = c.line;
   ctx.lineWidth = 1.5 * scale;
   ctx.globalAlpha = alpha * 0.5;
@@ -859,31 +1009,157 @@ function drawTextPanel(ctx, sl, c, sw, sh, cx2, textW, alpha, slideInProgress) {
   ctx.globalAlpha = alpha;
   y += G4;
 
-  // Price
+  // ── Price with motion ──
   if (sl.price) {
-    const priceText = formatPrice(sl.price);
-    const unitText  = '원';
-    ctx.font = `900 ${sz.price}px "Noto Sans KR",sans-serif`;
-    ctx.fillStyle = c.price;
-    const pW = ctx.measureText(priceText).width;
-    ctx.font = `700 ${sz.price * 0.52}px "Noto Sans KR",sans-serif`;
-    const uW = ctx.measureText(unitText).width;
-    const totalPW = pW + sz.price * 0.08 + uW;
-    ctx.font = `900 ${sz.price}px "Noto Sans KR",sans-serif`;
-    ctx.textAlign = 'left';
-    ctx.fillText(priceText, cx2 - totalPW / 2, y + sz.price * 0.5);
-    ctx.font = `700 ${sz.price * 0.52}px "Noto Sans KR",sans-serif`;
-    ctx.fillText(unitText, cx2 - totalPW / 2 + pW + sz.price * 0.08, y + sz.price * 0.5);
-    ctx.textAlign = 'center';
+    const priceY = y + sz.price * 0.5;
+    drawPriceWithMotion(ctx, sl, c, sz, cx2, priceY, scale, alpha, localT);
     y += priceBlockH + G5;
   }
 
-  // Highlight
+  // ── Highlight with motion ──
   if (sl.highlight) {
+    const hlY = y + sz.hl * 0.5;
+    drawHighlightWithMotion(ctx, sl, c, sz, cx2, hlY, maxPW, scale, alpha, localT);
+  }
+
+  ctx.restore();
+}
+
+// ── Motion renderers ───────────────────────────────
+// localT: 0→1 within current slide, motion happens in first 0.4 of each slide
+
+function getMotionT(localT, delay, duration) {
+  // localT in [0,1]. Motion window: delay → delay+duration
+  return clamp((localT - delay) / duration, 0, 1);
+}
+
+function drawPriceWithMotion(ctx, sl, c, sz, cx2, cy, scale, globalAlpha, localT) {
+  const motion = sl.priceMotion || 'countup';
+  const mt = easeOut(getMotionT(localT, 0.05, 0.35));
+  const priceNum  = parseFloat((sl.price || '0').replace(/,/g,'')) || 0;
+  const unitText  = '원';
+
+  ctx.save();
+  ctx.globalAlpha = globalAlpha;
+  ctx.textBaseline = 'middle';
+
+  let displayPrice = formatPrice(sl.price);
+
+  if (motion === 'countup') {
+    // Count up from 0 to final value
+    const current = Math.round(priceNum * mt);
+    displayPrice = current.toLocaleString('ko-KR');
+  }
+
+  // Compute positions
+  ctx.font = `900 ${sz.price}px "Noto Sans KR",sans-serif`;
+  const pW = ctx.measureText(displayPrice).width;
+  ctx.font = `700 ${sz.price * 0.52}px "Noto Sans KR",sans-serif`;
+  const uW = ctx.measureText(unitText).width;
+  const totalPW = pW + sz.price * 0.08 + uW;
+  let drawCx = cx2;
+  let drawCy = cy;
+  let extraAlpha = 1;
+  let scaleF = 1;
+
+  if (motion === 'popin') {
+    scaleF = 0.4 + mt * 0.6;
+    extraAlpha = mt;
+  } else if (motion === 'bounce') {
+    // Overshoot spring
+    const spring = mt < 0.7
+      ? easeOut(mt / 0.7) * 1.12
+      : 1.12 - (mt - 0.7) / 0.3 * 0.12;
+    scaleF = spring;
+    extraAlpha = clamp(mt * 3, 0, 1);
+  } else if (motion === 'glow') {
+    extraAlpha = 1;
+    // Draw glow behind price
+    const glowSize = sz.price * 0.8 * mt;
+    const grd = ctx.createRadialGradient(cx2, cy, 0, cx2, cy, glowSize);
+    grd.addColorStop(0, `rgba(124,107,255,${0.35 * mt})`);
+    grd.addColorStop(1, 'rgba(124,107,255,0)');
+    ctx.fillStyle = grd;
+    ctx.fillRect(cx2 - glowSize, cy - glowSize, glowSize * 2, glowSize * 2);
+  } else if (motion === 'slide') {
+    drawCx = cx2 + (1 - mt) * textWFromSz(sz) * 0.3;
+    extraAlpha = mt;
+  }
+
+  ctx.globalAlpha = globalAlpha * extraAlpha;
+  if (scaleF !== 1) {
+    ctx.save();
+    ctx.translate(cx2, cy);
+    ctx.scale(scaleF, scaleF);
+    ctx.translate(-cx2, -cy);
+  }
+
+  ctx.font = `900 ${sz.price}px "Noto Sans KR",sans-serif`;
+  ctx.fillStyle = c.price;
+  ctx.textAlign = 'left';
+  ctx.fillText(displayPrice, drawCx - totalPW / 2, cy);
+  ctx.font = `700 ${sz.price * 0.52}px "Noto Sans KR",sans-serif`;
+  ctx.fillText(unitText, drawCx - totalPW / 2 + pW + sz.price * 0.08, cy);
+  ctx.textAlign = 'center';
+
+  if (scaleF !== 1) ctx.restore();
+  ctx.restore();
+}
+
+function textWFromSz(sz) { return sz.price * 3; } // approximation
+
+function drawHighlightWithMotion(ctx, sl, c, sz, cx2, cy, maxPW, scale, globalAlpha, localT) {
+  const motion = sl.hlMotion || 'popin';
+  const mt = easeOut(getMotionT(localT, 0.18, 0.35));
+  const text = sl.highlight || '';
+
+  ctx.save();
+  ctx.globalAlpha = globalAlpha;
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'center';
+
+  let extraAlpha = 1;
+  let scaleF = 1;
+  let drawCx = cx2, drawCy = cy;
+
+  if (motion === 'popin') {
+    scaleF = 0.3 + mt * 0.7;
+    extraAlpha = mt;
+  } else if (motion === 'bounce') {
+    const spring = mt < 0.7 ? easeOut(mt / 0.7) * 1.15 : 1.15 - (mt - 0.7) / 0.3 * 0.15;
+    scaleF = spring;
+    extraAlpha = clamp(mt * 3, 0, 1);
+  } else if (motion === 'glow') {
+    extraAlpha = 1;
+    const grd = ctx.createRadialGradient(cx2, cy, 0, cx2, cy, sz.hl * 2 * mt);
+    grd.addColorStop(0, `rgba(0,229,160,${0.25 * mt})`);
+    grd.addColorStop(1, 'rgba(0,229,160,0)');
+    ctx.fillStyle = grd;
+    ctx.fillRect(cx2 - sz.hl*3, cy - sz.hl, sz.hl*6, sz.hl*2);
+  } else if (motion === 'slide') {
+    drawCx = cx2 - (1 - mt) * maxPW * 0.25;
+    extraAlpha = mt;
+  } else if (motion === 'typewriter') {
+    // Show chars one by one
+    const chars = Math.round(text.length * mt);
+    const visible = text.slice(0, chars) + (chars < text.length && mt < 0.98 ? '|' : '');
+    ctx.globalAlpha = globalAlpha;
     ctx.font = `900 ${sz.hl}px "Noto Sans KR",sans-serif`;
     ctx.fillStyle = c.htext;
-    ctx.fillText(truncateText(ctx, sl.highlight, maxPW), cx2, y + sz.hl * 0.5);
+    ctx.fillText(visible, cx2, cy);
+    ctx.restore();
+    return;
   }
+
+  ctx.globalAlpha = globalAlpha * extraAlpha;
+  if (scaleF !== 1) {
+    ctx.save();
+    ctx.translate(cx2, cy); ctx.scale(scaleF, scaleF); ctx.translate(-cx2, -cy);
+  }
+  ctx.font = `900 ${sz.hl}px "Noto Sans KR",sans-serif`;
+  ctx.fillStyle = c.htext;
+  ctx.fillText(truncateText(ctx, text, maxPW), drawCx, cy);
+  if (scaleF !== 1) ctx.restore();
 
   ctx.restore();
 }
