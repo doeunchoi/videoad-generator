@@ -79,13 +79,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;hei
 .slide-card.open .sc-body{display:block}
 .sc-duration{font-size:9px;color:var(--accent);font-weight:700;margin-left:auto}
 
-/* Joystick */
-.joystick-wrap{border-radius:8px;overflow:hidden;border:1.5px solid var(--border);cursor:crosshair;margin-top:2px}
-.joystick-canvas{display:block;width:100%;height:80px}
-
 /* Motion buttons */
-.motion-row{display:flex;gap:3px;flex-wrap:wrap;margin-top:3px}
-.motion-btn{padding:4px 7px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);color:var(--muted);font-size:9px;font-weight:600;cursor:pointer;transition:all .18s;font-family:'DM Sans',sans-serif}
+.motion-row{display:flex;gap:3px;flex-wrap:wrap}
+.motion-btn{padding:4px 8px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);color:var(--muted);font-size:9px;font-weight:600;cursor:pointer;transition:all .18s;font-family:'DM Sans',sans-serif}
 .motion-btn:hover{border-color:var(--accent);color:var(--accent)}
 .motion-btn.on{border-color:var(--accent);background:rgba(124,107,255,.15);color:var(--accent)}
 
@@ -516,7 +512,7 @@ function processFiles(files) {
     reader.onload = e2 => {
       const img = new Image();
       img.onload = () => {
-        slides.push({ img, src: e2.target.result, brand:'', product:'', desc:'', price:'', highlight:'', fit:'cover', posX:50, posY:50, priceMotion:'countup', hlMotion:'popin' });
+        slides.push({ img, src: e2.target.result, brand:'', product:'', desc:'', price:'', highlight:'', fit:'cover', posX:50, posY:50, priceMotion:'pulse', hlMotion:'underline' });
         rebuildCards();
         updateTimeline();
         updateInfo();
@@ -566,8 +562,8 @@ function rebuildCards() {
     `;
     container.appendChild(card);
   });
-  // Draw joysticks after DOM is updated
-  requestAnimationFrame(() => drawAllJoysticks());
+  // Rebuild done
+  requestAnimationFrame(() => {});
 }
 
 function toggleCard(i) {
@@ -578,28 +574,21 @@ function toggleCard(i) {
 function buildFieldsHTML(i, sl) {
   const posX = sl.posX !== undefined ? sl.posX : 50;
   const posY = sl.posY !== undefined ? sl.posY : 50;
-  const priceMotion = sl.priceMotion || 'countup';
-  const hlMotion    = sl.hlMotion    || 'popin';
   return `
   <div class="fstack">
     <div class="f">
-      <div class="f-header"><span class="f-label">이미지 포커스 위치</span><span class="f-guide">드래그로 조정</span></div>
-      <div class="joystick-wrap" id="jw_${i}">
-        <canvas class="joystick-canvas" id="jc_${i}" width="236" height="100"
-          onmousedown="jwDown(event,${i})" onmousemove="jwMove(event,${i})" onmouseup="jwUp(event,${i})" onmouseleave="jwUp(event,${i})"
-          ontouchstart="jwTDown(event,${i})" ontouchmove="jwTMove(event,${i})" ontouchend="jwUp(event,${i})"></canvas>
+      <div class="f-header"><span class="f-label">이미지 포커스 위치</span></div>
+      <div class="vrow" style="margin-top:4px">
+        <label style="min-width:20px;font-size:9px;color:var(--muted)">좌우</label>
+        <input type="range" class="slider" min="0" max="100" value="${Math.round(posX)}"
+          oninput="slides[${i}].posX=+this.value;render()">
+        <span style="font-size:9px;color:var(--muted);min-width:28px;text-align:right">${Math.round(posX)}%</span>
       </div>
-    </div>
-    <div class="f">
-      <div class="f-header"><span class="f-label">가격 모션</span></div>
-      <div class="motion-row">
-        ${['countup','popin','bounce','glow','slide'].map(m=>`<button class="motion-btn ${priceMotion===m?'on':''}" onclick="setMotion(${i},'price','${m}',this)">${motionLabel(m)}</button>`).join('')}
-      </div>
-    </div>
-    <div class="f">
-      <div class="f-header"><span class="f-label">강조 문구 모션</span></div>
-      <div class="motion-row">
-        ${['popin','bounce','glow','slide','typewriter'].map(m=>`<button class="motion-btn ${hlMotion===m?'on':''}" onclick="setMotion(${i},'hl','${m}',this)">${motionLabel(m)}</button>`).join('')}
+      <div class="vrow" style="margin-top:4px">
+        <label style="min-width:20px;font-size:9px;color:var(--muted)">상하</label>
+        <input type="range" class="slider" min="0" max="100" value="${Math.round(posY)}"
+          oninput="slides[${i}].posY=+this.value;render()">
+        <span style="font-size:9px;color:var(--muted);min-width:28px;text-align:right">${Math.round(posY)}%</span>
       </div>
     </div>
     ${fieldHTML(i,'brand','브랜드명', sl.brand, LIMITS.brand, '예: 앳센셜', false)}
@@ -608,89 +597,6 @@ function buildFieldsHTML(i, sl) {
     ${priceFieldHTML(i, sl.price)}
     ${fieldHTML(i,'highlight','강조 문구', sl.highlight, LIMITS.highlight, '예: 우리 팀 굿즈, 품절 전 선점 필수!', false)}
   </div>`;
-}
-
-function motionLabel(m) {
-  return {countup:'카운트업',popin:'팝인',bounce:'바운스',glow:'글로우',slide:'슬라이드',typewriter:'타이핑'}[m] || m;
-}
-
-function setMotion(i, field, val, btn) {
-  if (field === 'price') slides[i].priceMotion = val;
-  else                   slides[i].hlMotion    = val;
-  rebuildCards(); render();
-}
-
-function setFit(i, val) { slides[i].fit = val; rebuildCards(); render(); }
-function setPos(i, val) { slides[i].pos = val; rebuildCards(); render(); }
-
-// ── Joystick (2D focus point) ──────────────────────
-let jwDragging = {};
-function jwDown(e, i) { jwDragging[i] = true; jwApply(e, i); }
-function jwUp(e, i)   { jwDragging[i] = false; }
-function jwMove(e, i) { if (jwDragging[i]) jwApply(e, i); }
-function jwTDown(e, i){ e.preventDefault(); jwDragging[i] = true; jwApplyT(e, i); }
-function jwTMove(e, i){ e.preventDefault(); if (jwDragging[i]) jwApplyT(e, i); }
-function jwApplyT(e, i){ const t = e.touches[0]; jwApplyXY(i, t.clientX, t.clientY); }
-function jwApply(e, i) { jwApplyXY(i, e.clientX, e.clientY); }
-function jwApplyXY(i, cx, cy) {
-  const canvas = document.getElementById(`jc_${i}`);
-  if (!canvas) return;
-  const r = canvas.getBoundingClientRect();
-  const px = clamp((cx - r.left) / r.width * 100, 0, 100);
-  const py = clamp((cy - r.top)  / r.height * 100, 0, 100);
-  slides[i].posX = px;
-  slides[i].posY = py;
-  drawJoystick(i);
-  render();
-}
-
-function drawJoystick(i) {
-  const canvas = document.getElementById(`jc_${i}`);
-  if (!canvas) return;
-  const sl = slides[i];
-  const ctx2 = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  const posX = sl.posX !== undefined ? sl.posX : 50;
-  const posY = sl.posY !== undefined ? sl.posY : 50;
-
-  ctx2.clearRect(0, 0, W, H);
-
-  // Background: mini image preview if available
-  if (sl.img) {
-    ctx2.save();
-    ctx2.globalAlpha = 0.5;
-    ctx2.drawImage(sl.img, 0, 0, W, H);
-    ctx2.restore();
-  } else {
-    ctx2.fillStyle = '#1a1a2e';
-    ctx2.fillRect(0, 0, W, H);
-  }
-
-  // Grid lines
-  ctx2.strokeStyle = 'rgba(255,255,255,0.15)';
-  ctx2.lineWidth = 1;
-  [33, 66].forEach(pct => {
-    ctx2.beginPath(); ctx2.moveTo(pct/100*W, 0); ctx2.lineTo(pct/100*W, H); ctx2.stroke();
-    ctx2.beginPath(); ctx2.moveTo(0, pct/100*H); ctx2.lineTo(W, pct/100*H); ctx2.stroke();
-  });
-
-  // Crosshair cursor
-  const cx = posX / 100 * W;
-  const cy = posY / 100 * H;
-  ctx2.strokeStyle = '#fff';
-  ctx2.lineWidth = 1.5;
-  ctx2.beginPath(); ctx2.moveTo(cx - 10, cy); ctx2.lineTo(cx + 10, cy); ctx2.stroke();
-  ctx2.beginPath(); ctx2.moveTo(cx, cy - 10); ctx2.lineTo(cx, cy + 10); ctx2.stroke();
-  ctx2.beginPath(); ctx2.arc(cx, cy, 6, 0, Math.PI*2);
-  ctx2.strokeStyle = '#7c6bff'; ctx2.lineWidth = 2; ctx2.stroke();
-  ctx2.fillStyle = 'rgba(124,107,255,0.3)'; ctx2.fill();
-}
-
-// Draw all joysticks after card build
-function drawAllJoysticks() {
-  slides.forEach((sl, i) => {
-    if (document.getElementById(`jc_${i}`)) drawJoystick(i);
-  });
 }
 
 function fieldHTML(i, key, label, val, max, placeholder, isTextarea) {
@@ -1025,144 +931,66 @@ function drawTextPanel(ctx, sl, c, sw, sh, cx2, textW, alpha, slideInProgress, l
   ctx.restore();
 }
 
-// ── Motion renderers ───────────────────────────────
-// localT: 0→1 within current slide, motion happens in first 0.4 of each slide
-
-function getMotionT(localT, delay, duration) {
-  // localT in [0,1]. Motion window: delay → delay+duration
-  return clamp((localT - delay) / duration, 0, 1);
+// ── Motion renderers ─────────────────────────────────
+// Fast pump oscillator: sharp attack, quick decay, 3Hz
+function pump(t) {
+  // Creates a sharp "thump" shape: quick rise, quick fall, repeat at ~3Hz
+  const cycle = (t * 3) % 1;           // 3 beats per second
+  return Math.pow(Math.sin(cycle * Math.PI), 2.5); // pow makes it snappier
 }
 
 function drawPriceWithMotion(ctx, sl, c, sz, cx2, cy, scale, globalAlpha, localT) {
-  const motion = sl.priceMotion || 'countup';
-  const mt = easeOut(getMotionT(localT, 0.05, 0.35));
-  const priceNum  = parseFloat((sl.price || '0').replace(/,/g,'')) || 0;
-  const unitText  = '원';
+  // Always: countup — finishes in first 6% of slide (very fast)
+  const priceNum = parseFloat((sl.price || '0').replace(/,/g,'')) || 0;
+  const mt = easeOut(clamp(localT / 0.06, 0, 1));
+  const displayPrice = Math.round(priceNum * mt).toLocaleString('ko-KR');
+  const unitText = '원';
 
   ctx.save();
   ctx.globalAlpha = globalAlpha;
   ctx.textBaseline = 'middle';
 
-  let displayPrice = formatPrice(sl.price);
-
-  if (motion === 'countup') {
-    // Count up from 0 to final value
-    const current = Math.round(priceNum * mt);
-    displayPrice = current.toLocaleString('ko-KR');
-  }
-
-  // Compute positions
   ctx.font = `900 ${sz.price}px "Noto Sans KR",sans-serif`;
   const pW = ctx.measureText(displayPrice).width;
   ctx.font = `700 ${sz.price * 0.52}px "Noto Sans KR",sans-serif`;
   const uW = ctx.measureText(unitText).width;
   const totalPW = pW + sz.price * 0.08 + uW;
-  let drawCx = cx2;
-  let drawCy = cy;
-  let extraAlpha = 1;
-  let scaleF = 1;
-
-  if (motion === 'popin') {
-    scaleF = 0.4 + mt * 0.6;
-    extraAlpha = mt;
-  } else if (motion === 'bounce') {
-    // Overshoot spring
-    const spring = mt < 0.7
-      ? easeOut(mt / 0.7) * 1.12
-      : 1.12 - (mt - 0.7) / 0.3 * 0.12;
-    scaleF = spring;
-    extraAlpha = clamp(mt * 3, 0, 1);
-  } else if (motion === 'glow') {
-    extraAlpha = 1;
-    // Draw glow behind price
-    const glowSize = sz.price * 0.8 * mt;
-    const grd = ctx.createRadialGradient(cx2, cy, 0, cx2, cy, glowSize);
-    grd.addColorStop(0, `rgba(124,107,255,${0.35 * mt})`);
-    grd.addColorStop(1, 'rgba(124,107,255,0)');
-    ctx.fillStyle = grd;
-    ctx.fillRect(cx2 - glowSize, cy - glowSize, glowSize * 2, glowSize * 2);
-  } else if (motion === 'slide') {
-    drawCx = cx2 + (1 - mt) * textWFromSz(sz) * 0.3;
-    extraAlpha = mt;
-  }
-
-  ctx.globalAlpha = globalAlpha * extraAlpha;
-  if (scaleF !== 1) {
-    ctx.save();
-    ctx.translate(cx2, cy);
-    ctx.scale(scaleF, scaleF);
-    ctx.translate(-cx2, -cy);
-  }
+  const priceX = cx2 - totalPW / 2;
 
   ctx.font = `900 ${sz.price}px "Noto Sans KR",sans-serif`;
   ctx.fillStyle = c.price;
   ctx.textAlign = 'left';
-  ctx.fillText(displayPrice, drawCx - totalPW / 2, cy);
+  ctx.fillText(displayPrice, priceX, cy);
   ctx.font = `700 ${sz.price * 0.52}px "Noto Sans KR",sans-serif`;
-  ctx.fillText(unitText, drawCx - totalPW / 2 + pW + sz.price * 0.08, cy);
+  ctx.fillText(unitText, priceX + pW + sz.price * 0.08, cy);
   ctx.textAlign = 'center';
-
-  if (scaleF !== 1) ctx.restore();
   ctx.restore();
 }
 
-function textWFromSz(sz) { return sz.price * 3; } // approximation
-
 function drawHighlightWithMotion(ctx, sl, c, sz, cx2, cy, maxPW, scale, globalAlpha, localT) {
-  const motion = sl.hlMotion || 'popin';
-  const mt = easeOut(getMotionT(localT, 0.18, 0.35));
-  const text = sl.highlight || '';
+  // Always: fast pump pulse — 3Hz, ±12% scale, sharp curve
+  const p = pump(localT);
+  const scaleF = 1 + p * 0.12;        // 1.0 → 1.12 → 1.0 repeatedly
 
   ctx.save();
   ctx.globalAlpha = globalAlpha;
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'center';
-
-  let extraAlpha = 1;
-  let scaleF = 1;
-  let drawCx = cx2, drawCy = cy;
-
-  if (motion === 'popin') {
-    scaleF = 0.3 + mt * 0.7;
-    extraAlpha = mt;
-  } else if (motion === 'bounce') {
-    const spring = mt < 0.7 ? easeOut(mt / 0.7) * 1.15 : 1.15 - (mt - 0.7) / 0.3 * 0.15;
-    scaleF = spring;
-    extraAlpha = clamp(mt * 3, 0, 1);
-  } else if (motion === 'glow') {
-    extraAlpha = 1;
-    const grd = ctx.createRadialGradient(cx2, cy, 0, cx2, cy, sz.hl * 2 * mt);
-    grd.addColorStop(0, `rgba(0,229,160,${0.25 * mt})`);
-    grd.addColorStop(1, 'rgba(0,229,160,0)');
-    ctx.fillStyle = grd;
-    ctx.fillRect(cx2 - sz.hl*3, cy - sz.hl, sz.hl*6, sz.hl*2);
-  } else if (motion === 'slide') {
-    drawCx = cx2 - (1 - mt) * maxPW * 0.25;
-    extraAlpha = mt;
-  } else if (motion === 'typewriter') {
-    // Show chars one by one
-    const chars = Math.round(text.length * mt);
-    const visible = text.slice(0, chars) + (chars < text.length && mt < 0.98 ? '|' : '');
-    ctx.globalAlpha = globalAlpha;
-    ctx.font = `900 ${sz.hl}px "Noto Sans KR",sans-serif`;
-    ctx.fillStyle = c.htext;
-    ctx.fillText(visible, cx2, cy);
-    ctx.restore();
-    return;
-  }
-
-  ctx.globalAlpha = globalAlpha * extraAlpha;
-  if (scaleF !== 1) {
-    ctx.save();
-    ctx.translate(cx2, cy); ctx.scale(scaleF, scaleF); ctx.translate(-cx2, -cy);
-  }
   ctx.font = `900 ${sz.hl}px "Noto Sans KR",sans-serif`;
+
+  const text = truncateText(ctx, sl.highlight || '', maxPW);
+
+  ctx.translate(cx2, cy);
+  ctx.scale(scaleF, scaleF);
+  ctx.translate(-cx2, -cy);
+
   ctx.fillStyle = c.htext;
-  ctx.fillText(truncateText(ctx, text, maxPW), drawCx, cy);
-  if (scaleF !== 1) ctx.restore();
+  ctx.fillText(text, cx2, cy);
 
   ctx.restore();
 }
+
+function textWFromSz(sz) { return sz.price * 3; }
 
 // Wrap text into max N lines — last line gets ellipsis if overflow
 function wrapText(ctx, text, maxW, maxLines) {
