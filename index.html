@@ -1314,22 +1314,23 @@ async function generateVideo() {
     notify('✅ MP4 영상 생성 완료! 다운로드 버튼을 눌러주세요.');
     render(curT);
   };
-  rec.start(200);
 
-  // ── Real-time recording: run for exactly DUR seconds ──
-  // Drive canvas at FPS using wall-clock time so captureStream
-  // records the correct number of frames regardless of browser speed.
+  // Stop recorder at EXACTLY DUR seconds — independent of render loop
+  const recStartTime = performance.now();
+  rec.start(100);
+  setTimeout(() => rec.stop(), DUR * 1000);
+
+  // Render loop: drive canvas for DUR seconds using wall clock
   await new Promise(resolve => {
-    const startTime = performance.now();
-    const totalMs   = DUR * 1000;
-    let lastFrame   = -1;
+    let lastFrame = -1;
 
     function tick() {
-      const elapsed = performance.now() - startTime;
-      const t       = clamp(elapsed / totalMs, 0, 1);
+      const elapsed = performance.now() - recStartTime;
+      if (elapsed >= DUR * 1000) { resolve(); return; }
 
-      // Render only when we've advanced to the next frame slot
+      const t = clamp(elapsed / (DUR * 1000), 0, 1);
       const frameIdx = Math.floor(t * TOTAL);
+
       if (frameIdx !== lastFrame) {
         renderExport(t);
         lastFrame = frameIdx;
@@ -1337,21 +1338,14 @@ async function generateVideo() {
         updateProgress(pct, `렌더링 중... ${(elapsed / 1000).toFixed(1)}s / ${DUR}s`);
       }
 
-      if (elapsed < totalMs) {
-        requestAnimationFrame(tick);
-      } else {
-        // Render final frame then stop
-        renderExport(1);
-        updateProgress(100, '완료 중...');
-        resolve();
-      }
+      requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
   });
 
-  // Give recorder time to flush remaining chunks
-  await new Promise(r => setTimeout(r, 800));
-  rec.stop();
+  // Render final frame
+  renderExport(1);
+  updateProgress(100, '완료 중...');
 }
 
 function resetGenBtn() {
