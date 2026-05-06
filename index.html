@@ -255,14 +255,14 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
       <!-- Logo Upload — 이미지 업로드와 슬라이드 사이 -->
       <div class="sh" style="margin-top:14px;margin-bottom:6px">브랜드 로고 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(선택 · 공통 적용)</span></div>
       <div style="position:relative">
-        <div class="logo-upload" id="logoUpload" onclick="document.getElementById('logoFileInput').click()">
-          <input type="file" id="logoFileInput" accept="image/png,image/jpeg,image/svg+xml,image/webp" onchange="loadLogo(this)">
+        <label class="logo-upload" id="logoUpload" for="logoFileInput">
+          <input type="file" id="logoFileInput" accept="image/png,image/jpeg,image/svg+xml,image/webp" onchange="loadLogo(this)" style="display:none">
           <img class="logo-preview" id="logoPreview">
           <div class="logo-texts">
             <span class="logo-name" id="logoName">클릭하여 로고 업로드</span>
             <span class="logo-sub">PNG(투명 권장) · JPG · SVG · WEBP</span>
           </div>
-        </div>
+        </label>
         <button class="logo-rm-btn" id="logoRm" onclick="removeLogo(event)" title="로고 제거">✕</button>
       </div>
       <div id="logoSizeWrap" style="display:none">
@@ -291,7 +291,7 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
 
       <!-- Auto color button -->
       <button class="btn" style="width:100%;justify-content:center;font-size:11px;margin-bottom:12px" onclick="autoColor()">
-        🎨 이미지 색상으로 자동 설정
+        🎲 랜덤 색상 조합 적용
       </button>
 
       <div class="cgrid">
@@ -578,7 +578,8 @@ function loadLogo(input) {
       document.getElementById('logoUpload').classList.add('has-logo');
       document.getElementById('logoRm').classList.add('visible');
       document.getElementById('logoSizeWrap').style.display = 'block';
-      render();
+      // Small delay to ensure DOM is updated before render reads slider
+      requestAnimationFrame(() => render());
     };
     img.src = e.target.result;
   };
@@ -1293,36 +1294,58 @@ function buildMusic(name, ac, dest, st, dur) {
 
 // ── Auto Color from first uploaded image ──────────
 function autoColor() {
-  const firstImg = slides.find(s => s.img)?.img;
-  if (!firstImg) { notify('이미지를 먼저 업로드해 주세요.'); return; }
+  // Curated palette library: [bg, highlight, price, htext, brand, desc]
+  // Dark bg with good contrast, varied moods
+  const PALETTES = [
+    // Navy & Gold
+    { bg:'#0d1b4b', hl:'#4a6fa5', price:'#ffffff', htext:'#ffd166', brand:'#ffffff', desc:'#c8d0e8', label:'네이비 골드' },
+    // Deep Purple
+    { bg:'#1a0a2e', hl:'#7c3aed', price:'#ffffff', htext:'#a78bfa', brand:'#ffffff', desc:'#d1c4e9', label:'딥 퍼플' },
+    // Forest Green
+    { bg:'#0a2218', hl:'#16a34a', price:'#ffffff', htext:'#4ade80', brand:'#ffffff', desc:'#bbf7d0', label:'포레스트 그린' },
+    // Charcoal & Coral
+    { bg:'#1c1c1c', hl:'#e05c4b', price:'#ffffff', htext:'#ff8a7a', brand:'#ffffff', desc:'#d6d6d6', label:'차콜 코랄' },
+    // Midnight Teal
+    { bg:'#0a2130', hl:'#0891b2', price:'#ffffff', htext:'#22d3ee', brand:'#ffffff', desc:'#bae6fd', label:'미드나이트 틸' },
+    // Warm Brown
+    { bg:'#1c1208', hl:'#b45309', price:'#ffffff', htext:'#fbbf24', brand:'#ffffff', desc:'#fde68a', label:'웜 브라운' },
+    // Rose Dark
+    { bg:'#1f0a12', hl:'#be185d', price:'#ffffff', htext:'#f472b6', brand:'#ffffff', desc:'#fbcfe8', label:'로즈 다크' },
+    // Slate Blue
+    { bg:'#0f172a', hl:'#3b82f6', price:'#ffffff', htext:'#60a5fa', brand:'#ffffff', desc:'#bfdbfe', label:'슬레이트 블루' },
+    // Dark Olive
+    { bg:'#141a0a', hl:'#65a30d', price:'#ffffff', htext:'#a3e635', brand:'#ffffff', desc:'#d9f99d', label:'다크 올리브' },
+    // Indigo & Orange
+    { bg:'#1e1b4b', hl:'#4338ca', price:'#ffffff', htext:'#fb923c', brand:'#ffffff', desc:'#c7d2fe', label:'인디고 오렌지' },
+    // Dark Crimson
+    { bg:'#1a0505', hl:'#991b1b', price:'#ffffff', htext:'#fca5a5', brand:'#ffffff', desc:'#fee2e2', label:'다크 크림슨' },
+    // Gunmetal & Cyan
+    { bg:'#0d1117', hl:'#164e63', price:'#ffffff', htext:'#06b6d4', brand:'#ffffff', desc:'#a5f3fc', label:'건메탈 사이언' },
+    // Plum & Lime
+    { bg:'#2e1065', hl:'#7e22ce', price:'#ffffff', htext:'#bef264', brand:'#ffffff', desc:'#e9d5ff', label:'플럼 라임' },
+    // Dark Warm Gray
+    { bg:'#18130f', hl:'#78350f', price:'#ffffff', htext:'#f59e0b', brand:'#ffffff', desc:'#fef3c7', label:'다크 웜 그레이' },
+    // Electric Blue
+    { bg:'#05050f', hl:'#2563eb', price:'#ffffff', htext:'#7c6bff', brand:'#ffffff', desc:'#c7d2fe', label:'일렉트릭 블루' },
+  ];
 
-  const tmpCanvas = document.createElement('canvas');
-  const tmpCtx = tmpCanvas.getContext('2d');
-  tmpCanvas.width = 80; tmpCanvas.height = 45;
-  tmpCtx.drawImage(firstImg, 0, 0, 80, 45);
+  const p = PALETTES[Math.floor(Math.random() * PALETTES.length)];
 
-  // Sample pixels from different zones
-  const data = tmpCtx.getImageData(0, 0, 80, 45).data;
-  let rSum=0,gSum=0,bSum=0,cnt=0;
-  // Sample every 4th pixel
-  for(let i=0;i<data.length;i+=16){
-    rSum+=data[i]; gSum+=data[i+1]; bSum+=data[i+2]; cnt++;
-  }
-  const avgR=rSum/cnt, avgG=gSum/cnt, avgB=bSum/cnt;
+  const set = (id, labelId, val) => {
+    document.getElementById(id).value = val;
+    document.getElementById(labelId).textContent = val;
+  };
 
-  // Dominant: darken for background, shift hue for accent
-  const bgR=Math.round(avgR*0.25), bgG=Math.round(avgG*0.25), bgB=Math.round(avgB*0.35);
-  const acR=Math.min(255,Math.round(avgR*0.5+100)), acG=Math.min(255,Math.round(avgG*0.6+80)), acB=Math.min(255,Math.round(avgB*0.4+120));
+  set('cBg',        'cBgL',  p.bg);
+  set('cHighlight', 'cHL',   p.hl);
+  set('cPrice',     'cPL',   p.price);
+  set('cHText',     'cHTL',  p.htext);
+  set('cBrand',     'cBrL',  p.brand);
+  document.getElementById('cProduct').value = p.brand;
+  set('cDesc',      'cDL',   p.desc);
 
-  const bgHex = `#${toHex(bgR)}${toHex(bgG)}${toHex(bgB)}`;
-  const acHex = `#${toHex(acR)}${toHex(acG)}${toHex(acB)}`;
-
-  document.getElementById('cBg').value = bgHex;
-  document.getElementById('cBgL').textContent = bgHex;
-  document.getElementById('cHighlight').value = acHex;
-  document.getElementById('cHL').textContent = acHex;
   render();
-  notify('🎨 이미지 색상 기반으로 자동 설정했어요!');
+  notify(`🎨 "${p.label}" 팔레트 적용됐어요!`);
 }
 function toHex(n) { return Math.max(0,Math.min(255,Math.round(n))).toString(16).padStart(2,'0'); }
 function sKick(ac,d,t,v){if(t>ac.currentTime+DUR+.1)return;const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(d);o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(.01,t+.3);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+.3);o.start(t);o.stop(t+.35);}
