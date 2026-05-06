@@ -177,6 +177,7 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
   </div>
   <div class="spec-badge">1920×1080 · <b>16:9</b></div>
   <div class="spec-badge"><b>15초</b> · 24FPS</div>
+  <div class="spec-badge"><b>MP4</b></div>
   <div class="topbar-right">
     <button class="btn" id="genBtn" onclick="generateVideo()">🎬 영상 생성</button>
     <button class="btn primary" id="dlBtn" onclick="downloadVideo()" disabled>⬇ 다운로드</button>
@@ -387,7 +388,7 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
       <div class="pi-row"><span class="pi-label">해상도</span><span class="pi-val ok">1920 × 1080</span></div>
       <div class="pi-row"><span class="pi-label">길이</span><span class="pi-val ok">15초</span></div>
       <div class="pi-row"><span class="pi-label">프레임</span><span class="pi-val ok">24 FPS</span></div>
-      <div class="pi-row"><span class="pi-label">포맷</span><span class="pi-val warn">WebM</span></div>
+      <div class="pi-row"><span class="pi-label">포맷</span><span class="pi-val ok">MP4</span></div>
       <div class="pi-row"><span class="pi-label">슬라이드 수</span><span class="pi-val" id="infoN">0장</span></div>
       <div class="pi-row"><span class="pi-label">슬라이드당</span><span class="pi-val" id="infoDur">—</span></div>
     </div>
@@ -446,6 +447,7 @@ let animFrame = null;
 let playStart = null;
 let curT = 0.2;
 let videoBlob = null;
+let videoMime = 'video/mp4';
 let audioCtx = null;
 let prevSrc = null;
 let DW, DH;
@@ -1235,11 +1237,31 @@ function sPad(ac,d,freq,t,dur,v){if(t>ac.currentTime+DUR+.5)return;const o=ac.cr
 // ═══════════════════════════════════════════════════
 // VIDEO GENERATION
 // ═══════════════════════════════════════════════════
+function updateProgress(pct, sub) {
+  const p = clamp(Math.round(pct), 0, 100);
+  document.getElementById('progPct').textContent = p + '%';
+  document.getElementById('progFill').style.width = p + '%';
+  document.getElementById('progSub').textContent = sub;
+}
+
+function getMp4RecordingMime() {
+  if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) return '';
+  return [
+    'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+    'video/mp4;codecs=h264,aac',
+    'video/mp4',
+  ].find(m => MediaRecorder.isTypeSupported(m)) || '';
+}
+
 async function generateVideo() {
   const btn = document.getElementById('genBtn');
+  videoBlob = null;
+  videoMime = 'video/mp4';
+  document.getElementById('dlBtn').disabled = true;
   btn.disabled = true;
   btn.innerHTML = '<div class="spinner"></div> 렌더링...';
   document.getElementById('progOv').classList.add('show');
+  updateProgress(0, '프레임 렌더링 중...');
 
   let stream;
   try {
@@ -1263,50 +1285,70 @@ async function generateVideo() {
     stream = ec.captureStream(FPS);
   }
 
-  const mime = ['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(m => MediaRecorder.isTypeSupported(m));
+  const mime = getMp4RecordingMime();
+  if (!mime) {
+    alert('현재 브라우저가 MP4 녹화를 지원하지 않아요. Chrome 또는 Edge 최신 버전을 사용해 주세요.');
+    resetGenBtn();
+    document.getElementById('progOv').classList.remove('show');
+    return;
+  }
+
   const chunks = [];
   let rec;
   try {
     rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 10000000 });
   } catch(e) {
-    alert('Chrome 브라우저를 사용해 주세요.'); resetGenBtn(); document.getElementById('progOv').classList.remove('show'); return;
+    alert('현재 브라우저에서 MP4 녹화를 시작할 수 없어요. Chrome 또는 Edge 최신 버전을 사용해 주세요.');
+    resetGenBtn();
+    document.getElementById('progOv').classList.remove('show');
+    return;
   }
   rec.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+  rec.onstop = () => {
+    videoMime = mime || chunks[0]?.type || 'video/mp4';
+    videoBlob = new Blob(chunks, { type: videoMime });
+    document.getElementById('progOv').classList.remove('show');
+    document.getElementById('dlBtn').disabled = false;
+    resetGenBtn();
+    notify('✅ MP4 영상 생성 완료! 다운로드 버튼을 눌러주세요.');
+    render(curT);
+  };
   rec.start(200);
 
   let frame = 0;
   const doFrame = () => new Promise(res => requestAnimationFrame(() => {
     const t = clamp(frame / TOTAL, 0, 1);
     renderExport(t); frame++;
-    const pct = Math.round(frame / TOTAL * 100);
-    document.getElementById('progPct').textContent = pct + '%';
-    document.getElementById('progFill').style.width = pct + '%';
-    document.getElementById('progSub').textContent = `프레임 ${frame} / ${TOTAL}`;
+    updateProgress(frame / TOTAL * 100, `프레임 ${frame} / ${TOTAL}`);
     res();
   }));
 
   for (let i = 0; i < TOTAL; i++) await doFrame();
   await new Promise(r => setTimeout(r, 300));
   rec.stop();
-  rec.onstop = () => {
-    videoBlob = new Blob(chunks, { type: 'video/webm' });
-    document.getElementById('progOv').classList.remove('show');
-    document.getElementById('dlBtn').disabled = false;
-    resetGenBtn();
-    notify('✅ 영상 생성 완료! 다운로드 버튼을 눌러주세요.');
-    render(curT);
-  };
 }
 
 function resetGenBtn() {
   const b = document.getElementById('genBtn');
   b.disabled = false; b.innerHTML = '🎬 영상 생성';
 }
+function resetDownloadBtn() {
+  const b = document.getElementById('dlBtn');
+  b.disabled = !videoBlob;
+  b.innerHTML = '⬇ 다운로드';
+}
+function saveBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 function downloadVideo() {
   if (!videoBlob) return;
-  const url = URL.createObjectURL(videoBlob);
-  const a = document.createElement('a'); a.href=url; a.download=`ad_15s_${Date.now()}.webm`; a.click();
-  URL.revokeObjectURL(url);
+  saveBlob(videoBlob, `ad_15s_${Date.now()}.mp4`);
+  notify('✅ MP4 다운로드를 시작했어요.');
 }
 
 // ═══════════════════════════════════════════════════
