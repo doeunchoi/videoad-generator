@@ -1316,23 +1316,41 @@ async function generateVideo() {
   };
   rec.start(200);
 
-  // Real-time render: setTimeout pacing for accurate 15s duration
-  const FRAME_MS = 1000 / FPS; // ~41.67ms per frame at 24fps
-  let frame = 0;
-
+  // ── Real-time recording: run for exactly DUR seconds ──
+  // Drive canvas at FPS using wall-clock time so captureStream
+  // records the correct number of frames regardless of browser speed.
   await new Promise(resolve => {
-    function doFrame() {
-      if (frame > TOTAL) { resolve(); return; }
-      const t = clamp(frame / TOTAL, 0, 1);
-      renderExport(t);
-      frame++;
-      updateProgress(frame / TOTAL * 100, `프레임 ${frame} / ${TOTAL}`);
-      setTimeout(doFrame, FRAME_MS);
+    const startTime = performance.now();
+    const totalMs   = DUR * 1000;
+    let lastFrame   = -1;
+
+    function tick() {
+      const elapsed = performance.now() - startTime;
+      const t       = clamp(elapsed / totalMs, 0, 1);
+
+      // Render only when we've advanced to the next frame slot
+      const frameIdx = Math.floor(t * TOTAL);
+      if (frameIdx !== lastFrame) {
+        renderExport(t);
+        lastFrame = frameIdx;
+        const pct = clamp(Math.round(t * 100), 0, 100);
+        updateProgress(pct, `렌더링 중... ${(elapsed / 1000).toFixed(1)}s / ${DUR}s`);
+      }
+
+      if (elapsed < totalMs) {
+        requestAnimationFrame(tick);
+      } else {
+        // Render final frame then stop
+        renderExport(1);
+        updateProgress(100, '완료 중...');
+        resolve();
+      }
     }
-    doFrame();
+    requestAnimationFrame(tick);
   });
 
-  await new Promise(r => setTimeout(r, 500));
+  // Give recorder time to flush remaining chunks
+  await new Promise(r => setTimeout(r, 800));
   rec.stop();
 }
 
