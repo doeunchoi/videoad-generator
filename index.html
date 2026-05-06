@@ -1303,6 +1303,7 @@ async function generateVideo() {
     document.getElementById('progOv').classList.remove('show');
     return;
   }
+
   rec.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
   rec.onstop = () => {
     videoMime = mime || chunks[0]?.type || 'video/mp4';
@@ -1315,16 +1316,23 @@ async function generateVideo() {
   };
   rec.start(200);
 
+  // Real-time render: setTimeout pacing for accurate 15s duration
+  const FRAME_MS = 1000 / FPS; // ~41.67ms per frame at 24fps
   let frame = 0;
-  const doFrame = () => new Promise(res => requestAnimationFrame(() => {
-    const t = clamp(frame / TOTAL, 0, 1);
-    renderExport(t); frame++;
-    updateProgress(frame / TOTAL * 100, `프레임 ${frame} / ${TOTAL}`);
-    res();
-  }));
 
-  for (let i = 0; i < TOTAL; i++) await doFrame();
-  await new Promise(r => setTimeout(r, 300));
+  await new Promise(resolve => {
+    function doFrame() {
+      if (frame > TOTAL) { resolve(); return; }
+      const t = clamp(frame / TOTAL, 0, 1);
+      renderExport(t);
+      frame++;
+      updateProgress(frame / TOTAL * 100, `프레임 ${frame} / ${TOTAL}`);
+      setTimeout(doFrame, FRAME_MS);
+    }
+    doFrame();
+  });
+
+  await new Promise(r => setTimeout(r, 500));
   rec.stop();
 }
 
@@ -1332,22 +1340,14 @@ function resetGenBtn() {
   const b = document.getElementById('genBtn');
   b.disabled = false; b.innerHTML = '🎬 영상 생성';
 }
-function resetDownloadBtn() {
-  const b = document.getElementById('dlBtn');
-  b.disabled = !videoBlob;
-  b.innerHTML = '⬇ 다운로드';
-}
-function saveBlob(blob, filename) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
 function downloadVideo() {
   if (!videoBlob) return;
-  saveBlob(videoBlob, `ad_15s_${Date.now()}.mp4`);
+  const url = URL.createObjectURL(videoBlob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ad_15s_${Date.now()}.mp4`;
+  a.click();
+  URL.revokeObjectURL(url);
   notify('✅ MP4 다운로드를 시작했어요.');
 }
 
