@@ -60,7 +60,20 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;hei
 .tooltip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1e1e35;border:1px solid var(--border);border-radius:8px;padding:10px 12px;width:200px;font-size:10px;color:var(--text);line-height:1.7;z-index:100;white-space:normal;text-align:left;box-shadow:0 8px 24px rgba(0,0,0,.5)}
 .tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1e1e35}
 
-/* ── Slide Cards ── */
+/* ── Logo upload ── */
+.logo-upload{display:flex;align-items:center;gap:10px;background:var(--bg);border:1.5px dashed var(--border);border-radius:9px;padding:8px 10px;cursor:pointer;position:relative;transition:all .2s}
+.logo-upload:hover{border-color:var(--accent)}
+.logo-upload.has-logo{border-style:solid;border-color:var(--accent)}
+.logo-upload input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
+.logo-preview{width:44px;height:28px;border-radius:5px;object-fit:contain;background:rgba(255,255,255,.08);border:1px solid var(--border);flex-shrink:0;display:none}
+.logo-texts{flex:1;min-width:0}
+.logo-name{font-size:11px;font-weight:600;color:var(--text);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.logo-sub{font-size:9px;color:var(--muted)}
+.logo-rm{width:20px;height:20px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:10px;cursor:pointer;display:none;align-items:center;justify-content:center;flex-shrink:0;transition:all .18s}
+.logo-rm:hover{border-color:var(--accent2);color:var(--accent2)}
+.logo-upload.has-logo .logo-rm{display:flex}
+.logo-size-row{display:flex;align-items:center;gap:8px;margin-top:6px}
+.logo-size-row label{font-size:10px;color:var(--muted);min-width:28px}
 .slide-cards{display:flex;flex-direction:column;gap:10px;margin-top:10px}
 .slide-card{border:1.5px solid var(--border);border-radius:10px;overflow:hidden;background:var(--bg);transition:border-color .18s}
 .slide-card.active{border-color:var(--accent)}
@@ -244,6 +257,29 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
 
       <div style="margin-top:10px;font-size:10px;color:var(--muted);text-align:center" id="emptyHint">
         이미지를 업로드하면 슬라이드별 정보를 입력할 수 있어요
+      </div>
+
+      <div class="hdiv"></div>
+
+      <!-- Logo Upload -->
+      <div class="sh" style="margin-top:0">브랜드 로고 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(공통 적용)</span></div>
+      <div class="logo-upload" id="logoUpload" onclick="document.getElementById('logoFileInput').click()">
+        <input type="file" id="logoFileInput" accept="image/png,image/jpeg,image/svg+xml,image/webp" onchange="loadLogo(this)">
+        <img class="logo-preview" id="logoPreview">
+        <div class="logo-texts">
+          <span class="logo-name" id="logoName">클릭하여 로고 업로드</span>
+          <span class="logo-sub">PNG(투명 권장) · JPG · SVG · WEBP</span>
+        </div>
+        <button class="logo-rm" id="logoRm" onclick="removeLogo(event)">✕</button>
+      </div>
+      <div class="logo-size-row">
+        <label>크기</label>
+        <input type="range" class="slider" id="logoSizeS" min="20" max="200" value="80" oninput="document.getElementById('logoSizeV').textContent=this.value+'px';render()">
+        <span class="vval" id="logoSizeV">80px</span>
+      </div>
+      <div style="margin-top:6px;font-size:9px;color:var(--muted);line-height:1.6">
+        💡 투명 PNG 로고를 사용하면 배경색과 자연스럽게 어울립니다.<br>
+        로고는 우측 패널 상단에 고정 표시됩니다.
       </div>
 
     </div>
@@ -448,6 +484,7 @@ let playStart = null;
 let curT = 0.2;
 let videoBlob = null;
 let videoMime = 'video/mp4';
+let logoImg   = null;   // brand logo image (shared across all slides)
 let audioCtx = null;
 let prevSrc = null;
 let DW, DH;
@@ -524,6 +561,37 @@ function processFiles(files) {
     };
     reader.readAsDataURL(file);
   });
+}
+
+function loadLogo(input) {
+  if (!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      logoImg = img;
+      const preview = document.getElementById('logoPreview');
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+      document.getElementById('logoName').textContent = input.files[0].name;
+      document.getElementById('logoUpload').classList.add('has-logo');
+      render();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(input.files[0]);
+  input.value = '';
+}
+
+function removeLogo(e) {
+  e.stopPropagation();
+  logoImg = null;
+  document.getElementById('logoPreview').src = '';
+  document.getElementById('logoPreview').style.display = 'none';
+  document.getElementById('logoName').textContent = '클릭하여 로고 업로드';
+  document.getElementById('logoUpload').classList.remove('has-logo');
+  document.getElementById('logoFileInput').value = '';
+  render();
 }
 
 function removeSlide(idx) {
@@ -882,11 +950,24 @@ function drawTextPanel(ctx, sl, c, sw, sh, cx2, textW, alpha, slideInProgress, l
 
   let y = (sh - totalH) / 2 + sz.brand / 2;
 
-  // Brand
-  ctx.font = `700 ${sz.brand}px "Noto Sans KR",sans-serif`;
-  ctx.fillStyle = c.brand;
-  ctx.fillText(sl.brand || '', cx2, y);
-  y += sz.brand / 2 + G1;
+  // ── Brand / Logo ──
+  if (logoImg) {
+    // Render logo image centered, height = brandFS, width auto
+    const logoH = parseInt(document.getElementById('logoSizeS').value || 80) * scale;
+    const logoAR = logoImg.width / logoImg.height;
+    const logoW = logoH * logoAR;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(logoImg, cx2 - logoW / 2, y - logoH / 2, logoW, logoH);
+    ctx.restore();
+    // Adjust y by actual logo height vs expected brandFS
+    y += (logoH - sz.brand) / 2 + sz.brand / 2 + G1;
+  } else {
+    ctx.font = `700 ${sz.brand}px "Noto Sans KR",sans-serif`;
+    ctx.fillStyle = c.brand;
+    ctx.fillText(sl.brand || '', cx2, y);
+    y += sz.brand / 2 + G1;
+  }
 
   // Product
   ctx.font = `900 ${sz.prod}px "Noto Sans KR",sans-serif`;
@@ -970,25 +1051,21 @@ function drawPriceWithMotion(ctx, sl, c, sz, cx2, cy, scale, globalAlpha, localT
 }
 
 function drawHighlightWithMotion(ctx, sl, c, sz, cx2, cy, maxPW, scale, globalAlpha, localT) {
-  // Always: fast pump pulse — 3Hz, ±12% scale, sharp curve
+  // Pulse via font-size change — avoids baseline shift from ctx.scale()
   const p = pump(localT);
-  const scaleF = 1 + p * 0.12;        // 1.0 → 1.12 → 1.0 repeatedly
+  const pulsedSize = sz.hl * (1 + p * 0.12); // ±12% size, no translate needed
 
   ctx.save();
   ctx.globalAlpha = globalAlpha;
-  ctx.textBaseline = 'middle';
+  ctx.textBaseline = 'middle';  // cy stays fixed — no movement
   ctx.textAlign = 'center';
-  ctx.font = `900 ${sz.hl}px "Noto Sans KR",sans-serif`;
+  ctx.font = `900 ${pulsedSize}px "Noto Sans KR",sans-serif`;
 
+  // Re-truncate with pulsed size's measure
   const text = truncateText(ctx, sl.highlight || '', maxPW);
-
-  ctx.translate(cx2, cy);
-  ctx.scale(scaleF, scaleF);
-  ctx.translate(-cx2, -cy);
 
   ctx.fillStyle = c.htext;
   ctx.fillText(text, cx2, cy);
-
   ctx.restore();
 }
 
