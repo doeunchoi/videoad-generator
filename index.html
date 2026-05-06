@@ -71,7 +71,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;hei
 .logo-sub{font-size:9px;color:var(--muted)}
 .logo-rm-btn{position:absolute;top:-8px;right:-8px;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);background:var(--panel2);color:var(--text);font-size:10px;cursor:pointer;display:none;align-items:center;justify-content:center;transition:all .18s;z-index:2;line-height:1}
 .logo-rm-btn:hover{border-color:var(--accent2);color:var(--accent2);background:var(--panel)}
-.logo-upload.has-logo ~ .logo-rm-btn, .logo-rm-btn.visible{display:flex}
 .logo-size-row{display:flex;align-items:center;gap:8px;margin-top:6px}
 .logo-size-row label{font-size:10px;color:var(--muted);min-width:28px}
 .slide-cards{display:flex;flex-direction:column;gap:10px;margin-top:10px}
@@ -576,9 +575,9 @@ function loadLogo(input) {
       preview.style.display = 'block';
       document.getElementById('logoName').textContent = input.files[0].name;
       document.getElementById('logoUpload').classList.add('has-logo');
-      document.getElementById('logoRm').classList.add('visible');
+      // Force show via inline style (avoids CSS specificity issues)
+      document.getElementById('logoRm').style.display = 'flex';
       document.getElementById('logoSizeWrap').style.display = 'block';
-      // Small delay to ensure DOM is updated before render reads slider
       requestAnimationFrame(() => render());
     };
     img.src = e.target.result;
@@ -594,7 +593,7 @@ function removeLogo(e) {
   document.getElementById('logoPreview').style.display = 'none';
   document.getElementById('logoName').textContent = '클릭하여 로고 업로드';
   document.getElementById('logoUpload').classList.remove('has-logo');
-  document.getElementById('logoRm').classList.remove('visible');
+  document.getElementById('logoRm').style.display = 'none';
   document.getElementById('logoSizeWrap').style.display = 'none';
   document.getElementById('logoFileInput').value = '';
   render();
@@ -1295,38 +1294,36 @@ function buildMusic(name, ac, dest, st, dur) {
 // ── Auto Color from first uploaded image ──────────
 function autoColor() {
   // Curated palette library: [bg, highlight, price, htext, brand, desc]
-  // Dark bg with good contrast, varied moods
+  // Includes dark bg, light bg + dark text, and gradient-style suggestions
   const PALETTES = [
-    // Navy & Gold
+    // ── Dark backgrounds ──
     { bg:'#0d1b4b', hl:'#4a6fa5', price:'#ffffff', htext:'#ffd166', brand:'#ffffff', desc:'#c8d0e8', label:'네이비 골드' },
-    // Deep Purple
     { bg:'#1a0a2e', hl:'#7c3aed', price:'#ffffff', htext:'#a78bfa', brand:'#ffffff', desc:'#d1c4e9', label:'딥 퍼플' },
-    // Forest Green
     { bg:'#0a2218', hl:'#16a34a', price:'#ffffff', htext:'#4ade80', brand:'#ffffff', desc:'#bbf7d0', label:'포레스트 그린' },
-    // Charcoal & Coral
     { bg:'#1c1c1c', hl:'#e05c4b', price:'#ffffff', htext:'#ff8a7a', brand:'#ffffff', desc:'#d6d6d6', label:'차콜 코랄' },
-    // Midnight Teal
     { bg:'#0a2130', hl:'#0891b2', price:'#ffffff', htext:'#22d3ee', brand:'#ffffff', desc:'#bae6fd', label:'미드나이트 틸' },
-    // Warm Brown
     { bg:'#1c1208', hl:'#b45309', price:'#ffffff', htext:'#fbbf24', brand:'#ffffff', desc:'#fde68a', label:'웜 브라운' },
-    // Rose Dark
     { bg:'#1f0a12', hl:'#be185d', price:'#ffffff', htext:'#f472b6', brand:'#ffffff', desc:'#fbcfe8', label:'로즈 다크' },
-    // Slate Blue
     { bg:'#0f172a', hl:'#3b82f6', price:'#ffffff', htext:'#60a5fa', brand:'#ffffff', desc:'#bfdbfe', label:'슬레이트 블루' },
-    // Dark Olive
-    { bg:'#141a0a', hl:'#65a30d', price:'#ffffff', htext:'#a3e635', brand:'#ffffff', desc:'#d9f99d', label:'다크 올리브' },
-    // Indigo & Orange
     { bg:'#1e1b4b', hl:'#4338ca', price:'#ffffff', htext:'#fb923c', brand:'#ffffff', desc:'#c7d2fe', label:'인디고 오렌지' },
-    // Dark Crimson
-    { bg:'#1a0505', hl:'#991b1b', price:'#ffffff', htext:'#fca5a5', brand:'#ffffff', desc:'#fee2e2', label:'다크 크림슨' },
-    // Gunmetal & Cyan
-    { bg:'#0d1117', hl:'#164e63', price:'#ffffff', htext:'#06b6d4', brand:'#ffffff', desc:'#a5f3fc', label:'건메탈 사이언' },
-    // Plum & Lime
-    { bg:'#2e1065', hl:'#7e22ce', price:'#ffffff', htext:'#bef264', brand:'#ffffff', desc:'#e9d5ff', label:'플럼 라임' },
-    // Dark Warm Gray
-    { bg:'#18130f', hl:'#78350f', price:'#ffffff', htext:'#f59e0b', brand:'#ffffff', desc:'#fef3c7', label:'다크 웜 그레이' },
-    // Electric Blue
     { bg:'#05050f', hl:'#2563eb', price:'#ffffff', htext:'#7c6bff', brand:'#ffffff', desc:'#c7d2fe', label:'일렉트릭 블루' },
+    { bg:'#0d1117', hl:'#164e63', price:'#ffffff', htext:'#06b6d4', brand:'#ffffff', desc:'#a5f3fc', label:'건메탈 사이언' },
+    { bg:'#2e1065', hl:'#7e22ce', price:'#ffffff', htext:'#bef264', brand:'#ffffff', desc:'#e9d5ff', label:'플럼 라임' },
+    // ── Light backgrounds + dark text ──
+    { bg:'#fdf6ec', hl:'#c2410c', price:'#1c1c1c', htext:'#c2410c', brand:'#1c1c1c', desc:'#4b3a2a', label:'크림 오렌지' },
+    { bg:'#f0f9ff', hl:'#0369a1', price:'#0c1a2e', htext:'#0369a1', brand:'#0c1a2e', desc:'#374151', label:'스카이 화이트' },
+    { bg:'#f0fdf4', hl:'#15803d', price:'#0c2a14', htext:'#15803d', brand:'#0c2a14', desc:'#374151', label:'민트 그린 라이트' },
+    { bg:'#fdf2f8', hl:'#9d174d', price:'#1c0a10', htext:'#9d174d', brand:'#1c0a10', desc:'#4b2436', label:'블러시 핑크' },
+    { bg:'#fffbeb', hl:'#92400e', price:'#1c1208', htext:'#b45309', brand:'#1c1208', desc:'#4b3a0a', label:'버터 골드' },
+    { bg:'#f8f9ff', hl:'#4338ca', price:'#0f0a2e', htext:'#4338ca', brand:'#0f0a2e', desc:'#374151', label:'라벤더 화이트' },
+    { bg:'#fff1f2', hl:'#be123c', price:'#1a0508', htext:'#be123c', brand:'#1a0508', desc:'#4b2030', label:'로즈 화이트' },
+    { bg:'#f0fdfa', hl:'#0f766e', price:'#0a2e2a', htext:'#0f766e', brand:'#0a2e2a', desc:'#374151', label:'민트 다크' },
+    // ── Bold gradient-feel combos (deep + vivid accent) ──
+    { bg:'#0f0c29', hl:'#c026d3', price:'#ffffff', htext:'#f0abfc', brand:'#ffffff', desc:'#e9d5ff', label:'코스믹 퍼플' },
+    { bg:'#022c22', hl:'#059669', price:'#ffffff', htext:'#6ee7b7', brand:'#ffffff', desc:'#a7f3d0', label:'에메랄드 딥' },
+    { bg:'#1a0000', hl:'#dc2626', price:'#ffffff', htext:'#fca5a5', brand:'#ffffff', desc:'#fed7aa', label:'딥 레드 골드' },
+    { bg:'#0c0a00', hl:'#ca8a04', price:'#ffffff', htext:'#fde047', brand:'#ffffff', desc:'#fef9c3', label:'블랙 골드' },
+    { bg:'#001a2c', hl:'#0ea5e9', price:'#ffffff', htext:'#38bdf8', brand:'#ffffff', desc:'#e0f2fe', label:'오션 딥' },
   ];
 
   const p = PALETTES[Math.floor(Math.random() * PALETTES.length)];
