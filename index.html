@@ -69,9 +69,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;hei
 .logo-texts{flex:1;min-width:0}
 .logo-name{font-size:11px;font-weight:600;color:var(--text);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .logo-sub{font-size:9px;color:var(--muted)}
-.logo-rm{width:20px;height:20px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:10px;cursor:pointer;display:none;align-items:center;justify-content:center;flex-shrink:0;transition:all .18s}
-.logo-rm:hover{border-color:var(--accent2);color:var(--accent2)}
-.logo-upload.has-logo .logo-rm{display:flex}
+.logo-rm-btn{position:absolute;top:-8px;right:-8px;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);background:var(--panel2);color:var(--text);font-size:10px;cursor:pointer;display:none;align-items:center;justify-content:center;transition:all .18s;z-index:2;line-height:1}
+.logo-rm-btn:hover{border-color:var(--accent2);color:var(--accent2);background:var(--panel)}
+.logo-upload.has-logo ~ .logo-rm-btn, .logo-rm-btn.visible{display:flex}
 .logo-size-row{display:flex;align-items:center;gap:8px;margin-top:6px}
 .logo-size-row label{font-size:10px;color:var(--muted);min-width:28px}
 .slide-cards{display:flex;flex-direction:column;gap:10px;margin-top:10px}
@@ -252,34 +252,35 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
         </div>
       </div>
 
+      <!-- Logo Upload — 이미지 업로드와 슬라이드 사이 -->
+      <div class="sh" style="margin-top:14px;margin-bottom:6px">브랜드 로고 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(선택 · 공통 적용)</span></div>
+      <div style="position:relative">
+        <div class="logo-upload" id="logoUpload" onclick="document.getElementById('logoFileInput').click()">
+          <input type="file" id="logoFileInput" accept="image/png,image/jpeg,image/svg+xml,image/webp" onchange="loadLogo(this)">
+          <img class="logo-preview" id="logoPreview">
+          <div class="logo-texts">
+            <span class="logo-name" id="logoName">클릭하여 로고 업로드</span>
+            <span class="logo-sub">PNG(투명 권장) · JPG · SVG · WEBP</span>
+          </div>
+        </div>
+        <button class="logo-rm-btn" id="logoRm" onclick="removeLogo(event)" title="로고 제거">✕</button>
+      </div>
+      <div id="logoSizeWrap" style="display:none">
+        <div class="logo-size-row" style="margin-top:6px">
+          <label>크기</label>
+          <input type="range" class="slider" id="logoSizeS" min="20" max="200" value="80" oninput="document.getElementById('logoSizeV').textContent=this.value+'px';render()">
+          <span class="vval" id="logoSizeV">80px</span>
+        </div>
+        <div style="margin-top:5px;padding:6px 8px;background:rgba(124,107,255,.08);border:1px solid rgba(124,107,255,.2);border-radius:6px;font-size:9px;color:var(--muted);line-height:1.6">
+          ℹ️ 로고를 업로드하면 각 슬라이드의 <b style="color:var(--text)">브랜드명 입력 내용은 표시되지 않습니다.</b>
+        </div>
+      </div>
+
       <!-- Slide Cards -->
       <div class="slide-cards" id="slideCards"></div>
 
       <div style="margin-top:10px;font-size:10px;color:var(--muted);text-align:center" id="emptyHint">
         이미지를 업로드하면 슬라이드별 정보를 입력할 수 있어요
-      </div>
-
-      <div class="hdiv"></div>
-
-      <!-- Logo Upload -->
-      <div class="sh" style="margin-top:0">브랜드 로고 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(공통 적용)</span></div>
-      <div class="logo-upload" id="logoUpload" onclick="document.getElementById('logoFileInput').click()">
-        <input type="file" id="logoFileInput" accept="image/png,image/jpeg,image/svg+xml,image/webp" onchange="loadLogo(this)">
-        <img class="logo-preview" id="logoPreview">
-        <div class="logo-texts">
-          <span class="logo-name" id="logoName">클릭하여 로고 업로드</span>
-          <span class="logo-sub">PNG(투명 권장) · JPG · SVG · WEBP</span>
-        </div>
-        <button class="logo-rm" id="logoRm" onclick="removeLogo(event)">✕</button>
-      </div>
-      <div class="logo-size-row">
-        <label>크기</label>
-        <input type="range" class="slider" id="logoSizeS" min="20" max="200" value="80" oninput="document.getElementById('logoSizeV').textContent=this.value+'px';render()">
-        <span class="vval" id="logoSizeV">80px</span>
-      </div>
-      <div style="margin-top:6px;font-size:9px;color:var(--muted);line-height:1.6">
-        💡 투명 PNG 로고를 사용하면 배경색과 자연스럽게 어울립니다.<br>
-        로고는 우측 패널 상단에 고정 표시됩니다.
       </div>
 
     </div>
@@ -575,6 +576,8 @@ function loadLogo(input) {
       preview.style.display = 'block';
       document.getElementById('logoName').textContent = input.files[0].name;
       document.getElementById('logoUpload').classList.add('has-logo');
+      document.getElementById('logoRm').classList.add('visible');
+      document.getElementById('logoSizeWrap').style.display = 'block';
       render();
     };
     img.src = e.target.result;
@@ -590,6 +593,8 @@ function removeLogo(e) {
   document.getElementById('logoPreview').style.display = 'none';
   document.getElementById('logoName').textContent = '클릭하여 로고 업로드';
   document.getElementById('logoUpload').classList.remove('has-logo');
+  document.getElementById('logoRm').classList.remove('visible');
+  document.getElementById('logoSizeWrap').style.display = 'none';
   document.getElementById('logoFileInput').value = '';
   render();
 }
@@ -1051,21 +1056,38 @@ function drawPriceWithMotion(ctx, sl, c, sz, cx2, cy, scale, globalAlpha, localT
 }
 
 function drawHighlightWithMotion(ctx, sl, c, sz, cx2, cy, maxPW, scale, globalAlpha, localT) {
-  // Pulse via font-size change — avoids baseline shift from ctx.scale()
-  const p = pump(localT);
-  const pulsedSize = sz.hl * (1 + p * 0.12); // ±12% size, no translate needed
+  // Glow: colour oscillates between base and bright white — no size/position change at all
+  const cycle = (localT * 2.5) % 1;               // 2.5 beats per second
+  const glow  = Math.pow(Math.sin(cycle * Math.PI), 2); // smooth 0→1→0
+
+  // Blend htext colour toward white
+  const r1 = parseInt(c.htext.slice(1,3)||'00',16);
+  const g1 = parseInt(c.htext.slice(3,5)||'e5',16);
+  const b1 = parseInt(c.htext.slice(5,7)||'a0',16);
+  const blend = (a, b, t) => Math.round(a + (b - a) * t);
+  const glowColor = `rgb(${blend(r1,255,glow*0.65)},${blend(g1,255,glow*0.65)},${blend(b1,255,glow*0.65)})`;
 
   ctx.save();
   ctx.globalAlpha = globalAlpha;
-  ctx.textBaseline = 'middle';  // cy stays fixed — no movement
+  ctx.textBaseline = 'middle';
   ctx.textAlign = 'center';
-  ctx.font = `900 ${pulsedSize}px "Noto Sans KR",sans-serif`;
+  ctx.font = `900 ${sz.hl}px "Noto Sans KR",sans-serif`;
 
-  // Re-truncate with pulsed size's measure
   const text = truncateText(ctx, sl.highlight || '', maxPW);
 
-  ctx.fillStyle = c.htext;
-  ctx.fillText(text, cx2, cy);
+  // Optional subtle shadow glow behind text
+  if (glow > 0.1) {
+    ctx.save();
+    ctx.shadowColor = c.htext;
+    ctx.shadowBlur = glow * 18 * scale;
+    ctx.fillStyle = glowColor;
+    ctx.fillText(text, cx2, cy);
+    ctx.restore();
+  } else {
+    ctx.fillStyle = c.htext;
+    ctx.fillText(text, cx2, cy);
+  }
+
   ctx.restore();
 }
 
