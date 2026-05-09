@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>영상 광고 소재 생성기</title>
+<title> TVING 영상 광고 소재 생성기</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Sans:wght@400;500;600;700&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -251,33 +251,6 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
         </div>
       </div>
 
-      <!-- Logo Upload — 이미지 업로드와 슬라이드 사이 -->
-      <div class="sh" style="margin-top:14px;margin-bottom:6px">브랜드 로고 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(선택 · 공통 적용)</span></div>
-      <div id="logoArea">
-        <div style="display:flex;align-items:center;gap:8px">
-          <label class="logo-upload" id="logoUpload" for="logoFileInput" style="flex:1">
-            <input type="file" id="logoFileInput" accept="image/png,image/jpeg,image/svg+xml,image/webp" onchange="loadLogo(this)" style="display:none">
-            <img class="logo-preview" id="logoPreview">
-            <div class="logo-texts">
-              <span class="logo-name" id="logoName">클릭하여 로고 업로드</span>
-              <span class="logo-sub">PNG(투명 권장) · JPG · SVG · WEBP</span>
-            </div>
-          </label>
-          <button id="logoRm" onclick="removeLogo(event)" title="로고 제거"
-            style="display:none;width:26px;height:26px;flex-shrink:0;border-radius:50%;border:1.5px solid var(--border);background:var(--panel2);color:var(--text);font-size:11px;cursor:pointer;align-items:center;justify-content:center;transition:all .18s">✕</button>
-        </div>
-        <div id="logoSizeWrap" style="display:none;margin-top:8px">
-          <div class="logo-size-row">
-            <label>크기</label>
-            <input type="range" class="slider" id="logoSizeS" min="20" max="200" value="80" oninput="document.getElementById('logoSizeV').textContent=this.value+'px';render()">
-            <span class="vval" id="logoSizeV">80px</span>
-          </div>
-          <div style="margin-top:5px;padding:6px 8px;background:rgba(124,107,255,.08);border:1px solid rgba(124,107,255,.2);border-radius:6px;font-size:9px;color:var(--muted);line-height:1.6">
-            ℹ️ 로고를 업로드하면 각 슬라이드의 <b style="color:var(--text)">브랜드명 입력 내용은 표시되지 않습니다.</b>
-          </div>
-        </div>
-      </div>
-
       <!-- Slide Cards -->
       <div class="slide-cards" id="slideCards"></div>
 
@@ -487,7 +460,6 @@ let playStart = null;
 let curT = 0.2;
 let videoBlob = null;
 let videoMime = 'video/mp4';
-let logoImg   = null;   // brand logo image (shared across all slides)
 let audioCtx = null;
 let prevSrc = null;
 let DW, DH;
@@ -554,7 +526,12 @@ function processFiles(files) {
     reader.onload = e2 => {
       const img = new Image();
       img.onload = () => {
-        slides.push({ img, src: e2.target.result, brand:'', product:'', desc:'', price:'', highlight:'', fit:'cover', posX:50, posY:50, priceMotion:'pulse', hlMotion:'underline' });
+        slides.push({ img, src: e2.target.result, brand:'', product:'', desc:'', price:'', highlight:'',
+          fit:'cover', posX:50, posY:50,
+          brandMode:'text',   // 'text' | 'logo'
+          logoImg: null, logoSrc: null, logoSize: 80,
+          copyFrom: false     // copy brand/product/etc from slide 0
+        });
         rebuildCards();
         updateTimeline();
         updateInfo();
@@ -564,42 +541,6 @@ function processFiles(files) {
     };
     reader.readAsDataURL(file);
   });
-}
-
-function loadLogo(input) {
-  if (!input.files[0]) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const img = new Image();
-    img.onload = () => {
-      logoImg = img;
-      const preview = document.getElementById('logoPreview');
-      preview.src = e.target.result;
-      preview.style.display = 'block';
-      document.getElementById('logoName').textContent = input.files[0].name;
-      document.getElementById('logoUpload').classList.add('has-logo');
-      // Force show via inline style (avoids CSS specificity issues)
-      document.getElementById('logoRm').style.display = 'flex';
-      document.getElementById('logoSizeWrap').style.display = 'block';
-      requestAnimationFrame(() => render());
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(input.files[0]);
-  input.value = '';
-}
-
-function removeLogo(e) {
-  e.stopPropagation();
-  logoImg = null;
-  document.getElementById('logoPreview').src = '';
-  document.getElementById('logoPreview').style.display = 'none';
-  document.getElementById('logoName').textContent = '클릭하여 로고 업로드';
-  document.getElementById('logoUpload').classList.remove('has-logo');
-  document.getElementById('logoRm').style.display = 'none';
-  document.getElementById('logoSizeWrap').style.display = 'none';
-  document.getElementById('logoFileInput').value = '';
-  render();
 }
 
 function removeSlide(idx) {
@@ -652,8 +593,20 @@ function toggleCard(i) {
 function buildFieldsHTML(i, sl) {
   const posX = sl.posX !== undefined ? sl.posX : 50;
   const posY = sl.posY !== undefined ? sl.posY : 50;
+  const mode = sl.brandMode || 'text';
+  const hasLogo = !!sl.logoImg;
+  const copyFrom = sl.copyFrom || false;
+  const showCopy = i > 0;
+
   return `
   <div class="fstack">
+
+    ${showCopy ? `
+    <div class="f" style="flex-direction:row;align-items:center;gap:8px;padding:7px 10px;background:rgba(124,107,255,.06);border:1px solid rgba(124,107,255,.2);border-radius:8px;cursor:pointer" onclick="toggleCopy(${i})">
+      <div style="width:16px;height:16px;border-radius:4px;border:1.5px solid var(--accent);background:${copyFrom?'var(--accent)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:#fff">${copyFrom?'✓':''}</div>
+      <span style="font-size:10px;color:var(--text)">슬라이드 1의 텍스트 정보 그대로 사용</span>
+    </div>` : ''}
+
     <div class="f">
       <div class="f-header"><span class="f-label">이미지 포커스 위치</span></div>
       <div class="vrow" style="margin-top:4px">
@@ -669,12 +622,82 @@ function buildFieldsHTML(i, sl) {
         <span style="font-size:9px;color:var(--muted);min-width:28px;text-align:right">${Math.round(posY)}%</span>
       </div>
     </div>
-    ${fieldHTML(i,'brand','브랜드명', sl.brand, LIMITS.brand, '예: 앳센셜', false)}
-    ${fieldHTML(i,'product','제품명', sl.product, LIMITS.product, '예: KBO 치어 모먼트\n배트 키링', true)}
+
+    ${copyFrom && i > 0 ? '' : `
+    <div class="f">
+      <div class="f-header"><span class="f-label">브랜드명</span></div>
+      <div style="display:flex;gap:4px;margin-bottom:6px">
+        <button class="motion-btn ${mode==='text'?'on':''}" onclick="setBrandMode(${i},'text')">텍스트</button>
+        <button class="motion-btn ${mode==='logo'?'on':''}" onclick="setBrandMode(${i},'logo')">로고 이미지</button>
+      </div>
+      ${mode === 'text' ? `
+        <input type="text" maxlength="12" placeholder="예: 앳센셜"
+          value="${escapeAttr(sl.brand)}" oninput="onFieldInput(${i},'brand',this.value)">
+        <div style="font-size:9px;color:var(--muted);margin-top:2px;text-align:right">${(sl.brand||'').length}/12</div>
+      ` : `
+        <label style="display:flex;align-items:center;gap:8px;background:var(--panel);border:1.5px dashed var(--border);border-radius:7px;padding:7px 10px;cursor:pointer">
+          <input type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style="display:none"
+            onchange="loadSlideLogo(${i},this)">
+          ${hasLogo
+            ? `<img src="${sl.logoSrc}" style="height:28px;max-width:80px;object-fit:contain;border-radius:3px">`
+            : `<span style="font-size:11px;color:var(--muted)">📁 로고 파일 선택</span>`}
+          <span style="font-size:10px;color:var(--muted)">${hasLogo ? sl.logoName||'로고 업로드됨' : 'PNG · JPG · SVG'}</span>
+        </label>
+        ${hasLogo ? `
+        <div class="vrow" style="margin-top:6px">
+          <label style="font-size:9px;color:var(--muted);min-width:28px">크기</label>
+          <input type="range" class="slider" min="20" max="300" value="${sl.logoSize||80}"
+            oninput="slides[${i}].logoSize=+this.value;render()">
+          <span style="font-size:9px;color:var(--muted);min-width:30px;text-align:right">${sl.logoSize||80}px</span>
+        </div>` : ''}
+      `}
+    </div>
+
+    ${fieldHTML(i,'product','제품명', sl.product, LIMITS.product, '예: KBO 치어 모먼트 배트 키링', true)}
     ${fieldHTML(i,'desc','제품 설명 문구', sl.desc, LIMITS.desc, '예: 어디에서도 볼 수 없는 유니크한 디자인', true)}
     ${priceFieldHTML(i, sl.price)}
     ${fieldHTML(i,'highlight','강조 문구', sl.highlight, LIMITS.highlight, '예: 우리 팀 굿즈, 품절 전 선점 필수!', false)}
+    `}
   </div>`;
+}
+
+function setBrandMode(i, mode) {
+  slides[i].brandMode = mode;
+  rebuildCards(); render();
+}
+
+function loadSlideLogo(i, input) {
+  if (!input.files[0]) return;
+  slides[i].logoName = input.files[0].name;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      slides[i].logoImg = img;
+      slides[i].logoSrc = e.target.result;
+      rebuildCards(); render();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(input.files[0]);
+  input.value = '';
+}
+
+function toggleCopy(i) {
+  slides[i].copyFrom = !slides[i].copyFrom;
+  rebuildCards(); render();
+}
+
+// Resolve effective slide data (respects copyFrom)
+function getSlideData(i) {
+  const sl = slides[i];
+  if (sl.copyFrom && i > 0 && slides[0]) {
+    const s0 = slides[0];
+    return { ...sl, brand: s0.brand, product: s0.product, desc: s0.desc,
+      price: s0.price, highlight: s0.highlight,
+      brandMode: s0.brandMode, logoImg: s0.logoImg, logoSrc: s0.logoSrc, logoSize: s0.logoSize };
+  }
+  return sl;
 }
 
 function fieldHTML(i, key, label, val, max, placeholder, isTextarea) {
@@ -848,24 +871,7 @@ function drawFrame(ctx, sw, sh, t) {
   ctx.fillStyle = vignette; ctx.fillRect(imgX, imgY + imgH * 0.72, imgW, imgH * 0.28);
   ctx.restore();
 
-  // Slide dots
-  if (n > 1) {
-    const dotR = Math.max(2, sw * 0.006);
-    const gap = dotR * 2.5;
-    const totalDotW = n * dotR * 2 + (n - 1) * gap;
-    const dotBaseX = imgX + imgW / 2 - totalDotW / 2;
-    const dotY = imgY + imgH - Math.max(pad * 0.85, dotR * 2);
-    for (let i = 0; i < n; i++) {
-      const dx = dotBaseX + i * (dotR * 2 + gap) + dotR;
-      // Blend dot during transition
-      const activeFrac = i === curIdx ? (1 - ease) : i === curIdx + 1 ? ease : 0;
-      const alpha = activeFrac > 0 ? 1 : 0.32;
-      ctx.beginPath();
-      ctx.arc(dx, dotY, dotR, 0, Math.PI * 2);
-      ctx.fillStyle = activeFrac > 0 ? `rgba(255,255,255,${0.32 + activeFrac * 0.68})` : 'rgba(255,255,255,0.32)';
-      ctx.fill();
-    }
-  }
+  // Dots removed — they obscure the image
 
   // ── TEXT PANEL ─────────────────────────────────────
   const textX = imgPanelW;
@@ -884,13 +890,13 @@ function drawFrame(ctx, sw, sh, t) {
     const curAlpha = easeOut(1 - ease);
     const nxtAlpha = easeOut(ease);
     if (curAlpha > 0.01)
-      drawTextPanel(ctx, slides[curIdx], c, sw, sh, cx2 + curTextX, textW, curAlpha, 1.0, localT);
+      drawTextPanel(ctx, getSlideData(curIdx), c, sw, sh, cx2 + curTextX, textW, curAlpha, 1.0, localT);
     if (nxtAlpha > 0.01 && curIdx + 1 < n)
-      drawTextPanel(ctx, slides[curIdx + 1], c, sw, sh, cx2 + nxtTextX, textW, nxtAlpha, 0, 0);
+      drawTextPanel(ctx, getSlideData(curIdx + 1), c, sw, sh, cx2 + nxtTextX, textW, nxtAlpha, 0, 0);
     ctx.restore();
   } else {
     // Show text immediately (no fade-in delay)
-    drawTextPanel(ctx, slides[curIdx], c, sw, sh, cx2, textW, 1, 1.0, localT);
+    drawTextPanel(ctx, getSlideData(curIdx), c, sw, sh, cx2, textW, 1, 1.0, localT);
   }
 }
 
@@ -905,13 +911,20 @@ function drawImgFit(ctx, sl, x, y, w, h) {
   const tr  = w / h;
   let sw2, sh2, sx, sy;
 
+  const EPS = 0.001; // tolerance for "square enough"
+  if (Math.abs(ar - tr) < EPS) {
+    // Aspect ratios match exactly — no crop needed
+    ctx.drawImage(img, x, y, w, h);
+    return;
+  }
+
   if (ar > tr) {
-    // Wider than slot → crop horizontally
+    // Wider than slot → crop sides, full height
     sh2 = img.height; sw2 = sh2 * tr;
     sy  = 0;
     sx  = (img.width - sw2) * (posX / 100);
   } else {
-    // Taller than slot → crop vertically
+    // Taller than slot → crop top/bottom, full width
     sw2 = img.width; sh2 = sw2 / tr;
     sx  = 0;
     sy  = (img.height - sh2) * (posY / 100);
@@ -959,17 +972,15 @@ function drawTextPanel(ctx, sl, c, sw, sh, cx2, textW, alpha, slideInProgress, l
   let y = (sh - totalH) / 2 + sz.brand / 2;
 
   // ── Brand / Logo ──
-  if (logoImg) {
-    // Render logo image centered, height = brandFS, width auto
-    const logoH = parseInt(document.getElementById('logoSizeS').value || 80) * scale;
-    const logoAR = logoImg.width / logoImg.height;
+  if (sl.brandMode === 'logo' && sl.logoImg) {
+    const logoH = (sl.logoSize || 80) * scale;
+    const logoAR = sl.logoImg.width / sl.logoImg.height;
     const logoW = logoH * logoAR;
     ctx.save();
     ctx.globalAlpha = alpha;
-    ctx.drawImage(logoImg, cx2 - logoW / 2, y - logoH / 2, logoW, logoH);
+    ctx.drawImage(sl.logoImg, cx2 - logoW / 2, y - logoH / 2, logoW, logoH);
     ctx.restore();
-    // Adjust y by actual logo height vs expected brandFS
-    y += (logoH - sz.brand) / 2 + sz.brand / 2 + G1;
+    y += logoH / 2 + G1;
   } else {
     ctx.font = `700 ${sz.brand}px "Noto Sans KR",sans-serif`;
     ctx.fillStyle = c.brand;
