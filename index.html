@@ -1083,44 +1083,51 @@ function drawHighlightWithMotion(ctx, sl, c, sz, cx2, cy, maxPW, scale, globalAl
 
   ctx.save();
   ctx.globalAlpha = globalAlpha;
-  ctx.textBaseline = 'middle';
+  ctx.textBaseline = 'alphabetic'; // 안정적인 baseline — 절대 움직이지 않음
   ctx.textAlign = 'center';
-  ctx.font = `900 ${sz.hl}px "Noto Sans KR",sans-serif`;
 
   const text = truncateText(ctx, sl.highlight || '', maxPW);
   if (!text) { ctx.restore(); return; }
 
+  // alphabetic baseline 기준 cy 보정 (middle → alphabetic 오프셋)
+  ctx.font = `900 ${sz.hl}px "Noto Sans KR",sans-serif`;
+  const metrics = ctx.measureText(text);
+  const ascent  = metrics.actualBoundingBoxAscent  || sz.hl * 0.72;
+  const descent = metrics.actualBoundingBoxDescent || sz.hl * 0.18;
+  const midToBase = (ascent - descent) / 2; // middle → alphabetic 보정값
+  const baseY = cy + midToBase;
+
   if (motion === 'pulse') {
-    // Scale font size only — cy never moves, so baseline is locked
-    const p = Math.pow(Math.sin(localT * Math.PI * 2 * 1.8), 2); // 1.8Hz, always positive
-    const pulsedFS = sz.hl * (1 + p * 0.13);
-    ctx.font = `900 ${pulsedFS}px "Noto Sans KR",sans-serif`;
+    // ctx.scale으로 확대 — baseY를 pivot으로 정확히 고정
+    const p  = Math.pow(0.5 + 0.5 * Math.sin(localT * Math.PI * 2 * 1.8), 2);
+    const sc = 1 + p * 0.13;
+    ctx.save();
+    ctx.translate(cx2, baseY);
+    ctx.scale(sc, sc);
+    ctx.translate(-cx2, -baseY);
     ctx.fillStyle = c.htext;
-    ctx.fillText(text, cx2, cy);
+    ctx.fillText(text, cx2, baseY);
+    ctx.restore();
 
   } else if (motion === 'shake') {
-    // Horizontal shake that repeats every ~0.7s, decays within each cycle
-    const cycle = (localT * 1.4) % 1;            // 1.4 cycles/sec
-    const decay = 1 - easeOut(Math.min(cycle / 0.55, 1)); // sharp decay
-    const shiftX = Math.sin(cycle * Math.PI * 10) * sz.hl * 0.06 * decay;
+    // 강한 수평 흔들기: 3Hz, 진폭 sz.hl * 0.18, 자연 감쇠 없이 지속
+    const shiftX = Math.sin(localT * Math.PI * 2 * 3.0) * sz.hl * 0.18;
     ctx.fillStyle = c.htext;
-    ctx.fillText(text, cx2 + shiftX, cy);
+    ctx.fillText(text, cx2 + shiftX, baseY);
 
   } else if (motion === 'blink') {
-    // Sharp brightness flash: bright → dim → bright, 2.5Hz
-    const b = Math.pow(0.5 + 0.5 * Math.sin(localT * Math.PI * 2 * 2.5), 3);
-    // Interpolate htext colour toward white
-    const r = parseInt(c.htext.slice(1,3)||'ff',16);
-    const g = parseInt(c.htext.slice(3,5)||'ff',16);
-    const bv = parseInt(c.htext.slice(5,7)||'ff',16);
-    const mix = (a, t) => Math.round(a + (255-a)*t);
-    ctx.fillStyle = `rgb(${mix(r,b*0.6)},${mix(g,b*0.6)},${mix(bv,b*0.6)})`;
-    ctx.fillText(text, cx2, cy);
+    // opacity로 깜빡임 — 색상 변경 없음 → 배경색 무관
+    // 2.5Hz sharp square-ish wave: 불투명 ↔ 반투명 반복
+    const wave = 0.5 + 0.5 * Math.sin(localT * Math.PI * 2 * 2.5);
+    const minA = 0.35; // 최소 opacity — 완전 투명으로는 가지 않음
+    ctx.globalAlpha = globalAlpha * (minA + (1 - minA) * wave);
+    ctx.fillStyle = c.htext;
+    ctx.fillText(text, cx2, baseY);
 
   } else {
-    // none — plain static text
+    // none
     ctx.fillStyle = c.htext;
-    ctx.fillText(text, cx2, cy);
+    ctx.fillText(text, cx2, baseY);
   }
 
   ctx.restore();
