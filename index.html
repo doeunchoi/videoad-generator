@@ -178,6 +178,44 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
 /* Notif */
 .notif{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(6px);background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:8px 16px;font-size:12px;font-weight:600;color:var(--text);z-index:999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap}
 .notif.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Tour Overlay */
+#tourWrap{position:fixed;inset:0;z-index:2000;pointer-events:none}
+#tourWrap.tour-hidden{display:none}
+#tourHl{
+  position:fixed;border-radius:10px;
+  box-shadow:0 0 0 9999px rgba(0,0,0,.72);
+  transition:all .35s cubic-bezier(.4,0,.2,1);
+  pointer-events:none;z-index:2001;
+  outline:2px solid rgba(124,107,255,.7);
+  outline-offset:0;
+}
+#tourTip{
+  position:fixed;z-index:2002;pointer-events:all;
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:13px;padding:16px 18px 14px;width:272px;
+  box-shadow:0 12px 40px rgba(0,0,0,.7);
+  transition:all .35s cubic-bezier(.4,0,.2,1);
+}
+#tourTip::before,#tourTip::after{content:'';position:absolute;border:8px solid transparent}
+#tourTip.arrow-left::before{left:-17px;top:22px;border-right-color:var(--border)}
+#tourTip.arrow-left::after{left:-15px;top:23px;border-right-color:var(--panel);border-width:7px}
+#tourTip.arrow-right::before{right:-17px;top:22px;border-left-color:var(--border)}
+#tourTip.arrow-right::after{right:-15px;top:23px;border-left-color:var(--panel);border-width:7px}
+#tourTip.arrow-top::before{top:-17px;left:22px;border-bottom-color:var(--border)}
+#tourTip.arrow-top::after{top:-15px;left:23px;border-bottom-color:var(--panel);border-width:7px}
+.tour-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent);background:rgba(124,107,255,.14);border:1px solid rgba(124,107,255,.3);border-radius:5px;padding:2px 7px;margin-bottom:8px}
+.tour-ttl{font-size:14px;font-weight:800;color:var(--text);margin-bottom:6px}
+.tour-dsc{font-size:11px;color:var(--muted);line-height:1.65;margin-bottom:14px}
+.tour-nav{display:flex;align-items:center;justify-content:space-between}
+.tour-skip{font-size:10px;color:var(--muted);cursor:pointer;border:none;background:none;font-family:'DM Sans',sans-serif;padding:0;transition:color .18s}
+.tour-skip:hover{color:var(--accent2)}
+.tour-btns{display:flex;gap:6px}
+.tour-btn{padding:6px 14px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--panel2);color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .18s}
+.tour-btn:hover{border-color:var(--accent);color:var(--text)}
+.tour-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.tour-btn.primary:hover{background:#6a59e8}
+.tour-btn:disabled{opacity:.3;pointer-events:none}
 </style>
 </head>
 <body>
@@ -431,6 +469,24 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
 </div>
 
 <div class="notif" id="notif"></div>
+
+<!-- Tour Overlay -->
+<div id="tourWrap" class="tour-hidden">
+  <div id="tourHl"></div>
+  <div id="tourTip">
+    <div class="tour-badge" id="tourCounter">1 / 5</div>
+    <div class="tour-ttl" id="tourTitle"></div>
+    <div class="tour-dsc" id="tourDesc"></div>
+    <div class="tour-nav">
+      <button class="tour-skip" onclick="tourSkipToday()">오늘 보지 않기</button>
+      <div class="tour-btns">
+        <button class="tour-btn" id="tourPrevBtn" onclick="tourPrev()">← 이전</button>
+        <button class="tour-btn primary" id="tourNextBtn" onclick="tourNext()">다음 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <canvas id="ec" style="display:none"></canvas>
 
 <script>
@@ -1581,6 +1637,92 @@ function notify(msg) {
 function easeOut(t)    { return 1 - Math.pow(1-t, 3); }
 function easeInOut(t)  { return t<.5 ? 4*t*t*t : (t-1)*(2*t-2)*(2*t-2)+1; }
 function clamp(v,a,b)  { return Math.max(a, Math.min(b, v)); }
+
+// ═══════════════════════════════════════════════════
+// GUIDED TOUR
+// ═══════════════════════════════════════════════════
+const TOUR_STEPS = [
+  { sel: '#uploadZone',         tip: 'right',  pad: 8,
+    title: '📁 이미지 업로드',
+    desc: '여기에 광고 이미지를 올려주세요.\nJPG · PNG · WEBP, 최대 3장까지 드래그 앤 드롭도 가능해요.' },
+  { sel: '.ltabs',              tip: 'right',  pad: 6,
+    title: '🗂 탭 전환',
+    desc: '소재 입력 탭에서 슬라이드별 텍스트를 입력하고,\n스타일 탭에서 색상 · 폰트 크기,\n음악 탭에서 배경음악을 설정해요.' },
+  { sel: '.cwrap',              tip: 'right',  pad: 10,
+    title: '▶ 미리보기',
+    desc: '재생 버튼(▶)을 눌러 15초 광고 영상을 미리 볼 수 있어요.\n슬라이더로 원하는 시점으로 이동도 가능해요.' },
+  { sel: '#genBtn',             tip: 'bottom', pad: 6,
+    title: '🎬 영상 생성',
+    desc: '설정이 끝나면 이 버튼을 눌러 MP4 영상을 렌더링해요.\nChrome 또는 Edge 최신 버전을 권장합니다.' },
+  { sel: '.topbar-right a.btn', tip: 'bottom', pad: 6,
+    title: '📄 상세 가이드 PDF',
+    desc: '자세한 사용법과 팁이 정리된 PDF 가이드를\n여기서 다운받을 수 있어요.' },
+];
+
+let _tourStep = 0;
+
+function tourShow() {
+  document.getElementById('tourWrap').classList.remove('tour-hidden');
+  _tourGoTo(0);
+}
+
+function _tourGoTo(i) {
+  _tourStep = i;
+  const step = TOUR_STEPS[i];
+  const el = document.querySelector(step.sel);
+  if (!el) { i < TOUR_STEPS.length - 1 ? _tourGoTo(i + 1) : tourClose(); return; }
+
+  const r = el.getBoundingClientRect();
+  const p = step.pad || 8;
+  const hl = document.getElementById('tourHl');
+  hl.style.cssText += `left:${r.left-p}px;top:${r.top-p}px;width:${r.width+p*2}px;height:${r.height+p*2}px`;
+
+  const tip = document.getElementById('tourTip');
+  const TW = 272, GAP = 16;
+  const hlL = r.left - p, hlR = r.right + p, hlT = r.top - p, hlB = r.bottom + p;
+  const hlCY = (hlT + hlB) / 2;
+  let tx, ty, cls = 'arrow-left';
+
+  if (step.tip === 'right') {
+    tx = hlR + GAP; ty = hlCY - 80; cls = 'arrow-left';
+  } else if (step.tip === 'left') {
+    tx = hlL - GAP - TW; ty = hlCY - 80; cls = 'arrow-right';
+  } else if (step.tip === 'bottom') {
+    tx = (hlL + hlR) / 2 - TW / 2; ty = hlB + GAP; cls = 'arrow-top';
+  } else {
+    tx = (hlL + hlR) / 2 - TW / 2; ty = hlT - GAP - 170; cls = 'arrow-bottom';
+  }
+  tx = Math.max(8, Math.min(window.innerWidth - TW - 8, tx));
+  ty = Math.max(8, Math.min(window.innerHeight - 200, ty));
+
+  tip.style.left = tx + 'px';
+  tip.style.top  = ty + 'px';
+  tip.className  = cls;
+
+  document.getElementById('tourCounter').textContent = `STEP ${i+1} / ${TOUR_STEPS.length}`;
+  document.getElementById('tourTitle').textContent   = step.title;
+  document.getElementById('tourDesc').textContent    = step.desc;
+  document.getElementById('tourPrevBtn').disabled    = i === 0;
+  document.getElementById('tourNextBtn').textContent = i === TOUR_STEPS.length - 1 ? '완료 ✓' : '다음 →';
+}
+
+function tourNext() {
+  _tourStep < TOUR_STEPS.length - 1 ? _tourGoTo(_tourStep + 1) : tourClose();
+}
+function tourPrev() {
+  if (_tourStep > 0) _tourGoTo(_tourStep - 1);
+}
+function tourClose() {
+  document.getElementById('tourWrap').classList.add('tour-hidden');
+}
+function tourSkipToday() {
+  localStorage.setItem('tourHiddenDate', new Date().toDateString());
+  tourClose();
+}
+(function tourInit() {
+  if (localStorage.getItem('tourHiddenDate') === new Date().toDateString()) return;
+  tourShow();
+}());
 
 // ═══════════════════════════════════════════════════
 init();
