@@ -1514,7 +1514,7 @@ async function generateVideo() {
   const chunks = [];
   let rec;
   try {
-    rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 10000000 });
+    rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 24000000, audioBitsPerSecond: 192000 });
   } catch(e) {
     alert('현재 브라우저에서 MP4 녹화를 시작할 수 없어요. Chrome 또는 Edge 최신 버전을 사용해 주세요.');
     resetGenBtn();
