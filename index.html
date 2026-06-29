@@ -57,7 +57,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;hei
 .uz-spec{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--muted);margin-top:2px;cursor:default}
 .uz-spec .iico{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--muted);display:inline-flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;flex-shrink:0;position:relative}
 .uz-spec .iico:hover .tooltip{display:block}
-.tooltip{display:none;position:fixed;background:#1e1e35;border:1px solid var(--border);border-radius:8px;padding:10px 12px;width:210px;font-size:10px;color:var(--text);line-height:1.7;z-index:9999;white-space:normal;text-align:left;box-shadow:0 8px 24px rgba(0,0,0,.7)}
+.tooltip{display:none;position:absolute;top:20px;left:0;background:#1e1e35;border:1px solid var(--border);border-radius:8px;padding:10px 12px;width:210px;font-size:10px;color:var(--text);line-height:1.7;z-index:9999;white-space:normal;text-align:left;box-shadow:0 8px 24px rgba(0,0,0,.7)}
 .tooltip::after{display:none}
 
 /* ── Logo upload ── */
@@ -257,7 +257,7 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
               <b>이미지 업로드 규격</b><br>
               • 권장 크기: 800×800px 이상<br>
               • 비율: 1:1 또는 4:3 권장<br>
-              • 최대 용량: 10MB / 장<br>
+              • 최대 용량: 30MB / 장<br>
               • 형식: JPG, PNG, WEBP<br>
               • 최대 3장까지 업로드<br><br>
               <span style="color:#7c6bff">Tip: 고화질 이미지일수록 영상 품질이 높아집니다</span>
@@ -279,7 +279,7 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
                 <b>이미지 업로드 규격</b><br>
                 • 권장 크기: 800×800px 이상<br>
                 • 비율: 1:1 또는 4:3 권장<br>
-                • 최대 용량: 10MB / 장<br>
+                • 최대 용량: 30MB / 장<br>
                 • 형식: JPG, PNG, WEBP<br>
                 • 최대 3장까지 업로드<br><br>
                 <span style="color:#7c6bff">Tip: 고화질일수록 영상 품질↑</span>
@@ -619,7 +619,7 @@ function processFiles(files) {
   if (imgFiles.length > remaining) notify(`최대 3장까지 가능해 ${imgFiles.length - remaining}장은 건너뛰었어요.`);
 
   toAdd.forEach(file => {
-    if (file.size > 10 * 1024 * 1024) { notify(`${file.name}: 10MB 초과 파일은 업로드할 수 없어요.`); return; }
+    if (file.size > 30 * 1024 * 1024) { notify(`${file.name}: 30MB 초과 파일은 업로드할 수 없어요.`); return; }
     const reader = new FileReader();
     reader.onload = e2 => {
       const img = new Image();
