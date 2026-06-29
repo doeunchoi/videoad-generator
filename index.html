@@ -389,6 +389,20 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
           <span class="mi">🔥</span><span><span class="mn">Hip-Hop Beat</span><span class="md">강렬한 힙합 비트 · 스포츠/스트릿</span></span><span class="dot"></span>
         </div>
       </div>
+
+      <div class="hdiv"></div>
+      <div class="sh" style="margin-top:0">직접 업로드</div>
+      <div class="mlist">
+        <div class="mitem" id="bgmUpItem" data-m="upload" style="display:none" onclick="pickMusic(this,'upload')">
+          <span class="mi">📤</span><span><span class="mn" id="bgmUpName">업로드한 음원</span><span class="md" id="bgmUpDesc">내 기기에서 추가한 BGM</span></span><span class="dot"></span>
+        </div>
+      </div>
+      <button class="btn" style="width:100%;justify-content:center;font-size:11px;margin-top:5px" onclick="requestBgmUpload()">＋ 내 음악 파일 추가</button>
+      <input type="file" id="bgmUpload" accept="audio/*" style="display:none" onchange="onBgmUpload(this)">
+      <div style="margin-top:7px;padding:8px 9px;background:rgba(229,62,62,.08);border:1px solid rgba(229,62,62,.45);border-radius:7px;font-size:9px;color:#e53e3e;line-height:1.65">
+        ⚠️ 저작권이 있는 음원을 업로드·사용함으로써 발생하는 모든 법적 책임은 업로드한 사용자 본인에게 있으며, TVING은 이에 대해 어떠한 책임도 지지 않습니다.
+      </div>
+
       <div class="hdiv"></div>
       <div class="sh" style="margin-top:0">볼륨 설정 <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:9px">(-20~-30dB 권장)</span></div>
       <div class="vrow">
@@ -406,9 +420,10 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
         <button class="btn" style="flex:1;justify-content:center;font-size:11px" onclick="stopMusic()">■ 정지</button>
       </div>
       <div style="margin-top:8px;padding:8px;background:var(--bg);border-radius:7px;border:1px solid var(--border);font-size:9px;color:var(--muted);line-height:1.7">
-        ✅ Web Audio 합성 · 저작권 없음<br>
+        ✅ 기본 제공 음악은 Web Audio 합성 · 저작권 없음<br>
         ✅ 연속 재생 시 자연스럽게 이어짐<br>
-        ✅ 영상 끝 자동 페이드아웃
+        ✅ 영상 끝 자동 페이드아웃<br>
+        ⚠️ 직접 업로드한 음원의 저작권 책임은 사용자에게 있습니다
       </div>
     </div>
   </div>
@@ -470,6 +485,29 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
 
 <div class="notif" id="notif"></div>
 
+<!-- BGM Copyright Warning Modal -->
+<div id="bgmWarnWrap" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);align-items:center;justify-content:center">
+  <div style="width:min(440px,90vw);background:var(--panel,#1b1b24);border:1.5px solid rgba(229,62,62,.55);border-radius:14px;padding:26px 24px;box-shadow:0 18px 60px rgba(0,0,0,.5)">
+    <div style="font-size:40px;text-align:center;line-height:1">⚠️</div>
+    <div style="font-size:17px;font-weight:800;text-align:center;color:#e53e3e;margin-top:10px">저작권 안내 — 반드시 읽어주세요</div>
+    <div style="margin-top:14px;font-size:12px;line-height:1.85;color:var(--text)">
+      직접 업로드하는 배경음악은 <b>저작권이 없는 음원이거나, 사용 권한을 정당하게 확보한 음원</b>이어야 합니다.
+    </div>
+    <div style="margin-top:12px;padding:12px 13px;background:rgba(229,62,62,.1);border:1px solid rgba(229,62,62,.45);border-radius:9px;font-size:11.5px;line-height:1.8;color:#e53e3e">
+      저작권을 침해하는 음원을 업로드·사용하여 발생하는 <b>모든 법적·금전적 책임은 전적으로 업로드한 사용자 본인</b>에게 있으며,
+      <b>TVING은 이에 대해 어떠한 책임도 지지 않습니다.</b>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;margin-top:16px;font-size:12px;color:var(--text);cursor:pointer">
+      <input type="checkbox" id="bgmWarnChk" style="width:16px;height:16px;flex-shrink:0;cursor:pointer" onchange="var b=document.getElementById('bgmWarnOk');b.disabled=!this.checked;b.style.opacity=this.checked?'1':'.45';b.style.cursor=this.checked?'pointer':'not-allowed'">
+      위 내용을 모두 확인했으며 이에 동의합니다.
+    </label>
+    <div style="display:flex;gap:8px;margin-top:18px">
+      <button class="btn" style="flex:1;justify-content:center" onclick="closeBgmWarn()">취소</button>
+      <button class="btn" id="bgmWarnOk" disabled style="flex:1;justify-content:center;background:#e53e3e;border-color:#e53e3e;color:#fff;opacity:.45;cursor:not-allowed" onclick="confirmBgmWarn()">동의하고 파일 선택</button>
+    </div>
+  </div>
+</div>
+
 <!-- Tour Overlay -->
 <div id="tourWrap" class="tour-hidden">
   <div id="tourHl"></div>
@@ -519,6 +557,9 @@ let videoBlob = null;
 let videoMime = 'video/mp4';
 let audioCtx = null;
 let prevSrc = null;
+let uploadedBuffer = null;   // decoded AudioBuffer of user-uploaded BGM
+let uploadedName = '';       // file name of uploaded BGM
+let _activeUploadSrcs = [];  // currently scheduled uploaded-BGM source nodes
 let DW, DH;
 let openCardIdx = 0; // which card is expanded
 
@@ -1309,6 +1350,51 @@ function pickMusic(btn, name) {
   btn.classList.add('on');
   curMusic = name; stopMusic();
 }
+
+// ── User-uploaded BGM (with copyright warning gate) ──
+function requestBgmUpload() {
+  const chk = document.getElementById('bgmWarnChk');
+  const ok  = document.getElementById('bgmWarnOk');
+  chk.checked = false;
+  ok.disabled = true; ok.style.opacity = '.45'; ok.style.cursor = 'not-allowed';
+  document.getElementById('bgmWarnWrap').style.display = 'flex';
+}
+function closeBgmWarn() {
+  document.getElementById('bgmWarnWrap').style.display = 'none';
+}
+function confirmBgmWarn() {
+  closeBgmWarn();
+  document.getElementById('bgmUpload').click();
+}
+async function onBgmUpload(input) {
+  const file = input.files && input.files[0];
+  input.value = '';
+  if (!file) return;
+  if (file.size > 30 * 1024 * 1024) {
+    alert('음원 파일은 최대 30MB까지 업로드할 수 있어요.');
+    return;
+  }
+  const item = document.getElementById('bgmUpItem');
+  document.getElementById('bgmUpName').textContent = '디코딩 중...';
+  document.getElementById('bgmUpDesc').textContent = file.name;
+  item.style.display = '';
+  try {
+    const ac = getAC();
+    if (ac.state === 'suspended') await ac.resume();
+    const buf = await file.arrayBuffer();
+    uploadedBuffer = await ac.decodeAudioData(buf);
+    uploadedName = file.name;
+    const secs = Math.round(uploadedBuffer.duration);
+    document.getElementById('bgmUpName').textContent = file.name.replace(/\.[^.]+$/, '');
+    document.getElementById('bgmUpDesc').textContent = `내 음원 · ${secs}초 (15초 영상에 맞춰 반복/페이드)`;
+    pickMusic(item, 'upload');
+    notify('✅ 음원을 추가했어요. 미리 듣기로 확인해 보세요.');
+  } catch (e) {
+    uploadedBuffer = null;
+    item.style.display = 'none';
+    alert('이 오디오 파일을 불러올 수 없어요. MP3 · WAV · M4A 등 일반 음원 형식을 사용해 주세요.');
+  }
+}
 function prevMusic() {
   if (curMusic === 'none') return;
   stopMusic();
@@ -1327,9 +1413,22 @@ function prevMusic() {
 }
 function stopMusic() {
   if (prevSrc) { try{prevSrc.stop();}catch(e){} prevSrc=null; }
+  _activeUploadSrcs.forEach(s => { try{s.stop();}catch(e){} });
+  _activeUploadSrcs = [];
   document.querySelectorAll('.mitem').forEach(b => b.classList.remove('playing'));
 }
 function buildMusic(name, ac, dest, st, dur) {
+  if(name==='upload'){
+    if(!uploadedBuffer) return;
+    const src=ac.createBufferSource();
+    src.buffer=uploadedBuffer;
+    src.loop=uploadedBuffer.duration < dur; // loop short clips to fill the video
+    src.connect(dest);
+    src.start(st);
+    try{ src.stop(st+dur+0.05); }catch(e){}
+    _activeUploadSrcs.push(src);
+    return;
+  }
   const bpm={upbeat:128,electronic:120,acoustic:96,cinematic:80,lofi:75,jazz:110,hiphop:90}[name]||120;
   const beat=60/bpm, bars=Math.ceil(dur/(beat*4));
   for(let b=0;b<bars;b++){
