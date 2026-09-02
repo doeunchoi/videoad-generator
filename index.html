@@ -21,6 +21,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;hei
 .logo h1{font-size:14px;font-weight:700}
 .spec-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;border:1px solid var(--border);color:var(--muted);letter-spacing:.4px}
 .spec-badge b{color:var(--accent)}
+.ws-tabs{display:flex;gap:2px;background:var(--bg);border-radius:7px;padding:3px}
+.ws-tab{padding:6px 12px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--muted);transition:all .18s;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.ws-tab.on{background:var(--panel2);color:var(--text)}
 .topbar-right{margin-left:auto;display:flex;gap:8px}
 .btn{padding:6px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--panel2);color:var(--text);display:flex;align-items:center;gap:6px;transition:all .18s;font-family:'DM Sans',sans-serif;white-space:nowrap}
 .btn:hover{border-color:var(--accent);color:var(--accent)}
@@ -32,6 +35,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;hei
 
 /* WORKSPACE */
 .workspace{flex:1;display:grid;grid-template-columns:300px 1fr 268px;overflow:hidden}
+.workspace-view{display:none}
+.workspace-view.on{display:grid}
 
 /* ── LEFT ── */
 .left{border-right:1px solid var(--border);background:var(--panel);overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:0;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
@@ -158,6 +163,12 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
 .playbar .slider{flex:1}
 .tval{font-size:11px;color:var(--text);min-width:30px;text-align:right}
 
+/* ── Merge workspace ── */
+.mc-order{width:18px;height:18px;border-radius:5px;background:var(--accent);color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.merge-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:640px;max-width:80vw;height:360px;border:1.5px dashed var(--border);border-radius:12px;color:var(--muted);font-size:12px;text-align:center;padding:20px}
+.merge-placeholder .mp-icon{font-size:34px}
+video#mergePreview{max-width:min(900px,84vw);max-height:70vh;border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(0,0,0,.6);display:block;background:#000}
+
 /* ── RIGHT ── */
 .right{border-left:1px solid var(--border);background:var(--panel);overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:12px}
 .rsh{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
@@ -225,17 +236,31 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
     <div class="logo-icon">🎬</div>
     <h1>TVING Ad Video Generator</h1>
   </div>
-  <div class="spec-badge">1920×1080 · <b>16:9</b></div>
-  <div class="spec-badge"><b>15초</b> · 24FPS</div>
-  <div class="spec-badge"><b>MP4</b></div>
-<div class="topbar-right">
+  <div class="ws-tabs">
+    <button class="ws-tab on" onclick="switchWorkspace('ad',this)">🎬 광고 생성</button>
+    <button class="ws-tab" onclick="switchWorkspace('merge',this)">🔗 영상 합치기</button>
+  </div>
+  <div id="specBadgesAd" style="display:flex;gap:12px">
+    <div class="spec-badge">1920×1080 · <b>16:9</b></div>
+    <div class="spec-badge"><b>15초</b> · 24FPS</div>
+    <div class="spec-badge"><b>MP4</b></div>
+  </div>
+  <div id="specBadgesMerge" style="display:none;gap:12px">
+    <div class="spec-badge">다중 클립 · <b>MP4 출력</b></div>
+  </div>
+<div class="topbar-right" id="topRightAd">
   <a class="btn" href="https://raw.githubusercontent.com/doeunchoi/videoad-generator/main/guide.pdf" target="_blank" download style="background:#e53e3e;border-color:#e53e3e;color:#fff;text-decoration:none">📄 사용 가이드</a>
   <button class="btn" id="genBtn" onclick="generateVideo()" style="background:#00e676;border-color:#00e676;color:#06110a;font-weight:800;box-shadow:0 0 16px rgba(0,230,118,.45);">🎬 영상 생성</button>
   <button class="btn primary" id="dlBtn" onclick="downloadVideo()" disabled>⬇ 다운로드</button>
 </div>
+<div class="topbar-right" id="topRightMerge" style="display:none">
+  <a class="btn" href="https://raw.githubusercontent.com/doeunchoi/videoad-generator/main/guide.pdf" target="_blank" download style="background:#e53e3e;border-color:#e53e3e;color:#fff;text-decoration:none">📄 사용 가이드</a>
+  <button class="btn" id="mergeGenBtn" onclick="startMerge()" disabled style="background:#00e676;border-color:#00e676;color:#06110a;font-weight:800;box-shadow:0 0 16px rgba(0,230,118,.45);">🔗 합치기 시작</button>
+  <button class="btn primary" id="mergeDlBtn" onclick="downloadMergedVideo()" disabled>⬇ 다운로드</button>
+</div>
 </div>
 
-<div class="workspace">
+<div class="workspace workspace-view on" id="wsAd">
 
   <!-- ── LEFT ── -->
   <div class="left">
@@ -483,6 +508,84 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
 
 </div>
 
+<!-- ── MERGE WORKSPACE ── -->
+<div class="workspace workspace-view" id="wsMerge">
+
+  <!-- ── LEFT ── -->
+  <div class="left">
+    <div class="sh" style="margin-top:0">
+      영상 업로드
+      <div class="uz-spec">
+        <div class="iico">i
+          <div class="tooltip">
+            <b>영상 업로드 규격</b><br>
+            • 최대 10개 클립<br>
+            • 클립당 최대 300MB<br>
+            • 전체 합계 최대 800MB<br>
+            • 형식: MP4, MOV, WEBM, MKV<br><br>
+            <span style="color:#7c6bff">Tip: 업로드한 순서대로 이어붙여지며, 아래 목록에서 순서를 바꿀 수 있어요</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="upload-zone" id="mergeUploadZone"
+         ondragover="onMergeDragOver(event)" ondragleave="onMergeDragLeave(event)" ondrop="onMergeDrop(event)">
+      <input type="file" id="mergeFileInput" accept="video/mp4,video/quicktime,video/webm,video/x-matroska" multiple onchange="onMergeFileInput(this)">
+      <div class="uz-icon">🎞️</div>
+      <div class="uz-texts">
+        <div class="uz-title">클릭 또는 드래그 앤 드롭</div>
+        <div class="uz-sub">MP4 · MOV · WEBM · 최대 10개</div>
+      </div>
+    </div>
+
+    <div class="slide-cards" id="mergeCards"></div>
+
+    <div style="margin-top:10px;font-size:10px;color:var(--muted);text-align:center" id="mergeEmptyHint">
+      영상을 2개 이상 업로드하면 순서대로 합칠 수 있어요
+    </div>
+  </div>
+
+  <!-- ── CENTER ── -->
+  <div class="center">
+    <div class="clabel">합쳐진 영상 미리보기</div>
+    <div class="cwrap" id="mergeCwrap">
+      <div class="merge-placeholder" id="mergePlaceholder">
+        <div class="mp-icon">🔗</div>
+        <div>영상을 업로드하고 <b style="color:var(--text)">합치기 시작</b>을 눌러주세요</div>
+      </div>
+      <video id="mergePreview" controls style="display:none"></video>
+      <div class="prog-ov" id="mergeProgOv">
+        <div class="prog-pct" id="mergeProgPct">0%</div>
+        <div class="prog-bar"><div class="prog-fill" id="mergeProgFill"></div></div>
+        <div class="prog-sub" id="mergeProgSub">FFmpeg 엔진 로딩 중...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT ── -->
+  <div class="right">
+    <div class="rsh">합치기 정보</div>
+    <div class="info-box">
+      <div class="pi-row"><span class="pi-label">클립 수</span><span class="pi-val" id="mergeInfoN">0개</span></div>
+      <div class="pi-row"><span class="pi-label">총 재생시간</span><span class="pi-val" id="mergeInfoDur">—</span></div>
+      <div class="pi-row"><span class="pi-label">총 용량</span><span class="pi-val" id="mergeInfoSize">—</span></div>
+      <div class="pi-row"><span class="pi-label">출력 포맷</span><span class="pi-val ok">MP4</span></div>
+    </div>
+
+    <div class="help-box">
+      <b>처리 방식</b><br>
+      가능하면 재인코딩 없이 무손실로 합치고, 클립 간 코덱·해상도가 다르면 자동으로 재인코딩해서 안전하게 합쳐요.<br><br>
+      <b>최초 실행</b><br>
+      처음 합치기를 누르면 영상 처리 엔진(약 25~30MB)을 내려받아 몇 초 정도 걸릴 수 있어요.<br><br>
+      <b>주의</b><br>
+      • 오디오 트랙이 없는 영상은 합치기가 실패할 수 있어요<br>
+      • 브라우저 메모리 한도로 전체 클립 합계는 800MB까지 지원돼요
+    </div>
+  </div>
+
+</div>
+
 <div class="notif" id="notif"></div>
 
 <!-- BGM Copyright Warning Modal -->
@@ -527,6 +630,14 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
 
 <canvas id="ec" style="display:none"></canvas>
 
+<!-- ffmpeg.wasm: used only by the 영상 합치기 workspace, loaded lazily on first use.
+     ffmpeg.js/814.ffmpeg.js are self-hosted (not CDN) because the library spawns its worker
+     with new Worker(<script's own directory>/814.ffmpeg.js) — a cross-origin CDN URL there is
+     blocked by the browser's same-origin Worker policy. The (large) ffmpeg-core engine itself
+     is still fetched from a CDN lazily at runtime, see getFFmpeg(). -->
+<script src="vendor/ffmpeg/ffmpeg.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
+
 <script>
 // ═══════════════════════════════════════════════════
 // CONSTANTS
@@ -562,6 +673,14 @@ let uploadedName = '';       // file name of uploaded BGM
 let _activeUploadSrcs = [];  // currently scheduled uploaded-BGM source nodes
 let DW, DH;
 let openCardIdx = 0; // which card is expanded
+
+// mergeClips: array of { file, name, url, duration, thumb }
+let mergeClips = [];
+let mergedBlob = null;
+let ffmpegInstance = null;
+const MERGE_MAX_CLIPS = 10;
+const MERGE_MAX_FILE_SIZE = 300 * 1024 * 1024;   // 300MB per clip
+const MERGE_MAX_TOTAL_SIZE = 800 * 1024 * 1024;  // 800MB total
 
 // ═══════════════════════════════════════════════════
 // CANVAS SETUP
@@ -1681,6 +1800,245 @@ function downloadVideo() {
 }
 
 // ═══════════════════════════════════════════════════
+// VIDEO MERGE (영상 합치기)
+// ═══════════════════════════════════════════════════
+function formatDuration(sec) {
+  sec = Math.round(sec || 0);
+  const m = Math.floor(sec / 60), s = sec % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+function formatBytes(bytes) {
+  if (!bytes) return '0MB';
+  return (bytes / (1024 * 1024)).toFixed(1) + 'MB';
+}
+
+function onMergeDragOver(e) {
+  e.preventDefault();
+  document.getElementById('mergeUploadZone').classList.add('drag');
+}
+function onMergeDragLeave() {
+  document.getElementById('mergeUploadZone').classList.remove('drag');
+}
+function onMergeDrop(e) {
+  e.preventDefault();
+  document.getElementById('mergeUploadZone').classList.remove('drag');
+  processMergeFiles(Array.from(e.dataTransfer.files));
+}
+function onMergeFileInput(input) {
+  processMergeFiles(Array.from(input.files));
+  input.value = '';
+}
+
+async function processMergeFiles(files) {
+  const vidFiles = files.filter(f => f.type.startsWith('video/'));
+  const remaining = MERGE_MAX_CLIPS - mergeClips.length;
+  if (remaining <= 0) { notify(`영상은 최대 ${MERGE_MAX_CLIPS}개까지 추가할 수 있어요.`); return; }
+  const toAdd = vidFiles.slice(0, remaining);
+  if (vidFiles.length > remaining) notify(`최대 ${MERGE_MAX_CLIPS}개까지 가능해 ${vidFiles.length - remaining}개는 건너뛰었어요.`);
+
+  let curTotal = mergeClips.reduce((s, c) => s + c.file.size, 0);
+  for (const file of toAdd) {
+    if (file.size > MERGE_MAX_FILE_SIZE) { notify(`${file.name}: ${Math.round(MERGE_MAX_FILE_SIZE / 1024 / 1024)}MB 초과 파일은 업로드할 수 없어요.`); continue; }
+    if (curTotal + file.size > MERGE_MAX_TOTAL_SIZE) { notify(`전체 용량 한도(${Math.round(MERGE_MAX_TOTAL_SIZE / 1024 / 1024)}MB)를 초과해 ${file.name}은 건너뛰었어요.`); continue; }
+    curTotal += file.size;
+    await addMergeClip(file);
+  }
+}
+
+function addMergeClip(file) {
+  return new Promise(resolve => {
+    const url = URL.createObjectURL(file);
+    const v = document.createElement('video');
+    v.preload = 'metadata';
+    v.muted = true;
+    v.src = url;
+    const finish = (duration, thumb) => {
+      mergeClips.push({ file, name: file.name, url, duration: duration || 0, thumb: thumb || '' });
+      rebuildMergeCards();
+      updateMergeInfo();
+      resolve();
+    };
+    v.onloadedmetadata = () => { v.currentTime = Math.min(0.3, (v.duration || 0) / 2); };
+    v.onseeked = () => {
+      const tc = document.createElement('canvas');
+      tc.width = 160; tc.height = 90;
+      let thumb = '';
+      try { tc.getContext('2d').drawImage(v, 0, 0, 160, 90); thumb = tc.toDataURL('image/jpeg', 0.7); } catch (e) {}
+      finish(v.duration, thumb);
+    };
+    v.onerror = () => finish(0, '');
+  });
+}
+
+function rebuildMergeCards() {
+  const container = document.getElementById('mergeCards');
+  document.getElementById('mergeEmptyHint').style.display = mergeClips.length === 0 ? '' : 'none';
+  container.innerHTML = '';
+
+  mergeClips.forEach((c, i) => {
+    const upDis = i === 0 ? 'disabled style="opacity:.3;cursor:not-allowed"' : '';
+    const downDis = i === mergeClips.length - 1 ? 'disabled style="opacity:.3;cursor:not-allowed"' : '';
+    const card = document.createElement('div');
+    card.className = 'slide-card active';
+    card.innerHTML = `
+      <div class="sc-header" style="cursor:default">
+        <span class="mc-order">${i + 1}</span>
+        ${c.thumb ? `<img class="sc-thumb" src="${c.thumb}" alt="">` : `<div class="sc-thumb-empty">🎞️</div>`}
+        <div class="sc-info">
+          <span class="sc-name">${c.name}</span>
+          <span class="sc-sub">${formatDuration(c.duration)} · ${formatBytes(c.file.size)}</span>
+        </div>
+        <div class="sc-actions">
+          <button class="sc-btn" onclick="moveMergeClip(${i},-1)" ${upDis} title="위로">▲</button>
+          <button class="sc-btn" onclick="moveMergeClip(${i},1)" ${downDis} title="아래로">▼</button>
+          <button class="sc-btn" onclick="removeMergeClip(${i})" title="삭제">✕</button>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function moveMergeClip(idx, dir) {
+  const j = idx + dir;
+  if (j < 0 || j >= mergeClips.length) return;
+  [mergeClips[idx], mergeClips[j]] = [mergeClips[j], mergeClips[idx]];
+  rebuildMergeCards();
+}
+function removeMergeClip(idx) {
+  const [removed] = mergeClips.splice(idx, 1);
+  if (removed) URL.revokeObjectURL(removed.url);
+  rebuildMergeCards();
+  updateMergeInfo();
+}
+
+function updateMergeInfo() {
+  const n = mergeClips.length;
+  document.getElementById('mergeInfoN').textContent = n + '개';
+  const totalDur = mergeClips.reduce((s, c) => s + (c.duration || 0), 0);
+  const totalSize = mergeClips.reduce((s, c) => s + c.file.size, 0);
+  document.getElementById('mergeInfoDur').textContent = n === 0 ? '—' : formatDuration(totalDur);
+  document.getElementById('mergeInfoSize').textContent = n === 0 ? '—' : formatBytes(totalSize);
+  document.getElementById('mergeGenBtn').disabled = n < 2;
+}
+
+function updateMergeProgress(pct, sub) {
+  const p = clamp(Math.round(pct), 0, 100);
+  document.getElementById('mergeProgPct').textContent = p + '%';
+  document.getElementById('mergeProgFill').style.width = p + '%';
+  document.getElementById('mergeProgSub').textContent = sub;
+}
+
+async function getFFmpeg() {
+  if (ffmpegInstance) return ffmpegInstance;
+  const { FFmpeg } = FFmpegWASM;
+  const ffmpeg = new FFmpeg();
+  ffmpeg.on('progress', ({ progress }) => {
+    updateMergeProgress(Math.round((progress || 0) * 100), '영상 합치는 중...');
+  });
+  const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd';
+  await ffmpeg.load({
+    coreURL: await FFmpegUtil.toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+    wasmURL: await FFmpegUtil.toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+  });
+  ffmpegInstance = ffmpeg;
+  return ffmpeg;
+}
+
+function extForClip(clip) {
+  const m = /\.([a-z0-9]+)$/i.exec(clip.name);
+  return m ? m[1].toLowerCase() : 'mp4';
+}
+
+function resetMergeBtn() {
+  const b = document.getElementById('mergeGenBtn');
+  b.disabled = mergeClips.length < 2;
+  b.innerHTML = '🔗 합치기 시작';
+}
+
+async function startMerge() {
+  if (mergeClips.length < 2) { notify('영상을 2개 이상 업로드해주세요.'); return; }
+
+  const btn = document.getElementById('mergeGenBtn');
+  mergedBlob = null;
+  document.getElementById('mergeDlBtn').disabled = true;
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> 처리 중...';
+  document.getElementById('mergeProgOv').classList.add('show');
+  updateMergeProgress(0, 'FFmpeg 엔진 로딩 중...');
+
+  const written = [];
+  try {
+    const ffmpeg = await getFFmpeg();
+
+    const exts = mergeClips.map(extForClip);
+    for (let i = 0; i < mergeClips.length; i++) {
+      updateMergeProgress(0, `클립 ${i + 1}/${mergeClips.length} 불러오는 중...`);
+      const fname = `clip${i}.${exts[i]}`;
+      await ffmpeg.writeFile(fname, await FFmpegUtil.fetchFile(mergeClips[i].file));
+      written.push(fname);
+    }
+    const listText = written.map(f => `file '${f}'`).join('\n');
+    await ffmpeg.writeFile('concat.txt', new TextEncoder().encode(listText));
+
+    updateMergeProgress(0, '영상 합치는 중...');
+    let success = false;
+    try {
+      await ffmpeg.exec(['-f', 'concat', '-safe', '0', '-i', 'concat.txt', '-c', 'copy', 'output.mp4']);
+      const check = await ffmpeg.readFile('output.mp4');
+      if (check && check.length > 1000) success = true;
+    } catch (e) { success = false; }
+
+    if (!success) {
+      updateMergeProgress(0, '형식이 달라 재인코딩하는 중...');
+      const inputs = [];
+      written.forEach(f => inputs.push('-i', f));
+      const filterParts = mergeClips.map((_, i) => `[${i}:v:0][${i}:a:0]`).join('');
+      const filter = `${filterParts}concat=n=${mergeClips.length}:v=1:a=1[outv][outa]`;
+      await ffmpeg.exec([
+        ...inputs,
+        '-filter_complex', filter,
+        '-map', '[outv]', '-map', '[outa]',
+        '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20',
+        '-c:a', 'aac',
+        'output.mp4'
+      ]);
+    }
+
+    const data = await ffmpeg.readFile('output.mp4');
+    mergedBlob = new Blob([data.buffer], { type: 'video/mp4' });
+
+    const video = document.getElementById('mergePreview');
+    video.src = URL.createObjectURL(mergedBlob);
+    video.style.display = '';
+    document.getElementById('mergePlaceholder').style.display = 'none';
+    document.getElementById('mergeDlBtn').disabled = false;
+    notify('✅ 영상 합치기 완료!');
+
+    for (const f of [...written, 'concat.txt', 'output.mp4']) {
+      try { await ffmpeg.deleteFile(f); } catch (e) {}
+    }
+  } catch (e) {
+    console.error(e);
+    notify('❌ 영상 합치기에 실패했어요. 형식을 확인하고 다시 시도해주세요.');
+  } finally {
+    document.getElementById('mergeProgOv').classList.remove('show');
+    resetMergeBtn();
+  }
+}
+
+function downloadMergedVideo() {
+  if (!mergedBlob) return;
+  const url = URL.createObjectURL(mergedBlob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `merged_${Date.now()}.mp4`;
+  a.click();
+  URL.revokeObjectURL(url);
+  notify('✅ MP4 다운로드를 시작했어요.');
+}
+
+// ═══════════════════════════════════════════════════
 // UI HELPERS
 // ═══════════════════════════════════════════════════
 function switchTab(name, btn) {
@@ -1688,6 +2046,27 @@ function switchTab(name, btn) {
   btn.classList.add('on');
   document.querySelectorAll('.ltab-panel').forEach(p => p.classList.remove('on'));
   document.getElementById('tp-'+name).classList.add('on');
+}
+
+function switchWorkspace(name, btn) {
+  document.querySelectorAll('.ws-tab').forEach(t => t.classList.remove('on'));
+  btn.classList.add('on');
+
+  document.getElementById('wsAd').classList.toggle('on', name === 'ad');
+  document.getElementById('wsMerge').classList.toggle('on', name === 'merge');
+  document.getElementById('specBadgesAd').style.display = name === 'ad' ? 'flex' : 'none';
+  document.getElementById('specBadgesMerge').style.display = name === 'merge' ? 'flex' : 'none';
+  document.getElementById('topRightAd').style.display = name === 'ad' ? 'flex' : 'none';
+  document.getElementById('topRightMerge').style.display = name === 'merge' ? 'flex' : 'none';
+
+  if (name !== 'ad') {
+    if (isPlaying) togglePreview();
+    stopMusic();
+  }
+  if (name !== 'merge') {
+    const v = document.getElementById('mergePreview');
+    if (v) v.pause();
+  }
 }
 
 function updateC(input, labelId) {
