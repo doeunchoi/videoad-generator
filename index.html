@@ -127,6 +127,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;hei
 .crow span{font-size:10px;color:var(--text)}
 
 /* ── Music tab ── */
+.mnew{display:inline-block;margin-left:6px;padding:1px 5px;border-radius:4px;background:#e53e3e;color:#fff;font-size:9px;font-weight:700;letter-spacing:.3px;line-height:1.4;vertical-align:middle}
 .mlist{display:flex;flex-direction:column;gap:5px}
 .mitem{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);cursor:pointer;transition:all .18s}
 .mitem:hover{border-color:var(--accent)}
@@ -392,17 +393,23 @@ video#mergePreview{max-width:min(900px,84vw);max-height:70vh;border-radius:10px;
     <div class="ltab-panel" id="tp-music">
       <div class="sh" style="margin-top:0">배경음악</div>
       <div class="mlist">
+        <div class="mitem" data-m="xmas" onclick="pickMusic(this,'xmas')">
+          <span class="mi">🎄</span><span><span class="mn">Jingle Holiday<span class="mnew">NEW</span></span><span class="md">신나는 썰매방울 + 브라스 + 벨 · 크리스마스/연말 세일</span></span><span class="dot"></span>
+        </div>
+        <div class="mitem" data-m="winter" onclick="pickMusic(this,'winter')">
+          <span class="mi">❄️</span><span><span class="mn">Winter Glow<span class="mnew">NEW</span></span><span class="md">잔잔한 첼레스타 + 따뜻한 패드 · 연말 감성/브랜드</span></span><span class="dot"></span>
+        </div>
+        <div class="mitem" data-m="piano" onclick="pickMusic(this,'piano')">
+          <span class="mi">🎹</span><span><span class="mn">Elegant Piano<span class="mnew">NEW</span></span><span class="md">우아한 피아노 + 스트링 · 뷰티/주얼리/프리미엄</span></span><span class="dot"></span>
+        </div>
+        <div class="mitem" data-m="velvet" onclick="pickMusic(this,'velvet')">
+          <span class="mi">🥂</span><span><span class="mn">Velvet Lounge<span class="mnew">NEW</span></span><span class="md">세련된 딥하우스 라운지 · 럭셔리 패션/호텔</span></span><span class="dot"></span>
+        </div>
         <div class="mitem on" data-m="upbeat" onclick="pickMusic(this,'upbeat')">
           <span class="mi">🎵</span><span><span class="mn">Bright & Upbeat</span><span class="md">밝고 경쾌한 팝 비트 · 소비재/패션</span></span><span class="dot"></span>
         </div>
-        <div class="mitem" data-m="electronic" onclick="pickMusic(this,'electronic')">
-          <span class="mi">🎹</span><span><span class="mn">Modern Electronic</span><span class="md">세련된 일렉 신스 · IT/테크</span></span><span class="dot"></span>
-        </div>
         <div class="mitem" data-m="acoustic" onclick="pickMusic(this,'acoustic')">
           <span class="mi">🎸</span><span><span class="mn">Warm Acoustic</span><span class="md">따뜻한 어쿠스틱 · 라이프스타일</span></span><span class="dot"></span>
-        </div>
-        <div class="mitem" data-m="cinematic" onclick="pickMusic(this,'cinematic')">
-          <span class="mi">🎼</span><span><span class="mn">Cinematic Rise</span><span class="md">웅장한 오케스트라 빌드업 · 브랜드</span></span><span class="dot"></span>
         </div>
         <div class="mitem" data-m="lofi" onclick="pickMusic(this,'lofi')">
           <span class="mi">☕</span><span><span class="mn">Lo-Fi Chill</span><span class="md">잔잔한 로파이 힙합 · 감성/일상</span></span><span class="dot"></span>
@@ -1548,7 +1555,7 @@ function buildMusic(name, ac, dest, st, dur) {
     _activeUploadSrcs.push(src);
     return;
   }
-  const bpm={upbeat:128,electronic:120,acoustic:96,cinematic:80,lofi:75,jazz:110,hiphop:90}[name]||120;
+  const bpm={upbeat:128,acoustic:96,lofi:75,jazz:110,hiphop:90,xmas:148,winter:72,piano:76,velvet:118}[name]||120;
   const beat=60/bpm, bars=Math.ceil(dur/(beat*4));
   for(let b=0;b<bars;b++){
     const bs=st+b*beat*4;
@@ -1558,23 +1565,11 @@ function buildMusic(name, ac, dest, st, dur) {
       for(let h=0;h<8;h++) sHat(ac,dest,bs+h*beat*.5,h%2===0?.18:.1);
       const sc=[523,587,659,698,784];
       [0,2,4,2,0,1,3,4].forEach((n,i)=>{const t2=bs+i*beat*.5;if(t2<st+dur)sSynth(ac,dest,sc[n%sc.length],t2,beat*.38,.1);});
-    }else if(name==='electronic'){
-      for(let k=0;k<4;k++) sKick(ac,dest,bs+k*beat,.5);
-      [1,3].forEach(k=>sSnare(ac,dest,bs+k*beat,.25));
-      const sc=[220,261,311,349,392];
-      for(let a=0;a<8;a++){const t2=bs+a*beat*.5;if(t2<st+dur)sSaw(ac,dest,sc[a%sc.length]*(a>4?2:1),t2,beat*.3,.08);}
-      for(let k=0;k<4;k++) sBass(ac,dest,110,bs+k*beat,beat*.8,.18);
     }else if(name==='acoustic'){
       [0,2.5].forEach(k=>sKick(ac,dest,bs+k*beat,.28));
       [1,3].forEach(k=>sSnare(ac,dest,bs+k*beat,.15));
       [[261,329,392],[220,277,349]][b%2].forEach((f,i)=>{const t2=bs+i*.015;if(t2<st+dur)sSynth(ac,dest,f,t2,beat*3.2,.08);});
       [392,440,493,440,392,349].forEach((f,i)=>{const t2=bs+i*beat*.67;if(t2<st+dur)sSynth(ac,dest,f,t2,beat*.45,.06);});
-    }else if(name==='cinematic'){
-      [130,146,164,174].forEach((root,i)=>{
-        const t2=st+i*(dur/4);
-        [root,root*1.5,root*2].forEach(f=>sPad(ac,dest,f,t2,dur/4+.2,.03+i*.025));
-      });
-      if(b>=2){sKick(ac,dest,bs,.35);sKick(ac,dest,bs+beat*2,.3);sSnare(ac,dest,bs+beat,.22);sSnare(ac,dest,bs+beat*3,.22);}
     }else if(name==='lofi'){
       // Lo-fi: slow swing beat, dusty feel
       sKick(ac,dest,bs,.3); sKick(ac,dest,bs+beat*2.5,.22);
@@ -1604,6 +1599,62 @@ function buildMusic(name, ac, dest, st, dur) {
       // Synth stab
       const sc=[220,246,261,220];
       sc.forEach((f,i)=>{const t2=bs+i*beat;if(t2<st+dur)sSaw(ac,dest,f,t2,beat*.25,.07);});
+    }else if(name==='xmas'){
+      // Jingle Holiday: shuffle groove, sleigh bells, brass stabs, octave bell melody + sparkle runs (original)
+      // Progression I-vi-IV-V in C (C / Am / F / G)
+      const sw=i=>Math.floor(i/2)*beat+(i%2?beat*.62:0); // shuffle 8th position
+      const ch=[[523,659,784],[440,523,659],[349,440,523],[392,494,587]][b%4];
+      const root=[131,110,87,98][b%4];
+      for(let j=0;j<8;j++) sJingle(ac,dest,bs+sw(j),j%2===1?.2:.11);
+      sKick(ac,dest,bs,.42); sKick(ac,dest,bs+beat*2,.36); sKick(ac,dest,bs+beat*2+beat*.62,.2);
+      [1,3].forEach(k=>sSnare(ac,dest,bs+k*beat,.22));
+      // bouncy bass: root - fifth - octave - fifth
+      [1,1.5,2,1.5].forEach((m,k)=>sBass(ac,dest,root*m,bs+k*beat,beat*.6,k===0?.22:.15));
+      // brass stabs on the "and" of 2 and on 4
+      [beat*1.62,beat*3].forEach(o=>{const t2=bs+o;if(t2<st+dur)sBrass(ac,dest,ch,t2,beat*.32,.035);});
+      const mel=[
+        [784,659,784,1047,988,1047,784,0],
+        [880,1047,880,659,784,659,523,659],
+        [698,880,1047,1175,1047,880,698,880],
+        [784,988,1175,988,784,587,0,0]
+      ][b%4];
+      mel.forEach((f,i)=>{const t2=bs+sw(i);if(f&&t2<st+dur){sBell(ac,dest,f,t2,beat*1.1,.07);sBell(ac,dest,f*2,t2,beat*.6,.022);}});
+      // sparkle run at the end of every 4-bar phrase
+      if(b%4===3)[1047,1175,1319,1568,1760,2093].forEach((f,i)=>{const t2=bs+beat*3+i*beat/6;if(t2<st+dur)sBell(ac,dest,f,t2,beat*.9,.05);});
+    }else if(name==='winter'){
+      // Winter Glow: warm pads, celesta arpeggio, sparse sleigh shimmer
+      const chords=[[261,329,392,493],[220,261,329,392],[174,220,261,329],[196,246,293,349]];
+      const ch=chords[b%4], bar=beat*4;
+      ch.forEach(f=>sPad(ac,dest,f*.5,bs,bar+.6,.022));
+      sBass(ac,dest,ch[0]*.25,bs,bar*.9,.14);
+      const arp=[0,1,2,3,2,1,2,3];
+      arp.forEach((n,i)=>{const t2=bs+i*beat*.5;if(t2<st+dur)sBell(ac,dest,ch[n]*2,t2,beat*1.6,i===0?.06:.04);});
+      if(b%2===1){const t2=bs+beat*3.5;if(t2<st+dur)sBell(ac,dest,ch[3]*4,t2,beat*2,.025);}
+      [1,3].forEach(k=>sJingle(ac,dest,bs+k*beat,.05));
+      if(b>=2){sKick(ac,dest,bs,.16);sKick(ac,dest,bs+beat*2.5,.12);}
+    }else if(name==='piano'){
+      // Elegant Piano: flowing arpeggios over D-major-7 colours, strings swell in from bar 2
+      const N=m=>440*Math.pow(2,(m-69)/12);
+      const ch=[[50,57,61,64,66],[47,54,57,62,66],[43,50,54,59,62],[45,52,57,61,64]][b%4]; // Dmaj9 / Bm11 / Gmaj9 / A6sus
+      sPiano(ac,dest,N(ch[0]-12),bs,beat*4,.13); sPiano(ac,dest,N(ch[0]),bs,beat*4,.08);
+      [1,2,3,4,3,2,3,4].forEach((n,i)=>{const t2=bs+i*beat*.5;if(t2<st+dur)sPiano(ac,dest,N(ch[n]+12),t2,beat*2.2,i===0?.07:.05);});
+      // top-line melody notes, two per bar
+      const top=[[78,76],[74,73],[71,74],[76,73]][b%4];
+      top.forEach((m,i)=>{const t2=bs+i*beat*2;if(t2<st+dur)sPiano(ac,dest,N(m),t2,beat*2.5,.075);});
+      if(b>=1) ch.slice(2).forEach(m=>sStr(ac,dest,N(m),bs,beat*4+.3,.014+Math.min(b,4)*.003));
+      if(b>=2) sStr(ac,dest,N(ch[0]-12),bs,beat*4+.3,.02);
+    }else if(name==='velvet'){
+      // Velvet Lounge: soft four-on-the-floor, warm Rhodes chords, syncopated sub bass
+      const N=m=>440*Math.pow(2,(m-69)/12);
+      const ch=[[57,60,64,67,71],[53,57,60,64,67],[50,53,57,60,64],[52,55,59,62,66]][b%4]; // Am9 / Fmaj9 / Dm9 / Em9
+      for(let k=0;k<4;k++) sKick(ac,dest,bs+k*beat,.36);
+      [1,3].forEach(k=>sSnare(ac,dest,bs+k*beat,.13));
+      for(let k=0;k<4;k++) sHat(ac,dest,bs+k*beat+beat*.5,.13);
+      for(let k=0;k<16;k++) if(k%4) sHat(ac,dest,bs+k*beat*.25,.035);
+      [beat*.5,beat*1.75,beat*2.5,beat*3.5].forEach((o,i)=>{const t2=bs+o;if(t2<st+dur)sBass(ac,dest,N(ch[0]-24)*(i===2?1.5:1),t2,beat*.45,.2);});
+      [beat*.5,beat*2.25].forEach(o=>{const t2=bs+o;if(t2<st+dur)ch.slice(1).forEach(m=>sEP(ac,dest,N(m),t2,beat*1.4,.035));});
+      if(b%2===1){const t2=bs+beat*3.5;if(t2<st+dur)sEP(ac,dest,N(ch[4]+12),t2,beat*1.2,.04);}
+      if(b>=2) ch.slice(1,4).forEach(m=>sStr(ac,dest,N(m),bs,beat*4+.3,.008));
     }
   }
 }
@@ -1668,6 +1719,18 @@ function sHat(ac,d,t,v){if(t>ac.currentTime+DUR+.1)return;const b=ac.createBuffe
 function sSynth(ac,d,freq,t,dur,v){if(t>ac.currentTime+DUR+.1)return;const o=ac.createOscillator(),g=ac.createGain();o.type='triangle';o.frequency.value=freq;o.connect(g);g.connect(d);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.start(t);o.stop(t+dur+.05);}
 function sSaw(ac,d,freq,t,dur,v){if(t>ac.currentTime+DUR+.1)return;const o=ac.createOscillator(),g=ac.createGain(),f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=2000;o.type='sawtooth';o.frequency.value=freq;o.connect(f);f.connect(g);g.connect(d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.start(t);o.stop(t+dur+.05);}
 function sBass(ac,d,freq,t,dur,v){if(t>ac.currentTime+DUR+.1)return;const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=freq;o.connect(g);g.connect(d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.start(t);o.stop(t+dur+.05);}
+// Bell / glockenspiel / celesta: sine fundamental + inharmonic partials, fast attack, long decay
+function sBell(ac,d,freq,t,dur,v){if(t>ac.currentTime+DUR+.1)return;[[1,1,1],[2.756,.32,.45],[5.404,.12,.25]].forEach(([r,a,dm])=>{const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=freq*r;o.connect(g);g.connect(d);const e=Math.max(.08,dur*dm);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v*a,t+.004);g.gain.exponentialRampToValueAtTime(.0005,t+e);o.start(t);o.stop(t+e+.05);});}
+// Festive brass stab: detuned saws per note through an opening/closing lowpass
+function sBrass(ac,d,freqs,t,dur,v){if(t>ac.currentTime+DUR+.1)return;const f=ac.createBiquadFilter(),g=ac.createGain();f.type='lowpass';f.Q.value=1.5;f.frequency.setValueAtTime(600,t);f.frequency.linearRampToValueAtTime(3200,t+.04);f.frequency.exponentialRampToValueAtTime(900,t+dur);f.connect(g);g.connect(d);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.02);g.gain.setValueAtTime(v,t+dur*.6);g.gain.exponentialRampToValueAtTime(.001,t+dur+.08);freqs.forEach(fr=>[-6,6].forEach(dt=>{const o=ac.createOscillator();o.type='sawtooth';o.frequency.value=fr;o.detune.value=dt;o.connect(f);o.start(t);o.stop(t+dur+.12);}));}
+// Sleigh-bell shake: a cluster of tiny high-passed noise ticks
+function sJingle(ac,d,t,v){if(t>ac.currentTime+DUR+.1)return;const len=Math.floor(ac.sampleRate*.14),b=ac.createBuffer(1,len,ac.sampleRate),da=b.getChannelData(0);const hits=[0,.018+Math.random()*.008,.04+Math.random()*.01,.07+Math.random()*.012].map(x=>Math.floor(x*ac.sampleRate));for(let i=0;i<len;i++){let env=0;hits.forEach((h,k)=>{if(i>=h)env+=Math.exp(-(i-h)/(ac.sampleRate*.012))*(1-k*.18);});da[i]=(Math.random()*2-1)*env*.6;}const s=ac.createBufferSource(),g=ac.createGain(),f=ac.createBiquadFilter(),p=ac.createBiquadFilter();f.type='highpass';f.frequency.value=5500;p.type='peaking';p.frequency.value=8500;p.Q.value=2;p.gain.value=6;s.buffer=b;s.connect(f);f.connect(p);p.connect(g);g.connect(d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+.16);s.start(t);s.stop(t+.18);}
+// Piano: fundamental + soft harmonics, hammer-like attack, natural decay
+function sPiano(ac,d,freq,t,dur,v){if(t>ac.currentTime+DUR+.1)return;const f=ac.createBiquadFilter(),g=ac.createGain();f.type='lowpass';f.frequency.setValueAtTime(Math.min(9000,freq*8),t);f.frequency.exponentialRampToValueAtTime(Math.max(400,freq*2),t+dur);f.connect(g);g.connect(d);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.006);g.gain.exponentialRampToValueAtTime(v*.35,t+.25);g.gain.exponentialRampToValueAtTime(.0005,t+dur);[[1,'triangle',1],[2,'sine',.35],[3,'sine',.12]].forEach(([r,ty,a])=>{const o=ac.createOscillator(),og=ac.createGain();o.type=ty;o.frequency.value=freq*r;og.gain.value=a;o.connect(og);og.connect(f);o.start(t);o.stop(t+dur+.05);});}
+// Strings: detuned saws, slow bow-like attack and release
+function sStr(ac,d,freq,t,dur,v){if(t>ac.currentTime+DUR+.5)return;const f=ac.createBiquadFilter(),g=ac.createGain();f.type='lowpass';f.frequency.value=1600;f.Q.value=.7;f.connect(g);g.connect(d);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+Math.min(.9,dur*.3));g.gain.setValueAtTime(v,t+dur*.7);g.gain.linearRampToValueAtTime(0,t+dur);[-8,0,8].forEach(dt=>{const o=ac.createOscillator();o.type='sawtooth';o.frequency.value=freq;o.detune.value=dt;o.connect(f);o.start(t);o.stop(t+dur+.1);});}
+// Electric piano (Rhodes-ish): sine body + bright tine transient
+function sEP(ac,d,freq,t,dur,v){if(t>ac.currentTime+DUR+.1)return;const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=2400;f.connect(d);[[1,1,dur],[2,.28,.18],[3.01,.1,.08]].forEach(([r,a,dd])=>{const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=freq*r;o.connect(g);g.connect(f);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v*a,t+.008);g.gain.exponentialRampToValueAtTime(.0005,t+Math.max(.05,dd));o.start(t);o.stop(t+Math.max(.05,dd)+.05);});}
 function sPad(ac,d,freq,t,dur,v){if(t>ac.currentTime+DUR+.5)return;const o=ac.createOscillator(),g=ac.createGain(),f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=800;o.type='sawtooth';o.frequency.value=freq;o.connect(f);f.connect(g);g.connect(d);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.8);g.gain.setValueAtTime(v,t+dur-1);g.gain.linearRampToValueAtTime(0,t+dur);o.start(t);o.stop(t+dur+.1);}
 
 // ═══════════════════════════════════════════════════
