@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TVING 영상 광고 소재 생성기</title>
+<title>TVING 광고 소재 생성기</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Sans:wght@400;500;600;700&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#08080f;--panel:#0f0f1a;--panel2:#13131f;--border:#1e1e2e;
-  --accent:#7c6bff;--accent2:#ff5f87;--text:#eeeef8;--muted:#5a5a78;
-  --warn:#f59e0b;--ok:#4ade80;
+  --bg:#F7F7F8;--panel:#FFFFFF;--panel2:#F2F2F4;--border:#E4E4E8;
+  --accent:#FF1F4C;--accent2:#FF3D77;--text:#111111;--muted:#77777F;--sub:#4A4A55;
+  --warn:#D98E00;--ok:#0BA360;
 }
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
 
@@ -21,14 +21,16 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;hei
 .logo h1{font-size:14px;font-weight:700}
 .spec-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;border:1px solid var(--border);color:var(--muted);letter-spacing:.4px}
 .spec-badge b{color:var(--accent)}
-.ws-tabs{display:flex;gap:2px;background:var(--bg);border-radius:7px;padding:3px}
-.ws-tab{padding:6px 12px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--muted);transition:all .18s;font-family:'DM Sans',sans-serif;white-space:nowrap}
-.ws-tab.on{background:var(--panel2);color:var(--text)}
+.ws-tabs{display:flex;gap:4px;background:var(--panel2);border-radius:9px;padding:3px}
+.ws-tab{padding:6px 14px;border-radius:7px;font-size:12px;font-weight:800;cursor:pointer;border:none;background:transparent;color:var(--muted);transition:all .18s;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.ws-tab.soon{color:#AAAAB2;cursor:default}
+.soon-badge{font-size:9px;font-weight:700;color:#fff;background:#AAAAB2;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle}
+.ws-tab.on{background:#fff;color:var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.08)}
 .topbar-right{margin-left:auto;display:flex;gap:8px}
 .btn{padding:6px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--panel2);color:var(--text);display:flex;align-items:center;gap:6px;transition:all .18s;font-family:'DM Sans',sans-serif;white-space:nowrap}
 .btn:hover{border-color:var(--accent);color:var(--accent)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn.primary:hover{background:#6a59e8;border-color:#6a59e8}
+.btn.primary:hover{background:#E01541;border-color:#E01541}
 .btn:disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
 .spinner{width:11px;height:11px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -37,6 +39,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;hei
 .workspace{flex:1;display:grid;grid-template-columns:300px 1fr 268px;overflow:hidden}
 .workspace-view{display:none}
 .workspace-view.on{display:grid}
+.ws-da{flex:1;overflow:hidden;background:var(--bg)}
+.ws-da.on{display:block}
+.ws-da iframe{width:100%;height:100%;border:0;display:block;background:var(--bg)}
 
 /* ── LEFT ── */
 .left{border-right:1px solid var(--border);background:var(--panel);overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:0;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
@@ -53,7 +58,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;hei
 
 /* ── Image Upload Zone ── */
 .upload-zone{border:1.5px dashed var(--border);border-radius:9px;padding:9px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;position:relative;transition:all .2s;background:var(--bg)}
-.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:rgba(124,107,255,.05)}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:rgba(255,31,76,.05)}
 .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
 .uz-icon{font-size:20px;flex-shrink:0}
 .uz-texts{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
@@ -62,7 +67,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;hei
 .uz-spec{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--muted);margin-top:2px;cursor:default}
 .uz-spec .iico{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--muted);display:inline-flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;flex-shrink:0;position:relative}
 .uz-spec .iico:hover .tooltip{display:block}
-.tooltip{display:none;position:absolute;top:20px;left:0;background:#1e1e35;border:1px solid var(--border);border-radius:8px;padding:10px 12px;width:210px;font-size:10px;color:var(--text);line-height:1.7;z-index:9999;white-space:normal;text-align:left;box-shadow:0 8px 24px rgba(0,0,0,.7)}
+.tooltip{display:none;position:absolute;top:20px;left:0;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 12px;width:210px;font-size:10px;color:var(--text);line-height:1.7;z-index:9999;white-space:normal;text-align:left;box-shadow:0 8px 24px rgba(0,0,0,.16)}
 .tooltip::after{display:none}
 
 /* ── Logo upload ── */
@@ -70,7 +75,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;hei
 .logo-upload:hover{border-color:var(--accent)}
 .logo-upload.has-logo{border-style:solid;border-color:var(--accent)}
 .logo-upload input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
-.logo-preview{width:44px;height:28px;border-radius:5px;object-fit:contain;background:rgba(255,255,255,.08);border:1px solid var(--border);flex-shrink:0;display:none}
+.logo-preview{width:44px;height:28px;border-radius:5px;object-fit:contain;background:rgba(0,0,0,.04);border:1px solid var(--border);flex-shrink:0;display:none}
 .logo-texts{flex:1;min-width:0}
 .logo-name{font-size:11px;font-weight:600;color:var(--text);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .logo-sub{font-size:9px;color:var(--muted)}
@@ -82,8 +87,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;hei
 .slide-card{border:1.5px solid var(--border);border-radius:10px;overflow:hidden;background:var(--bg);transition:border-color .18s}
 .slide-card.active{border-color:var(--accent)}
 .sc-header{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;user-select:none}
-.sc-thumb{width:52px;height:34px;border-radius:5px;object-fit:cover;background:#1a1a2e;flex-shrink:0;border:1px solid var(--border)}
-.sc-thumb-empty{width:52px;height:34px;border-radius:5px;background:#1a1a2e;flex-shrink:0;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted)}
+.sc-thumb{width:52px;height:34px;border-radius:5px;object-fit:cover;background:#EDEDF0;flex-shrink:0;border:1px solid var(--border)}
+.sc-thumb-empty{width:52px;height:34px;border-radius:5px;background:#EDEDF0;flex-shrink:0;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted)}
 .sc-info{flex:1;min-width:0}
 .sc-name{font-size:11px;font-weight:700;color:var(--text);display:block}
 .sc-sub{font-size:9px;color:var(--muted);display:block;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -100,7 +105,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;hei
 .motion-row{display:flex;gap:3px;flex-wrap:wrap}
 .motion-btn{padding:4px 8px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);color:var(--muted);font-size:9px;font-weight:600;cursor:pointer;transition:all .18s;font-family:'DM Sans',sans-serif}
 .motion-btn:hover{border-color:var(--accent);color:var(--accent)}
-.motion-btn.on{border-color:var(--accent);background:rgba(124,107,255,.15);color:var(--accent)}
+.motion-btn.on{border-color:var(--accent);background:rgba(255,31,76,.15);color:var(--accent)}
 
 /* ── Fields ── */
 .fstack{display:flex;flex-direction:column;gap:8px;margin-top:10px}
@@ -126,12 +131,147 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;hei
 .crow input[type=color]{width:18px;height:18px;border:none;padding:0;cursor:pointer;background:transparent;border-radius:3px;flex-shrink:0}
 .crow span{font-size:10px;color:var(--text)}
 
+/* ── Step tabs ── */
+.ltab-no{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:var(--border);color:var(--muted);font-size:9px;font-weight:700;margin-right:5px;vertical-align:1px}
+.ltab.on .ltab-no{background:var(--accent);color:#fff}
+.next-step{width:100%;justify-content:center;font-size:11px;margin-top:16px;padding:9px 12px}
+
+/* ── Step nav / image list / text helpers ── */
+.ltab.done .ltab-no{background:var(--ok);color:#fff}
+.ltab.on.done .ltab-no{background:var(--accent);color:#fff}
+.ltab{font-size:10.5px}
+.step-nav{display:flex;gap:6px;margin-top:16px}
+.step-nav .next-step{margin-top:0;flex:1;width:auto}
+.step-nav .next-step.back{flex:0 0 auto;padding:9px 12px}
+.empty-hint{margin-top:12px;font-size:10px;color:var(--muted);text-align:center;line-height:1.6}
+.tpl-hint{margin-top:8px;font-size:10px;line-height:1.6;color:var(--sub);background:rgba(255,31,76,.07);border:1px solid rgba(255,31,76,.22);border-radius:8px;padding:7px 10px}
+.tpl-hint b{color:var(--text)}
+.img-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.img-card{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:8px;cursor:pointer;transition:border-color .18s}
+.img-card:hover{border-color:var(--muted)}
+.ic-top{display:flex;gap:10px}
+.ic-thumb{position:relative;width:76px;height:56px;border-radius:6px;background:#EDEDF0 center/cover no-repeat;flex-shrink:0;border:1px solid var(--border)}
+.ic-thumb span{position:absolute;left:4px;top:4px;width:16px;height:16px;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.ic-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ic-name{font-size:11px;font-weight:700}.ic-name em{font-style:normal;font-size:9px;color:var(--accent);margin-left:4px}
+.ic-size{font-size:9px;color:var(--muted)}
+.ic-actions{display:flex;gap:4px;margin-top:auto}
+.ic-actions .sc-btn:disabled{opacity:.3;cursor:default}
+.iw{font-size:9.5px;line-height:1.5;margin-top:6px;padding:4px 7px;border-radius:6px}
+.iw-ok{color:var(--ok);background:rgba(11,163,96,.08)}
+.iw-warn{color:var(--warn);background:rgba(245,158,11,.08)}
+.iw-info{color:#2F6BD8;background:rgba(47,107,216,.07)}
+.ic-focus{margin-top:4px}
+.ic-focus label{font-size:9px !important;min-width:22px !important}
+.ic-v{font-size:9px;color:var(--muted);min-width:28px;text-align:right}
+.share-brand{display:flex;align-items:flex-start;gap:7px;font-size:10px;line-height:1.5;color:var(--sub);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 9px;margin-bottom:8px;cursor:pointer}
+.share-brand input{margin-top:2px;accent-color:var(--accent)}
+.share-brand b{color:var(--text)}.share-brand em{font-style:normal;color:var(--muted)}
+.f-note{font-size:10px;color:var(--sub);background:var(--bg);border:1px dashed var(--border);border-radius:7px;padding:6px 9px}
+.f-note span{color:var(--muted)}
+.f-dim{opacity:.5}
+.f-off{color:var(--warn)}
+.req{font-size:8.5px;font-weight:700;color:var(--accent2);margin-left:3px}
+.opt{font-size:8.5px;font-weight:600;color:var(--muted);margin-left:3px}
+.disc-status{font-size:9.5px;margin-top:3px;min-height:0}
+.ds-ok{color:var(--ok)}.ds-warn{color:var(--warn)}.ds-info{color:var(--muted)}
+
+/* ── Text size inputs ── */
+.common-f{margin-bottom:10px}
+.size-box{border:1px solid var(--border);border-radius:9px;background:var(--panel);padding:0 10px}
+.size-box summary{cursor:pointer;list-style:none;white-space:nowrap;font-size:11px;font-weight:700;padding:9px 0;display:flex;align-items:center;gap:6px}
+.size-box summary::-webkit-details-marker{display:none}
+.size-box summary::after{content:'▾';margin-left:auto;color:var(--muted)}
+.size-box[open] summary::after{content:'▴'}
+.size-box summary em{font-style:normal;font-weight:500;font-size:9.5px;color:var(--muted)}
+.size-box[open]{padding-bottom:10px}
+.size-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.size-f{display:flex;flex-direction:column;gap:3px;background:var(--bg);border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;cursor:text}
+.size-f:focus-within{border-color:var(--accent)}
+.size-l{font-size:10px;font-weight:600;color:var(--muted)}
+.num-wrap{display:flex;align-items:baseline;gap:3px}
+.num-wrap input{width:100%;background:transparent;border:none;outline:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;padding:0;-moz-appearance:textfield}
+.num-wrap input::-webkit-inner-spin-button{opacity:.6}
+.num-wrap em{font-style:normal;font-size:10px;color:var(--muted)}
+.size-r{font-size:9px;color:var(--muted);opacity:.7}
+.size-hint{font-size:9px;color:var(--muted);margin-top:6px;line-height:1.5}
+
+/* ── Floating template guide ── */
+.sh-ic{margin-left:auto;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;letter-spacing:0;text-transform:none;color:var(--accent);background:rgba(255,31,76,.07);border:1px solid rgba(255,31,76,.22);border-radius:6px;padding:2px 7px;cursor:pointer;font-family:inherit}
+.sh-ic:hover{background:rgba(255,31,76,.14)}
+.tg-open{width:100%;justify-content:center;font-size:11px;margin-top:8px;padding:7px 10px}
+.tpl-float{position:fixed;left:312px;top:62px;width:440px;max-width:calc(100vw - 330px);max-height:calc(100vh - 80px);display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--border);border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.18);z-index:900;overflow:hidden}
+.tf-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border)}
+.tf-title{font-size:12px;font-weight:700}
+.tf-x{width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:11px}
+.tf-x:hover{color:var(--text);border-color:var(--muted)}
+.tf-tabs{display:flex;gap:4px;padding:8px 12px 0;flex-wrap:wrap}
+.tf-tab{font-size:10px;font-weight:600;padding:4px 9px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif}
+.tf-tab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.tf-tab .cur{font-size:8px;margin-left:3px;opacity:.85}
+.tpl-guide .tg-ex{position:relative;margin:0 0 12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:8px}
+.tpl-guide .tg-ex canvas{display:block;width:100%;aspect-ratio:16/9;border-radius:6px;cursor:pointer;background:#000}
+.tpl-guide .tg-ex-tag{position:absolute;top:14px;left:14px;z-index:1;background:rgba(0,0,0,.65);color:#ffd36a;font-size:10px;font-weight:700;padding:3px 7px;border-radius:5px;pointer-events:none}
+.tpl-guide .tg-ex-bar{display:flex;gap:6px;margin-top:7px}
+.tpl-guide .tg-ex-bar .btn{flex:1;padding:6px 8px;font-size:11px}
+.tpl-guide .tg-ex-in{margin-top:7px;font-size:10.5px;line-height:1.6;color:var(--muted)}
+.tpl-guide .tg-ex-in b{color:var(--text)}
+.tpl-float .tpl-guide{margin:0;border:none;border-radius:0;overflow-y:auto;padding:10px 14px 14px}
+.tg-use{width:100%;justify-content:center;font-size:11px;margin-top:12px}
+
+/* ── Template guide ── */
+.tpl-guide{margin-top:12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:10.5px;line-height:1.65;color:var(--sub)}
+.tpl-guide .tg-head{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px}
+.tpl-guide .tg-one{color:var(--muted);margin-bottom:10px}
+.tpl-guide .tg-sec{margin-top:10px}
+.tpl-guide .tg-sec b.t{display:block;font-size:10px;font-weight:700;letter-spacing:.4px;color:var(--accent);margin-bottom:3px}
+.tpl-guide ul{list-style:none;padding:0;margin:0}
+.tpl-guide li{position:relative;padding-left:10px;margin:2px 0}
+.tpl-guide li::before{content:'';position:absolute;left:1px;top:7px;width:3px;height:3px;border-radius:50%;background:var(--muted)}
+.tpl-guide li b{color:var(--text);font-weight:600}
+.tg-fields{display:flex;flex-wrap:wrap;gap:4px}
+.tg-f{font-size:9.5px;padding:2px 7px;border-radius:10px;border:1px solid var(--border)}
+.tg-f.y{color:var(--ok);border-color:rgba(11,163,96,.35);background:rgba(11,163,96,.07)}
+.tg-f.n{color:var(--muted);text-decoration:line-through;opacity:.7}
+.tg-f.p{color:var(--warn);border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.07)}
+.tg-legend{font-size:9px;color:var(--muted);margin-top:4px}
+.tpl-guide details{margin-top:10px;border-top:1px solid var(--border);padding-top:8px}
+.tpl-guide summary{cursor:pointer;font-size:10px;font-weight:700;color:var(--muted)}
+.tpl-guide summary:hover{color:var(--text)}
+.tg-table{width:100%;border-collapse:collapse;margin-top:6px;font-size:9.5px}
+.tg-table th,.tg-table td{border-bottom:1px solid var(--border);padding:4px 3px;text-align:center}
+.tg-table th{color:var(--muted);font-weight:600}
+.tg-table td:first-child,.tg-table th:first-child{text-align:left;color:var(--text)}
+
+/* ── Template picker ── */
+.tpl-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.tpl-btn{background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:6px;cursor:pointer;text-align:left;font-family:'DM Sans',sans-serif;color:var(--text);transition:border-color .18s}
+.tpl-btn:hover{border-color:var(--muted)}
+.tpl-btn.on{border-color:var(--accent);background:rgba(255,31,76,.08)}
+.tpl-thumb{position:relative;aspect-ratio:16/9;border-radius:5px;background:#16203f;overflow:hidden;margin-bottom:5px}
+.tpl-thumb i{position:absolute;display:block;border-radius:1.5px;background:rgba(255,255,255,.75)}
+.tpl-thumb i.a{background:#c9cfe0}
+.tpl-thumb i.cta{background:#fff;border-radius:6px}
+.tt-hero i.a{left:0;top:0;width:100%;height:100%;border-radius:0;background:linear-gradient(135deg,#8a94b8,#d8dcea)}
+.tt-hero i.sh{left:0;top:0;width:70%;height:100%;border-radius:0;background:linear-gradient(90deg,rgba(22,32,63,.95),rgba(22,32,63,0))}
+.tt-hero i.bar{left:6%;top:7%;width:88%;height:3%;background:rgba(255,255,255,.8)}
+.tt-hero i.l1{left:7%;top:52%;width:18%;height:6%;background:#00e5a0}.tt-hero i.l2{left:7%;top:63%;width:34%;height:10%}.tt-hero i.l3{left:7%;top:79%;width:22%;height:9%}.tt-hero i.cta{left:76%;top:80%;width:17%;height:9%}
+.tt-editorial i.a{left:42%;top:0;width:58%;height:100%;border-radius:0}
+.tt-editorial i.l1{left:7%;top:28%;width:22%;height:6%;background:#00e5a0}.tt-editorial i.l2{left:7%;top:40%;width:30%;height:10%}.tt-editorial i.l3{left:7%;top:58%;width:24%;height:9%}.tt-editorial i.cta{left:7%;top:80%;width:18%;height:9%}
+.tt-showcase i.a{left:8%;top:12%;width:42%;height:75%;background:#fff;border-radius:4px}
+.tt-showcase i.l1{left:58%;top:26%;width:20%;height:6%}.tt-showcase i.l2{left:58%;top:38%;width:30%;height:10%}.tt-showcase i.l3{left:58%;top:56%;width:24%;height:9%}.tt-showcase i.cta{left:58%;top:72%;width:18%;height:9%}
+.tt-carousel i.a{left:37%;top:10%;width:26%;height:46%;background:#fff;border-radius:3px}
+.tt-carousel i.a.s1{left:9%;top:16%;width:20%;height:35%;opacity:.45}.tt-carousel i.a.s2{left:71%;top:16%;width:20%;height:35%;opacity:.45}
+.tt-carousel i.l1{left:38%;top:66%;width:24%;height:7%}.tt-carousel i.l2{left:41%;top:80%;width:18%;height:9%}
+.tpl-name{font-size:11px;font-weight:700;display:flex;align-items:center}
+.tpl-desc{font-size:9px;color:var(--muted);margin-top:1px}
+
 /* ── Music tab ── */
 .mnew{display:inline-block;margin-left:6px;padding:1px 5px;border-radius:4px;background:#e53e3e;color:#fff;font-size:9px;font-weight:700;letter-spacing:.3px;line-height:1.4;vertical-align:middle}
 .mlist{display:flex;flex-direction:column;gap:5px}
 .mitem{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);cursor:pointer;transition:all .18s}
 .mitem:hover{border-color:var(--accent)}
-.mitem.on{border-color:var(--accent);background:rgba(124,107,255,.1)}
+.mitem.on{border-color:var(--accent);background:rgba(255,31,76,.1)}
 .mitem .mi{font-size:15px;flex-shrink:0}
 .mitem .mn{font-size:11px;font-weight:600;display:block;color:var(--text)}
 .mitem .md{font-size:9px;color:var(--muted);display:block;margin-top:1px}
@@ -146,11 +286,14 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;hei
 .vval{font-size:10px;color:var(--text);min-width:44px;text-align:right}
 
 /* ── CENTER ── */
-.center{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#050508;gap:10px;overflow:hidden;position:relative}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#EDEDF0;gap:10px;overflow:hidden;position:relative}
 .clabel{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);text-align:center}
 .cwrap{position:relative}
-canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(0,0,0,.6);display:block}
-.prog-ov{position:absolute;inset:0;background:rgba(5,5,8,.88);display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-radius:10px;z-index:10}
+.safe-toggle{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:10.5px;color:var(--sub);cursor:pointer}
+.safe-toggle input{accent-color:var(--accent)}
+.safe-toggle em{font-style:normal;color:var(--muted)}
+canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 10px 34px rgba(0,0,0,.14);display:block}
+.prog-ov{position:absolute;inset:0;background:rgba(255,255,255,.92);display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-radius:10px;z-index:10}
 .prog-ov.show{display:flex}
 .prog-pct{font-size:28px;font-weight:900;color:var(--text)}
 .prog-bar{width:200px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
@@ -159,16 +302,10 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(
 /* playbar row */
 .playbar{display:flex;align-items:center;gap:8px;width:100%;max-width:600px;padding:0 4px}
 .play-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);background:var(--panel2);color:var(--text);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0}
-.play-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(124,107,255,.1)}
+.play-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(255,31,76,.1)}
 .play-btn.playing{border-color:var(--accent);background:var(--accent);color:#fff}
 .playbar .slider{flex:1}
 .tval{font-size:11px;color:var(--text);min-width:30px;text-align:right}
-
-/* ── Merge workspace ── */
-.mc-order{width:18px;height:18px;border-radius:5px;background:var(--accent);color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.merge-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:640px;max-width:80vw;height:360px;border:1.5px dashed var(--border);border-radius:12px;color:var(--muted);font-size:12px;text-align:center;padding:20px}
-.merge-placeholder .mp-icon{font-size:34px}
-video#mergePreview{max-width:min(900px,84vw);max-height:70vh;border-radius:10px;box-shadow:0 0 0 1px var(--border),0 16px 48px rgba(0,0,0,.6);display:block;background:#000}
 
 /* ── RIGHT ── */
 .right{border-left:1px solid var(--border);background:var(--panel);overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:12px}
@@ -196,17 +333,17 @@ video#mergePreview{max-width:min(900px,84vw);max-height:70vh;border-radius:10px;
 #tourWrap.tour-hidden{display:none}
 #tourHl{
   position:fixed;border-radius:10px;
-  box-shadow:0 0 0 9999px rgba(0,0,0,.72);
+  box-shadow:0 0 0 9999px rgba(15,15,20,.5);
   transition:all .35s cubic-bezier(.4,0,.2,1);
   pointer-events:none;z-index:2001;
-  outline:2px solid rgba(124,107,255,.7);
+  outline:2px solid rgba(255,31,76,.7);
   outline-offset:0;
 }
 #tourTip{
   position:fixed;z-index:2002;pointer-events:all;
   background:var(--panel);border:1px solid var(--border);
   border-radius:13px;padding:16px 18px 14px;width:272px;
-  box-shadow:0 12px 40px rgba(0,0,0,.7);
+  box-shadow:0 12px 40px rgba(0,0,0,.18);
   transition:all .35s cubic-bezier(.4,0,.2,1);
 }
 #tourTip::before,#tourTip::after{content:'';position:absolute;border:8px solid transparent}
@@ -216,7 +353,7 @@ video#mergePreview{max-width:min(900px,84vw);max-height:70vh;border-radius:10px;
 #tourTip.arrow-right::after{right:-15px;top:23px;border-left-color:var(--panel);border-width:7px}
 #tourTip.arrow-top::before{top:-17px;left:22px;border-bottom-color:var(--border)}
 #tourTip.arrow-top::after{top:-15px;left:23px;border-bottom-color:var(--panel);border-width:7px}
-.tour-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent);background:rgba(124,107,255,.14);border:1px solid rgba(124,107,255,.3);border-radius:5px;padding:2px 7px;margin-bottom:8px}
+.tour-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent);background:rgba(255,31,76,.14);border:1px solid rgba(255,31,76,.3);border-radius:5px;padding:2px 7px;margin-bottom:8px}
 .tour-ttl{font-size:14px;font-weight:800;color:var(--text);margin-bottom:6px}
 .tour-dsc{font-size:11px;color:var(--muted);line-height:1.65;margin-bottom:14px}
 .tour-nav{display:flex;align-items:center;justify-content:space-between}
@@ -226,7 +363,7 @@ video#mergePreview{max-width:min(900px,84vw);max-height:70vh;border-radius:10px;
 .tour-btn{padding:6px 14px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--panel2);color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .18s}
 .tour-btn:hover{border-color:var(--accent);color:var(--text)}
 .tour-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-.tour-btn.primary:hover{background:#6a59e8}
+.tour-btn.primary:hover{background:#E01541}
 .tour-btn:disabled{opacity:.3;pointer-events:none}
 </style>
 </head>
@@ -235,29 +372,20 @@ video#mergePreview{max-width:min(900px,84vw);max-height:70vh;border-radius:10px;
 <div class="topbar">
   <div class="logo">
     <div class="logo-icon">🎬</div>
-    <h1>TVING Ad Video Generator</h1>
+    <h1>TVING Ads Creative Generator</h1>
   </div>
   <div class="ws-tabs">
-    <button class="ws-tab on" onclick="switchWorkspace('ad',this)">🎬 광고 생성</button>
-    <button class="ws-tab" onclick="switchWorkspace('merge',this)">🔗 영상 합치기</button>
+    <button class="ws-tab on" onclick="switchWorkspace('ad',this)">🎬 동영상</button>
+    <button class="ws-tab soon" onclick="notify('🖼️ 이미지 소재 기능은 준비 중이에요. 곧 열릴 예정이에요!')" title="준비 중">🖼️ 이미지 <span class="soon-badge">준비중</span></button>
   </div>
   <div id="specBadgesAd" style="display:flex;gap:12px">
     <div class="spec-badge">1920×1080 · <b>16:9</b></div>
     <div class="spec-badge"><b>15초</b> · 24FPS</div>
     <div class="spec-badge"><b>MP4</b></div>
   </div>
-  <div id="specBadgesMerge" style="display:none;gap:12px">
-    <div class="spec-badge">다중 클립 · <b>MP4 출력</b></div>
-  </div>
 <div class="topbar-right" id="topRightAd">
-  <a class="btn" href="https://raw.githubusercontent.com/doeunchoi/videoad-generator/main/guide.pdf" target="_blank" download style="background:#e53e3e;border-color:#e53e3e;color:#fff;text-decoration:none">📄 사용 가이드</a>
-  <button class="btn" id="genBtn" onclick="generateVideo()" style="background:#00e676;border-color:#00e676;color:#06110a;font-weight:800;box-shadow:0 0 16px rgba(0,230,118,.45);">🎬 영상 생성</button>
+  <button class="btn" id="genBtn" onclick="generateVideo()" style="background:var(--accent);border-color:var(--accent);color:#fff;font-weight:800;box-shadow:0 2px 10px rgba(255,31,76,.3);">🎬 영상 생성</button>
   <button class="btn primary" id="dlBtn" onclick="downloadVideo()" disabled>⬇ 다운로드</button>
-</div>
-<div class="topbar-right" id="topRightMerge" style="display:none">
-  <a class="btn" href="https://raw.githubusercontent.com/doeunchoi/videoad-generator/main/guide.pdf" target="_blank" download style="background:#e53e3e;border-color:#e53e3e;color:#fff;text-decoration:none">📄 사용 가이드</a>
-  <button class="btn" id="mergeGenBtn" onclick="startMerge()" disabled style="background:#00e676;border-color:#00e676;color:#06110a;font-weight:800;box-shadow:0 0 16px rgba(0,230,118,.45);">🔗 합치기 시작</button>
-  <button class="btn primary" id="mergeDlBtn" onclick="downloadMergedVideo()" disabled>⬇ 다운로드</button>
 </div>
 </div>
 
@@ -266,13 +394,14 @@ video#mergePreview{max-width:min(900px,84vw);max-height:70vh;border-radius:10px;
   <!-- ── LEFT ── -->
   <div class="left">
     <div class="ltabs">
-      <button class="ltab on" onclick="switchTab('input',this)">소재 입력</button>
-      <button class="ltab" onclick="switchTab('style',this)">스타일</button>
-      <button class="ltab" onclick="switchTab('music',this)">🎵 음악</button>
+      <button class="ltab on" data-tab="style" onclick="switchTab('style',this)"><span class="ltab-no">1</span>스타일</button>
+      <button class="ltab" data-tab="image" onclick="switchTab('image',this)"><span class="ltab-no">2</span>이미지</button>
+      <button class="ltab" data-tab="text" onclick="switchTab('text',this)"><span class="ltab-no">3</span>텍스트</button>
+      <button class="ltab" data-tab="music" onclick="switchTab('music',this)"><span class="ltab-no">4</span>음악</button>
     </div>
 
-    <!-- INPUT TAB -->
-    <div class="ltab-panel on" id="tp-input">
+    <!-- IMAGE TAB -->
+    <div class="ltab-panel" id="tp-image">
 
       <!-- Upload Zone -->
       <div class="sh" style="margin-top:0">
@@ -282,11 +411,11 @@ video#mergePreview{max-width:min(900px,84vw);max-height:70vh;border-radius:10px;
             <div class="tooltip">
               <b>이미지 업로드 규격</b><br>
               • 권장 크기: 800×800px 이상<br>
-              • 비율: 1:1 또는 4:3 권장<br>
+              • 비율: 템플릿마다 달라요 (아래 안내 참고)<br>
               • 최대 용량: 30MB / 장<br>
               • 형식: JPG, PNG, WEBP<br>
               • 최대 3장까지 업로드<br><br>
-              <span style="color:#7c6bff">Tip: 고화질 이미지일수록 영상 품질이 높아집니다</span>
+              <span style="color:var(--accent)">Tip: 고화질 이미지일수록 영상 품질이 높아집니다</span>
             </div>
           </div>
         </div>
@@ -304,11 +433,11 @@ video#mergePreview{max-width:min(900px,84vw);max-height:70vh;border-radius:10px;
               <div class="tooltip">
                 <b>이미지 업로드 규격</b><br>
                 • 권장 크기: 800×800px 이상<br>
-                • 비율: 1:1 또는 4:3 권장<br>
+                • 비율: 템플릿마다 달라요 (아래 안내 참고)<br>
                 • 최대 용량: 30MB / 장<br>
                 • 형식: JPG, PNG, WEBP<br>
                 • 최대 3장까지 업로드<br><br>
-                <span style="color:#7c6bff">Tip: 고화질일수록 영상 품질↑</span>
+                <span style="color:var(--accent)">Tip: 고화질일수록 영상 품질↑</span>
               </div>
             </div>
             업로드 규격 보기
@@ -316,17 +445,90 @@ video#mergePreview{max-width:min(900px,84vw);max-height:70vh;border-radius:10px;
         </div>
       </div>
 
+      <div class="tpl-hint" id="imgTplHint"></div>
+
+      <!-- Image list -->
+      <div class="img-list" id="imgList"></div>
+      <div class="empty-hint" id="imgEmptyHint">상품 이미지를 1~3장 올려주세요. 올린 순서대로 영상에 나와요.</div>
+
+      <div class="step-nav">
+        <button class="btn next-step back" onclick="goTab('style')">← 스타일</button>
+        <button class="btn primary next-step" onclick="goTab('text')">다음: 텍스트 입력하기 →</button>
+      </div>
+    </div>
+
+    <!-- TEXT TAB -->
+    <div class="ltab-panel" id="tp-text">
+      <div class="sh" style="margin-top:0">슬라이드별 상품 정보</div>
+      <label class="share-brand" id="shareBrandRow" style="display:none">
+        <input type="checkbox" id="shareBrand" checked onchange="rebuildCards();render()">
+        <span>모든 슬라이드에 <b>같은 브랜드명·로고</b> 사용 <em>(슬라이드 1에서만 입력)</em></span>
+      </label>
+
       <!-- Slide Cards -->
       <div class="slide-cards" id="slideCards"></div>
 
-      <div style="margin-top:10px;font-size:10px;color:var(--muted);text-align:center" id="emptyHint">
-        이미지를 업로드하면 슬라이드별 정보를 입력할 수 있어요
+      <div class="empty-hint" id="emptyHint">
+        먼저 이미지를 추가해 주세요.<br>
+        <button class="btn" style="margin:8px auto 0;font-size:11px" onclick="goTab('image')">② 이미지 추가하러 가기</button>
       </div>
 
+      <div class="hdiv"></div>
+      <div class="sh" style="margin-top:0">공통 문구 · 글자 크기</div>
+      <div class="f common-f" id="benefitRow">
+        <div class="f-header"><span class="f-label">혜택 문구 <span class="opt">선택 · 모든 슬라이드 공통</span></span><span class="f-guide">권장 16자 · 최대 20자</span></div>
+        <input type="text" id="benefitText" maxlength="20" placeholder="예: 12.31까지 · 무료배송" oninput="render()">
+        <div class="f-note" style="margin-top:5px">버튼이 아닌 <b>한 줄 문구</b>로 들어가요. 구매 버튼(CTA)은 광고 송출 시 플레이어가 자동으로 붙여줘요.</div>
+      </div>
+      <details class="size-box" id="sizeBox">
+        <summary>🔠 글자 크기 조절 <em>모든 슬라이드 공통</em></summary>
+      <div class="size-grid">
+        <label class="size-f"><span class="size-l">브랜드명</span><span class="num-wrap"><input type="number" id="brandSizeS" min="20" max="72" step="1" value="36" oninput="render()" onchange="normSize(this)"><em>px</em></span><span class="size-r">20~72</span></label>
+        <label class="size-f"><span class="size-l">제품명</span><span class="num-wrap"><input type="number" id="prodSizeS" min="28" max="88" step="1" value="54" oninput="render()" onchange="normSize(this)"><em>px</em></span><span class="size-r">28~88</span></label>
+        <label class="size-f"><span class="size-l">설명 문구</span><span class="num-wrap"><input type="number" id="descSizeS" min="16" max="48" step="1" value="27" oninput="render()" onchange="normSize(this)"><em>px</em></span><span class="size-r">16~48</span></label>
+        <label class="size-f"><span class="size-l">가격</span><span class="num-wrap"><input type="number" id="priceSizeS" min="48" max="140" step="1" value="100" oninput="render()" onchange="normSize(this)"><em>px</em></span><span class="size-r">48~140</span></label>
+        <label class="size-f"><span class="size-l">강조 문구</span><span class="num-wrap"><input type="number" id="hlSizeS" min="18" max="56" step="1" value="33" oninput="render()" onchange="normSize(this)"><em>px</em></span><span class="size-r">18~56</span></label>
+      </div>
+      <div class="size-hint">1920×1080 영상 기준 크기예요. 템플릿에 따라 비율에 맞게 자동 조정돼요.</div>
+      </details>
+
+      <div class="step-nav">
+        <button class="btn next-step back" onclick="goTab('image')">← 이미지</button>
+        <button class="btn primary next-step" onclick="goTab('music')">다음: 음악 고르기 →</button>
+      </div>
     </div>
 
     <!-- STYLE TAB -->
-    <div class="ltab-panel" id="tp-style">
+    <div class="ltab-panel on" id="tp-style">
+      <div class="sh" style="margin-top:0">템플릿 <button class="sh-ic" onclick="openTplGuide()" title="템플릿별 가이드 · 예시 · 비교 보기">📖 가이드</button></div>
+      <div class="tpl-grid">
+        <button class="tpl-btn on" onclick="pickTpl(this,'showcase')">
+          <div class="tpl-thumb tt-showcase"><i class="a"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="cta"></i></div>
+          <div class="tpl-name">Showcase<span class="mnew">NEW</span></div>
+          <div class="tpl-desc">상품 카드 쇼룸</div>
+        </button>
+        <button class="tpl-btn" onclick="pickTpl(this,'editorial')">
+          <div class="tpl-thumb tt-editorial"><i class="a"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="cta"></i></div>
+          <div class="tpl-name">Editorial<span class="mnew">NEW</span></div>
+          <div class="tpl-desc">매거진형 풀블리드</div>
+        </button>
+        <button class="tpl-btn" onclick="pickTpl(this,'carousel')">
+          <div class="tpl-thumb tt-carousel"><i class="a s1"></i><i class="a"></i><i class="a s2"></i><i class="l1"></i><i class="l2"></i></div>
+          <div class="tpl-name">Carousel<span class="mnew">NEW</span></div>
+          <div class="tpl-desc">상품 나열 카탈로그</div>
+        </button>
+        <button class="tpl-btn" onclick="pickTpl(this,'hero')">
+          <div class="tpl-thumb tt-hero"><i class="a"></i><i class="sh"></i><i class="bar"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="cta"></i></div>
+          <div class="tpl-name">Hero<span class="mnew">NEW</span></div>
+          <div class="tpl-desc">풀스크린 시네마틱</div>
+        </button>
+      </div>
+      <label class="share-brand" style="margin-top:8px">
+        <input type="checkbox" id="endcardOn" onchange="onEndcardToggle()">
+        <span><b>엔드카드 추가</b> <em>(마지막 2초)</em><br>브랜드·상품·혜택 문구를 한 화면에 모아 보여주고 끝나요</span>
+      </label>
+
+      <div class="hdiv"></div>
       <div class="sh" style="margin-top:0">색상 설정</div>
 
       <!-- Auto color button -->
@@ -335,7 +537,7 @@ video#mergePreview{max-width:min(900px,84vw);max-height:70vh;border-radius:10px;
       </button>
 
       <div class="cgrid">
-        <div class="ci"><label>우측 배경</label>
+        <div class="ci"><label>배경</label>
           <div class="crow"><input type="color" id="cBg" value="#0d1b4b" oninput="updateC(this,'cBgL')"><span id="cBgL">#0d1b4b</span></div></div>
         <div class="ci"><label>강조 / 구분선</label>
           <div class="crow"><input type="color" id="cHighlight" value="#3a4a8a" oninput="updateC(this,'cHL')"><span id="cHL">#3a4a8a</span></div></div>
@@ -357,36 +559,8 @@ video#mergePreview{max-width:min(900px,84vw);max-height:70vh;border-radius:10px;
       <input type="color" id="cProduct" value="#ffffff" style="display:none">
       <!-- hidden line color synced with highlight -->
 
-      <div class="hdiv"></div>
-      <div class="sh" style="margin-top:0">텍스트 크기</div>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <div class="vrow" style="margin-top:0">
-          <label style="min-width:52px">브랜드명</label>
-          <input type="range" class="slider" id="brandSizeS" min="20" max="72" value="36" oninput="document.getElementById('brandSizeV').textContent=this.value+'px';render()">
-          <span class="vval" id="brandSizeV">36px</span>
-        </div>
-        <div class="vrow" style="margin-top:0">
-          <label style="min-width:52px">제품명</label>
-          <input type="range" class="slider" id="prodSizeS" min="28" max="88" value="54" oninput="document.getElementById('prodSizeV').textContent=this.value+'px';render()">
-          <span class="vval" id="prodSizeV">54px</span>
-        </div>
-        <div class="vrow" style="margin-top:0">
-          <label style="min-width:52px">설명 문구</label>
-          <input type="range" class="slider" id="descSizeS" min="16" max="48" value="27" oninput="document.getElementById('descSizeV').textContent=this.value+'px';render()">
-          <span class="vval" id="descSizeV">27px</span>
-        </div>
-        <div class="vrow" style="margin-top:0">
-          <label style="min-width:52px">가격</label>
-          <input type="range" class="slider" id="priceSizeS" min="48" max="140" value="100" oninput="document.getElementById('priceSizeV').textContent=this.value+'px';render()">
-          <span class="vval" id="priceSizeV">100px</span>
-        </div>
-        <div class="vrow" style="margin-top:0">
-          <label style="min-width:52px">강조 문구</label>
-          <input type="range" class="slider" id="hlSizeS" min="18" max="56" value="33" oninput="document.getElementById('hlSizeV').textContent=this.value+'px';render()">
-          <span class="vval" id="hlSizeV">33px</span>
-        </div>
-      </div>
 
+      <button class="btn primary next-step" onclick="goTab('image')">다음: 이미지 추가하기 →</button>
     </div>
 
     <!-- MUSIC TAB -->
@@ -457,6 +631,11 @@ video#mergePreview{max-width:min(900px,84vw);max-height:70vh;border-radius:10px;
         ✅ 영상 끝 자동 페이드아웃<br>
         ⚠️ 직접 업로드한 음원의 저작권 책임은 사용자에게 있습니다
       </div>
+
+      <div class="step-nav">
+        <button class="btn next-step back" onclick="goTab('text')">← 텍스트</button>
+        <button class="btn primary next-step" onclick="generateVideo()">🎬 영상 생성하기</button>
+      </div>
     </div>
   </div>
 
@@ -477,6 +656,7 @@ video#mergePreview{max-width:min(900px,84vw);max-height:70vh;border-radius:10px;
       <input type="range" class="slider" id="ts" min="0" max="100" value="20" oninput="onTS(this.value)">
       <span class="tval" id="tv">3.0s</span>
     </div>
+    <label class="safe-toggle"><input type="checkbox" id="showSafe" checked onchange="render()"> 플레이어 CTA 노출 영역 표시 <em>(모바일·PC: 우상단 / CTV: 좌하단 · 영상에는 안 들어가요)</em></label>
   </div>
 
   <!-- ── RIGHT ── -->
@@ -508,96 +688,24 @@ video#mergePreview{max-width:min(900px,84vw);max-height:70vh;border-radius:10px;
       • 브랜드명: 최대 12자<br>
       • 제품명: 최대 30자 (2줄)<br>
       • 설명 문구: 최대 45자 (2줄)<br>
-      • 가격: 숫자 입력 시 자동 콤마<br>
+      • 정가·판매가: 숫자만 입력 (자동 콤마)<br>
+      • 정가 입력 시 할인율 자동 계산<br>
       • 강조 문구: 최대 22자
     </div>
   </div>
 
 </div>
 
-<!-- ── MERGE WORKSPACE ── -->
-<div class="workspace workspace-view" id="wsMerge">
-
-  <!-- ── LEFT ── -->
-  <div class="left">
-    <div class="sh" style="margin-top:0">
-      영상 업로드
-      <div class="uz-spec">
-        <div class="iico">i
-          <div class="tooltip">
-            <b>영상 업로드 규격</b><br>
-            • 최대 10개 클립<br>
-            • 클립당 최대 300MB<br>
-            • 전체 합계 최대 800MB<br>
-            • 형식: MP4, MOV, WEBM, MKV<br><br>
-            <span style="color:#7c6bff">Tip: 업로드한 순서대로 이어붙여지며, 아래 목록에서 순서를 바꿀 수 있어요</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="upload-zone" id="mergeUploadZone"
-         ondragover="onMergeDragOver(event)" ondragleave="onMergeDragLeave(event)" ondrop="onMergeDrop(event)">
-      <input type="file" id="mergeFileInput" accept="video/mp4,video/quicktime,video/webm,video/x-matroska" multiple onchange="onMergeFileInput(this)">
-      <div class="uz-icon">🎞️</div>
-      <div class="uz-texts">
-        <div class="uz-title">클릭 또는 드래그 앤 드롭</div>
-        <div class="uz-sub">MP4 · MOV · WEBM · 최대 10개</div>
-      </div>
-    </div>
-
-    <div class="slide-cards" id="mergeCards"></div>
-
-    <div style="margin-top:10px;font-size:10px;color:var(--muted);text-align:center" id="mergeEmptyHint">
-      영상을 2개 이상 업로드하면 순서대로 합칠 수 있어요
-    </div>
-  </div>
-
-  <!-- ── CENTER ── -->
-  <div class="center">
-    <div class="clabel">합쳐진 영상 미리보기</div>
-    <div class="cwrap" id="mergeCwrap">
-      <div class="merge-placeholder" id="mergePlaceholder">
-        <div class="mp-icon">🔗</div>
-        <div>영상을 업로드하고 <b style="color:var(--text)">합치기 시작</b>을 눌러주세요</div>
-      </div>
-      <video id="mergePreview" controls style="display:none"></video>
-      <div class="prog-ov" id="mergeProgOv">
-        <div class="prog-pct" id="mergeProgPct">0%</div>
-        <div class="prog-bar"><div class="prog-fill" id="mergeProgFill"></div></div>
-        <div class="prog-sub" id="mergeProgSub">FFmpeg 엔진 로딩 중...</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── RIGHT ── -->
-  <div class="right">
-    <div class="rsh">합치기 정보</div>
-    <div class="info-box">
-      <div class="pi-row"><span class="pi-label">클립 수</span><span class="pi-val" id="mergeInfoN">0개</span></div>
-      <div class="pi-row"><span class="pi-label">총 재생시간</span><span class="pi-val" id="mergeInfoDur">—</span></div>
-      <div class="pi-row"><span class="pi-label">총 용량</span><span class="pi-val" id="mergeInfoSize">—</span></div>
-      <div class="pi-row"><span class="pi-label">출력 포맷</span><span class="pi-val ok">MP4</span></div>
-    </div>
-
-    <div class="help-box">
-      <b>처리 방식</b><br>
-      가능하면 재인코딩 없이 무손실로 합치고, 클립 간 코덱·해상도가 다르면 자동으로 재인코딩해서 안전하게 합쳐요.<br><br>
-      <b>최초 실행</b><br>
-      처음 합치기를 누르면 영상 처리 엔진(약 25~30MB)을 내려받아 몇 초 정도 걸릴 수 있어요.<br><br>
-      <b>주의</b><br>
-      • 오디오 트랙이 없는 영상은 합치기가 실패할 수 있어요<br>
-      • 브라우저 메모리 한도로 전체 클립 합계는 800MB까지 지원돼요
-    </div>
-  </div>
-
+<!-- ── DA WORKSPACE (정적 이미지 소재: da/index.html, 처음 열 때 로드) ── -->
+<div class="workspace-view ws-da" id="wsDa">
+  <iframe id="daFrame" title="이미지 소재 생성기"></iframe>
 </div>
 
 <div class="notif" id="notif"></div>
 
 <!-- BGM Copyright Warning Modal -->
 <div id="bgmWarnWrap" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);align-items:center;justify-content:center">
-  <div style="width:min(440px,90vw);background:var(--panel,#1b1b24);border:1.5px solid rgba(229,62,62,.55);border-radius:14px;padding:26px 24px;box-shadow:0 18px 60px rgba(0,0,0,.5)">
+  <div style="width:min(440px,90vw);background:var(--panel);border:1.5px solid rgba(229,62,62,.55);border-radius:14px;padding:26px 24px;box-shadow:0 18px 60px rgba(0,0,0,.2)">
     <div style="font-size:40px;text-align:center;line-height:1">⚠️</div>
     <div style="font-size:17px;font-weight:800;text-align:center;color:#e53e3e;margin-top:10px">저작권 안내 — 반드시 읽어주세요</div>
     <div style="margin-top:14px;font-size:12px;line-height:1.85;color:var(--text)">
@@ -619,6 +727,15 @@ video#mergePreview{max-width:min(900px,84vw);max-height:70vh;border-radius:10px;
 </div>
 
 <!-- Tour Overlay -->
+<div class="tpl-float" id="tplFloat" style="display:none">
+  <div class="tf-bar">
+    <span class="tf-title">📖 템플릿 가이드</span>
+    <button class="tf-x" onclick="closeTplGuide()" title="닫기 (Esc)">✕</button>
+  </div>
+  <div class="tf-tabs" id="tfTabs"></div>
+  <div class="tpl-guide" id="tplGuide"></div>
+</div>
+
 <div id="tourWrap" class="tour-hidden">
   <div id="tourHl"></div>
   <div id="tourTip">
@@ -637,14 +754,6 @@ video#mergePreview{max-width:min(900px,84vw);max-height:70vh;border-radius:10px;
 
 <canvas id="ec" style="display:none"></canvas>
 
-<!-- ffmpeg.wasm: used only by the 영상 합치기 workspace, loaded lazily on first use.
-     ffmpeg.js/814.ffmpeg.js are self-hosted (not CDN) because the library spawns its worker
-     with new Worker(<script's own directory>/814.ffmpeg.js) — a cross-origin CDN URL there is
-     blocked by the browser's same-origin Worker policy. The (large) ffmpeg-core engine itself
-     is still fetched from a CDN lazily at runtime, see getFFmpeg(). -->
-<script src="vendor/ffmpeg/ffmpeg.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
-
 <script>
 // ═══════════════════════════════════════════════════
 // CONSTANTS
@@ -654,11 +763,6 @@ const FPS = 24;
 const DUR = 15;
 const TOTAL = FPS * DUR; // 360
 
-const IMG_RATIO  = 0.595;
-const IMG_PAD    = 0.022;
-const IMG_ROUND  = 40;
-
-// Per-field limits
 const LIMITS = { brand:12, product:30, desc:45, price:12, highlight:22 };
 
 // ═══════════════════════════════════════════════════
@@ -680,14 +784,6 @@ let uploadedName = '';       // file name of uploaded BGM
 let _activeUploadSrcs = [];  // currently scheduled uploaded-BGM source nodes
 let DW, DH;
 let openCardIdx = 0; // which card is expanded
-
-// mergeClips: array of { file, name, url, duration, thumb }
-let mergeClips = [];
-let mergedBlob = null;
-let ffmpegInstance = null;
-const MERGE_MAX_CLIPS = 10;
-const MERGE_MAX_FILE_SIZE = 300 * 1024 * 1024;   // 300MB per clip
-const MERGE_MAX_TOTAL_SIZE = 800 * 1024 * 1024;  // 800MB total
 
 // ═══════════════════════════════════════════════════
 // CANVAS SETUP
@@ -711,6 +807,9 @@ function fitCanvas() {
 
 function init() {
   fitCanvas();
+  renderTplGuide(curTpl);
+  rebuildImgList();
+  updateSteps();
   updateTimeline();
   updateInfo();
   render();
@@ -750,12 +849,12 @@ function processFiles(files) {
     reader.onload = e2 => {
       const img = new Image();
       img.onload = () => {
-        slides.push({ img, src: e2.target.result, brand:'', product:'', desc:'', price:'', highlight:'',
+        slides.push({ img, src: e2.target.result, brand:'', product:'', desc:'', price:'', origPrice:'', highlight:'',
           fit:'cover', posX:50, posY:50,
           brandMode:'text',
           logoImg: null, logoSrc: null, logoSize: 80,
           copyFrom: false,
-          hlMotion: 'pulse'
+          hlMotion: 'none'
         });
         rebuildCards();
         updateTimeline();
@@ -777,11 +876,147 @@ function removeSlide(idx) {
   render();
 }
 
+// ═══ Usability helpers: image list, recommended lengths, steps, seek ═══
+const REC_LEN = {
+  showcase:  { product: 20, desc: 25, highlight: 8 },
+  editorial: { product: 15, desc: 20, highlight: 8 },
+  carousel:  { product: 12, desc: 0,  highlight: 8 },
+  hero:      { product: 15, desc: 20, highlight: 8 },
+};
+function recLen(key) { const r = REC_LEN[curTpl] || {}; return key in r ? r[key] : null; }
+function counterCls(key, len, max) {
+  const rec = recLen(key);
+  if (len >= max) return 'over';
+  if (rec && len > rec) return 'warn';
+  return 'ok';
+}
+function shareBrandOn() { const el = document.getElementById('shareBrand'); return slides.length > 1 && (!el || el.checked); }
+function rebuildCardsKeepFocus() {
+  const ae = document.activeElement, pos = ae && ae.selectionStart;
+  const sel = ae && ae.getAttribute && ae.getAttribute('oninput');
+  rebuildCards();
+  if (sel) { const el = document.querySelector(`[oninput="${sel}"]`); if (el) { el.focus(); try { el.setSelectionRange(pos, pos); } catch (e) {} } }
+}
+
+function discStatusHTML(sl) {
+  if (!sl) return '';
+  const p = +(sl.price || 0), o = +(sl.origPrice || 0);
+  if (!o) return '';
+  if (!p) return '<span class="ds-info">판매가를 입력하면 할인율이 계산돼요</span>';
+  if (o <= p) return '<span class="ds-warn">⚠ 정가가 판매가보다 높아야 할인율이 표시돼요</span>';
+  return `<span class="ds-ok">✓ 할인율 ${Math.round((o - p) / o * 100)}% 자동 표시</span>`;
+}
+function updateDiscStatus(i) { const el = document.getElementById('disc_' + i); if (el) el.innerHTML = discStatusHTML(slides[i]); }
+
+// Per-template image recommendations
+const IMG_REC = {
+  showcase:  { crop: false, ar: 1,     label: '정사각형(1:1) 누끼컷 · 흰 배경 상품컷' },
+  carousel:  { crop: false, ar: 1,     label: '정사각형(1:1) 누끼컷 3장 (톤을 맞추면 더 좋아요)' },
+  editorial: { crop: true,  ar: 1.03,  label: '정사각형(1:1)에 가까운 연출컷 · 모델컷' },
+  hero:      { crop: true,  ar: 16/9,  label: '가로형(16:9) 연출컷 · 공간컷' },
+};
+function imgWarnings(sl) {
+  const r = IMG_REC[curTpl], w = sl.img.width, h = sl.img.height, ar = w / h, out = [];
+  if (Math.min(w, h) < 800) out.push({ lv: 'warn', t: `해상도가 낮아요 (${w}×${h}) · 영상에서 흐릿할 수 있어요` });
+  const diff = (ar - r.ar) / r.ar;
+  if (r.crop && Math.abs(diff) > 0.25) out.push({ lv: 'warn', t: `이 템플릿에서는 ${diff > 0 ? '양옆' : '위아래'}가 많이 잘려요 · 아래 포커스 위치로 보여줄 부분을 맞추세요` });
+  if (!r.crop && Math.abs(ar - 1) > 0.2) out.push({ lv: 'info', t: '카드 안에 흰 여백이 생겨요 · 1:1 이미지를 권장해요' });
+  if (!out.length) out.push({ lv: 'ok', t: '이 템플릿에 잘 맞는 이미지예요' });
+  return out;
+}
+function rebuildImgList() {
+  const list = document.getElementById('imgList');
+  if (!list) return;
+  const r = IMG_REC[curTpl];
+  document.getElementById('imgTplHint').innerHTML =
+    `<b>${TPL_GUIDE[curTpl].name}</b> 템플릿 추천: ${r.label}` +
+    (curTpl === 'carousel' && slides.length && slides.length < 3 ? `<br><span class="ds-warn">⚠ Carousel은 3장을 모두 올려야 효과가 가장 좋아요 (현재 ${slides.length}장)</span>` : '');
+  document.getElementById('imgEmptyHint').style.display = slides.length ? 'none' : '';
+  document.getElementById('uploadZone').style.display = slides.length >= 3 ? 'none' : '';
+  const dur = getDur();
+  list.innerHTML = slides.map((sl, i) => {
+    const posX = Math.round(sl.posX ?? 50), posY = Math.round(sl.posY ?? 50);
+    const warns = imgWarnings(sl).map(w => `<div class="iw iw-${w.lv}">${w.lv === 'ok' ? '✓' : w.lv === 'warn' ? '⚠' : 'ℹ'} ${w.t}</div>`).join('');
+    return `
+    <div class="img-card" onclick="seekToSlide(${i})">
+      <div class="ic-top">
+        <div class="ic-thumb" style="background-image:url('${sl.src}')"><span>${i + 1}</span></div>
+        <div class="ic-meta">
+          <div class="ic-name">슬라이드 ${i + 1} <em>${dur}초</em></div>
+          <div class="ic-size">${sl.img.width}×${sl.img.height}px</div>
+          <div class="ic-actions">
+            <button class="sc-btn" title="앞으로" ${i === 0 ? 'disabled' : ''} onclick="event.stopPropagation();moveSlide(${i},-1)">↑</button>
+            <button class="sc-btn" title="뒤로" ${i === slides.length - 1 ? 'disabled' : ''} onclick="event.stopPropagation();moveSlide(${i},1)">↓</button>
+            <button class="sc-btn" title="삭제" onclick="event.stopPropagation();removeSlide(${i})">✕</button>
+          </div>
+        </div>
+      </div>
+      ${warns}
+      ${r.crop ? `
+      <div class="ic-focus">
+        <div class="vrow" style="margin-top:4px"><label>좌우</label>
+          <input type="range" class="slider" min="0" max="100" value="${posX}" oninput="slides[${i}].posX=+this.value;this.nextElementSibling.textContent=this.value+'%';seekToSlide(${i})"><span class="ic-v">${posX}%</span></div>
+        <div class="vrow" style="margin-top:4px"><label>상하</label>
+          <input type="range" class="slider" min="0" max="100" value="${posY}" oninput="slides[${i}].posY=+this.value;this.nextElementSibling.textContent=this.value+'%';seekToSlide(${i})"><span class="ic-v">${posY}%</span></div>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+function moveSlide(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= slides.length) return;
+  [slides[i], slides[j]] = [slides[j], slides[i]];
+  if (openCardIdx === i) openCardIdx = j; else if (openCardIdx === j) openCardIdx = i;
+  rebuildCards(); updateTimeline(); seekToSlide(j);
+}
+// Jump the (paused) preview to the middle of slide i so edits are visible
+function seekToSlide(i) {
+  if (isPlaying || !slides.length) { render(); return; }
+  const t = (i + 0.5) / slides.length * slidesDur() / DUR;
+  curT = t;
+  const ts = document.getElementById('ts'); if (ts) ts.value = Math.round(t * 100);
+  const tv = document.getElementById('tv'); if (tv) tv.textContent = (t * DUR).toFixed(1) + 's';
+  render();
+}
+
+// Step tab status (✓ when a step looks complete)
+let _visited = { style: true };
+function updateSteps() {
+  const done = {
+    style: _visited.image || _visited.text || _visited.music,
+    image: slides.length > 0,
+    text: slides.length > 0 && slides.every((_, i) => { const d = getSlideData(i); return d.product && d.price; }),
+    music: !!_visited.music,
+  };
+  document.querySelectorAll('.ltab[data-tab]').forEach((b, idx) => {
+    const k = b.dataset.tab, no = b.querySelector('.ltab-no');
+    b.classList.toggle('done', !!done[k]);
+    if (no) no.textContent = done[k] ? '✓' : String(idx + 1);
+  });
+}
+
+// Pre-flight check before rendering the video
+function preflightIssues() {
+  const issues = [];
+  slides.forEach((_, i) => {
+    const d = getSlideData(i), miss = [];
+    if (!d.product) miss.push('제품명');
+    if (!d.price) miss.push('판매가');
+    if (miss.length) issues.push(`슬라이드 ${i + 1}: ${miss.join(', ')} 비어 있음`);
+    if (d.origPrice && d.price && +d.origPrice <= +d.price) issues.push(`슬라이드 ${i + 1}: 정가가 판매가보다 낮거나 같아서 할인율이 표시되지 않아요`);
+  });
+  if (curTpl === 'carousel' && slides.length < 3) issues.push(`Carousel 템플릿은 이미지 3장을 권장해요 (현재 ${slides.length}장)`);
+  return issues;
+}
+
 function rebuildCards() {
   const container = document.getElementById('slideCards');
   const hint = document.getElementById('emptyHint');
   hint.style.display = slides.length === 0 ? '' : 'none';
+  document.getElementById('shareBrandRow').style.display = slides.length > 1 ? 'flex' : 'none';
   container.innerHTML = '';
+  rebuildImgList();
+  updateSteps();
 
   slides.forEach((sl, i) => {
     const dur = getDur();
@@ -792,7 +1027,7 @@ function rebuildCards() {
         <img class="sc-thumb" src="${sl.src}" alt="">
         <div class="sc-info">
           <span class="sc-name">슬라이드 ${i+1}</span>
-          <span class="sc-sub">${sl.brand || sl.product || '내용을 입력해주세요'}</span>
+          <span class="sc-sub">${escapeHtml(sl.product || sl.brand || '내용을 입력해주세요')}</span>
         </div>
         <span class="sc-duration">${dur}초</span>
         <div class="sc-actions">
@@ -813,6 +1048,7 @@ function rebuildCards() {
 function toggleCard(i) {
   openCardIdx = (openCardIdx === i) ? -1 : i;
   rebuildCards();
+  if (openCardIdx === i) seekToSlide(i);
 }
 
 function buildFieldsHTML(i, sl) {
@@ -827,28 +1063,14 @@ function buildFieldsHTML(i, sl) {
   <div class="fstack">
 
     ${showCopy ? `
-    <div class="f" style="flex-direction:row;align-items:center;gap:8px;padding:7px 10px;background:rgba(124,107,255,.06);border:1px solid rgba(124,107,255,.2);border-radius:8px;cursor:pointer" onclick="toggleCopy(${i})">
+    <div class="f" style="flex-direction:row;align-items:center;gap:8px;padding:7px 10px;background:rgba(255,31,76,.06);border:1px solid rgba(255,31,76,.2);border-radius:8px;cursor:pointer" onclick="toggleCopy(${i})">
       <div style="width:16px;height:16px;border-radius:4px;border:1.5px solid var(--accent);background:${copyFrom?'var(--accent)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:#fff">${copyFrom?'✓':''}</div>
       <span style="font-size:10px;color:var(--text)">슬라이드 1의 텍스트 정보 그대로 사용</span>
     </div>` : ''}
 
-    <div class="f">
-      <div class="f-header"><span class="f-label">이미지 포커스 위치</span></div>
-      <div class="vrow" style="margin-top:4px">
-        <label style="min-width:20px;font-size:9px;color:var(--muted)">좌우</label>
-        <input type="range" class="slider" min="0" max="100" value="${Math.round(posX)}"
-          oninput="slides[${i}].posX=+this.value;render()">
-        <span style="font-size:9px;color:var(--muted);min-width:28px;text-align:right">${Math.round(posX)}%</span>
-      </div>
-      <div class="vrow" style="margin-top:4px">
-        <label style="min-width:20px;font-size:9px;color:var(--muted)">상하</label>
-        <input type="range" class="slider" min="0" max="100" value="${Math.round(posY)}"
-          oninput="slides[${i}].posY=+this.value;render()">
-        <span style="font-size:9px;color:var(--muted);min-width:28px;text-align:right">${Math.round(posY)}%</span>
-      </div>
-    </div>
-
     ${copyFrom && i > 0 ? '' : `
+    ${shareBrandOn() && i > 0 ? `
+    <div class="f-note">🏷 브랜드는 슬라이드 1과 같아요 <span>(${escapeHtml(slides[0].brandMode === 'logo' ? '로고 이미지' : (slides[0].brand || '미입력'))})</span></div>` : `
     <div class="f">
       <div class="f-header"><span class="f-label">브랜드명</span></div>
       <div style="display:flex;gap:4px;margin-bottom:6px">
@@ -856,7 +1078,7 @@ function buildFieldsHTML(i, sl) {
         <button class="motion-btn ${mode==='logo'?'on':''}" onclick="setBrandMode(${i},'logo')">로고 이미지</button>
       </div>
       ${mode === 'text' ? `
-        <input type="text" maxlength="12" placeholder="예: 앳센셜"
+        <input type="text" maxlength="12" placeholder="예: 아뜰리에 노드"
           value="${escapeAttr(sl.brand)}" oninput="onFieldInput(${i},'brand',this.value)">
         <div style="font-size:9px;color:var(--muted);margin-top:2px;text-align:right">${(sl.brand||'').length}/12</div>
       ` : `
@@ -878,15 +1100,17 @@ function buildFieldsHTML(i, sl) {
       `}
     </div>
 
-    ${fieldHTML(i,'product','제품명', sl.product, LIMITS.product, '예: KBO 치어 모먼트 배트 키링', true)}
-    ${fieldHTML(i,'desc','제품 설명 문구', sl.desc, LIMITS.desc, '예: 어디에서도 볼 수 없는 유니크한 디자인', true)}
+    `}
+    ${fieldHTML(i,'product','제품명', sl.product, LIMITS.product, '예: 캐시미어 블렌드 오버핏 코트', true)}
+    ${fieldHTML(i,'desc','설명 문구', sl.desc, LIMITS.desc, '예: 가볍고 따뜻한 프리미엄 울 혼방 소재', true)}
+    ${origPriceFieldHTML(i, sl.origPrice)}
     ${priceFieldHTML(i, sl.price)}
-    ${fieldHTML(i,'highlight','강조 문구', sl.highlight, LIMITS.highlight, '예: 우리 팀 굿즈, 품절 전 선점 필수!', false)}
+    ${fieldHTML(i,'highlight','강조 문구 (뱃지)', sl.highlight, LIMITS.highlight, '예: 연말 한정 특가', false)}
     <div class="f" style="margin-top:-4px">
       <span class="f-label" style="margin-bottom:4px">강조 문구 효과</span>
       <div class="motion-row">
-        ${[['pulse','펄스'],['shake','흔들기'],['blink','반짝거리기'],['none','효과 없음']].map(([val,label])=>`
-          <button class="motion-btn ${(sl.hlMotion||'pulse')===val?'on':''}"
+        ${[['none','효과 없음'],['pulse','펄스'],['shake','흔들기'],['blink','반짝거리기']].map(([val,label])=>`
+          <button class="motion-btn ${(sl.hlMotion||'none')===val?'on':''}"
             onclick="slides[${i}].hlMotion='${val}';rebuildCards();render()">${label}</button>`).join('')}
       </div>
     </div>
@@ -924,10 +1148,14 @@ function toggleCopy(i) {
 // Resolve effective slide data (respects copyFrom)
 function getSlideData(i) {
   const sl = slides[i];
+  if (shareBrandOn() && i > 0 && slides[0] && !sl.copyFrom) {
+    const s0 = slides[0];
+    return { ...sl, brand: s0.brand, brandMode: s0.brandMode, logoImg: s0.logoImg, logoSrc: s0.logoSrc, logoSize: s0.logoSize };
+  }
   if (sl.copyFrom && i > 0 && slides[0]) {
     const s0 = slides[0];
     return { ...sl, brand: s0.brand, product: s0.product, desc: s0.desc,
-      price: s0.price, highlight: s0.highlight, hlMotion: s0.hlMotion,
+      price: s0.price, origPrice: s0.origPrice, highlight: s0.highlight, hlMotion: s0.hlMotion,
       brandMode: s0.brandMode, logoImg: s0.logoImg, logoSrc: s0.logoSrc, logoSize: s0.logoSize };
   }
   return sl;
@@ -935,16 +1163,20 @@ function getSlideData(i) {
 
 function fieldHTML(i, key, label, val, max, placeholder, isTextarea) {
   const len = (val || '').length;
-  const pct = len / max;
-  const cls = pct >= 1 ? 'over' : pct >= 0.85 ? 'warn' : 'ok';
+  const rec = recLen(key);
+  const cls = counterCls(key, len, max);
+  const hidden = rec === 0;
   const inputEl = isTextarea
     ? `<textarea maxlength="${max}" placeholder="${placeholder}" oninput="onFieldInput(${i},'${key}',this.value)">${escapeHtml(val)}</textarea>`
     : `<input type="text" maxlength="${max}" placeholder="${placeholder}" value="${escapeAttr(val)}" oninput="onFieldInput(${i},'${key}',this.value)">`;
+  const req = key === 'product' ? ' <span class="req">필수</span>' : '';
+  const guide = hidden ? `<span class="f-off">${TPL_GUIDE[curTpl].name}에서는 표시 안 됨</span>`
+    : rec ? `권장 ${rec}자 · 최대 ${max}자` : `최대 ${max}자`;
   return `
-  <div class="f">
+  <div class="f${hidden ? ' f-dim' : ''}">
     <div class="f-header">
-      <span class="f-label">${label}</span>
-      <span class="f-guide">최대 ${max}자 &nbsp;<span class="f-counter ${cls}" id="cnt_${i}_${key}">${len}/${max}</span></span>
+      <span class="f-label">${label}${req}</span>
+      <span class="f-guide">${guide} &nbsp;<span class="f-counter ${cls}" id="cnt_${i}_${key}">${len}/${max}</span></span>
     </div>
     ${inputEl}
   </div>`;
@@ -955,17 +1187,43 @@ function priceFieldHTML(i, val) {
   return `
   <div class="f">
     <div class="f-header">
-      <span class="f-label">가격</span>
-      <span class="f-guide">숫자 입력 시 자동 콤마</span>
+      <span class="f-label">판매가 <span class="req">필수</span></span>
+      <span class="f-guide">숫자만 입력 · 자동 콤마</span>
     </div>
     <div class="price-wrap">
-      <input type="text" inputmode="numeric" placeholder="예: 29800"
+      <input type="text" inputmode="numeric" placeholder="예: 189,000"
         value="${escapeAttr(display)}"
         oninput="onPriceInput(${i},this)"
         maxlength="12">
       <span class="price-unit">원</span>
     </div>
+    <div class="disc-status" id="disc_${i}">${discStatusHTML(slides[i])}</div>
   </div>`;
+}
+
+function origPriceFieldHTML(i, val) {
+  const display = val ? formatPrice(val) : '';
+  return `
+  <div class="f">
+    <div class="f-header">
+      <span class="f-label">정가 <span class="opt">선택</span></span>
+      <span class="f-guide">할인 전 가격 · 입력 시 할인율 자동 계산</span>
+    </div>
+    <div class="price-wrap">
+      <input type="text" inputmode="numeric" placeholder="예: 259,000"
+        value="${escapeAttr(display)}"
+        oninput="onOrigPriceInput(${i},this)"
+        maxlength="12">
+      <span class="price-unit">원</span>
+    </div>
+  </div>`;
+}
+function onOrigPriceInput(i, input) {
+  const raw = input.value.replace(/[^0-9]/g, '');
+  slides[i].origPrice = raw;
+  input.value = raw ? formatPrice(raw) : '';
+  updateDiscStatus(i);
+  render();
 }
 
 function escapeAttr(s) { return (s||'').replace(/"/g,'&quot;'); }
@@ -976,13 +1234,14 @@ function onFieldInput(i, key, val) {
     slides[i][key] = val;
     const max = LIMITS[key];
     const len = val.length;
-    const pct = len / max;
-    const cls = pct >= 1 ? 'over' : pct >= 0.85 ? 'warn' : 'ok';
+    const cls = counterCls(key, len, max);
     const el = document.getElementById(`cnt_${i}_${key}`);
     if (el) { el.textContent = `${len}/${max}`; el.className = `f-counter ${cls}`; }
     // Update card subtitle
     const sub = document.querySelector(`#slideCards .slide-card:nth-child(${i+1}) .sc-sub`);
-    if (sub) sub.textContent = slides[i].brand || slides[i].product || '내용을 입력해주세요';
+    if (sub) sub.textContent = slides[i].product || slides[i].brand || '내용을 입력해주세요';
+    if (key === 'brand' && i === 0 && shareBrandOn()) rebuildCardsKeepFocus();
+    updateSteps();
     render();
   }
 }
@@ -992,6 +1251,8 @@ function onPriceInput(i, input) {
   slides[i].price = raw;
   const formatted = raw ? formatPrice(raw) : '';
   input.value = formatted;
+  updateDiscStatus(i);
+  updateSteps();
   render();
 }
 
@@ -1003,7 +1264,7 @@ function formatPrice(raw) {
 function getDur() {
   const n = slides.length;
   if (n === 0) return 15;
-  return Math.round(DUR / n * 10) / 10;
+  return Math.round(slidesDur() / n * 10) / 10;
 }
 
 // ═══════════════════════════════════════════════════
@@ -1012,6 +1273,8 @@ function getDur() {
 function render(t) {
   if (t === undefined) t = curT;
   drawFrame(ctx, DW, DH, t);
+  const sz = document.getElementById('showSafe');
+  if (sz && sz.checked) drawSafeZones(ctx, DW, DH);   // preview only — never in the export
 }
 
 function renderExport(t) {
@@ -1019,6 +1282,7 @@ function renderExport(t) {
 }
 
 function getColors() {
+  if (_exColors) return _exColors;
   const highlight = document.getElementById('cHighlight').value;
   return {
     bg:       document.getElementById('cBg').value,
@@ -1032,105 +1296,26 @@ function getColors() {
   };
 }
 
-function getBrandFS(scale) {
-  return parseInt(document.getElementById('brandSizeS').value || 36) * scale;
+function sizeVal(id, def) {
+  if (_exColors) return def;
+  const el = document.getElementById(id);
+  const v = parseInt(el && el.value, 10);
+  if (isNaN(v)) return def;
+  return clamp(v, +el.min || 1, +el.max || 999);
+}
+function normSize(el) {
+  const v = parseInt(el.value, 10);
+  el.value = isNaN(v) ? el.defaultValue : clamp(v, +el.min, +el.max);
+  render();
 }
 function getSizes(scale) {
   return {
-    brand: parseInt(document.getElementById('brandSizeS').value  || 36)  * scale,
-    prod:  parseInt(document.getElementById('prodSizeS').value   || 54)  * scale,
-    desc:  parseInt(document.getElementById('descSizeS').value   || 27)  * scale,
-    price: parseInt(document.getElementById('priceSizeS').value  || 100) * scale,
-    hl:    parseInt(document.getElementById('hlSizeS').value     || 33)  * scale,
+    brand: sizeVal('brandSizeS', 36)  * scale,
+    prod:  sizeVal('prodSizeS',  54)  * scale,
+    desc:  sizeVal('descSizeS',  27)  * scale,
+    price: sizeVal('priceSizeS', 100) * scale,
+    hl:    sizeVal('hlSizeS',    33)  * scale,
   };
-}
-
-function drawFrame(ctx, sw, sh, t) {
-  const c = getColors();
-  const n = slides.length;
-  const imgDur = n > 0 ? DUR / n : DUR;
-
-  ctx.clearRect(0, 0, sw, sh);
-  ctx.fillStyle = c.bg;
-  ctx.fillRect(0, 0, sw, sh);
-
-  const tSec = t * DUR;
-  let curIdx = n > 0 ? Math.min(Math.floor(tSec / imgDur), n - 1) : 0;
-  const localT = n > 0 ? (tSec - curIdx * imgDur) / imgDur : t;
-
-  // Transition window: last 10% of each slide segment
-  const SWIPE_DUR = 0.10;
-  const isTransitioning = localT > (1 - SWIPE_DUR) && curIdx < n - 1;
-  const rawProgress = isTransitioning ? (localT - (1 - SWIPE_DUR)) / SWIPE_DUR : 0;
-  const ease = easeInOut(rawProgress); // 0→1 during transition
-
-  // Image panel dimensions
-  const imgPanelW = sw * IMG_RATIO;
-  const pad = sw * IMG_PAD;
-  const imgX = pad, imgY = pad;
-  const imgW = imgPanelW - pad * 1.5;
-  const imgH = sh - pad * 2;
-  const rr = IMG_ROUND * (sw / EW);
-
-  // ── IMAGE PANEL: horizontal swipe ──────────────────
-  ctx.save();
-  roundRectClip(ctx, imgX, imgY, imgW, imgH, rr);
-
-  if (n === 0) {
-    const g = ctx.createLinearGradient(imgX, imgY, imgX+imgW, imgY+imgH);
-    g.addColorStop(0,'#1a1a2e'); g.addColorStop(1,'#0d0d1e');
-    ctx.fillStyle = g; ctx.fillRect(imgX, imgY, imgW, imgH);
-    ctx.fillStyle = 'rgba(255,255,255,0.1)';
-    ctx.font = `${sw*0.014}px "DM Sans"`;
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('이미지를 추가하세요', imgX+imgW/2, imgY+imgH/2);
-  } else {
-    // Current image slides out to the left
-    const curOffX = -ease * imgW;
-    drawImgFit(ctx, slides[curIdx], imgX + curOffX, imgY, imgW, imgH);
-    // Next image comes in from the right
-    if (isTransitioning && curIdx + 1 < n) {
-      const nxtOffX = (1 - ease) * imgW;
-      drawImgFit(ctx, slides[curIdx + 1], imgX + nxtOffX, imgY, imgW, imgH);
-    }
-  }
-  ctx.restore();
-
-  // Bottom vignette
-  const vignette = ctx.createLinearGradient(imgX, imgY + imgH * 0.72, imgX, imgY + imgH);
-  vignette.addColorStop(0, 'rgba(0,0,0,0)');
-  vignette.addColorStop(1, 'rgba(0,0,0,0.12)');
-  ctx.save(); roundRectClip(ctx, imgX, imgY, imgW, imgH, rr);
-  ctx.fillStyle = vignette; ctx.fillRect(imgX, imgY + imgH * 0.72, imgW, imgH * 0.28);
-  ctx.restore();
-
-  // Dots removed — they obscure the image
-
-  // ── TEXT PANEL ─────────────────────────────────────
-  const textX = imgPanelW;
-  const textW = sw - textX;
-  const cx2   = textX + textW / 2;
-
-  if (n === 0) {
-    // nothing
-  } else if (isTransitioning) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(imgPanelW, 0, sw - imgPanelW, sh);
-    ctx.clip();
-    const curTextX = -ease * textW * 0.5;
-    const nxtTextX = (1 - ease) * textW * 0.5;
-    const curAlpha = easeOut(1 - ease);
-    const nxtAlpha = easeOut(ease);
-    if (curAlpha > 0.01)
-      drawTextPanel(ctx, getSlideData(curIdx), c, sw, sh, cx2 + curTextX, textW, curAlpha, 1.0, localT);
-    if (nxtAlpha > 0.01 && curIdx + 1 < n)
-      drawTextPanel(ctx, getSlideData(curIdx + 1), c, sw, sh, cx2 + nxtTextX, textW, nxtAlpha, 0, 0);
-    ctx.restore();
-  } else {
-    // Show text immediately (no fade-in delay)
-    drawTextPanel(ctx, getSlideData(curIdx), c, sw, sh, cx2, textW, 1, 1.0, localT);
-  }
 }
 
 // Draw image with cover crop + 2D focus point (posX, posY: 0-100)
@@ -1164,200 +1349,6 @@ function drawImgFit(ctx, sl, x, y, w, h) {
   }
   ctx.drawImage(img, sx, sy, sw2, sh2, x, y, w, h);
 }
-
-function drawTextPanel(ctx, sl, c, sw, sh, cx2, textW, alpha, slideInProgress, localT) {
-  const scale = sw / EW;
-  const sz = getSizes(scale);
-  if (localT === undefined) localT = 1;
-
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-
-  const maxPW = textW * 0.82;
-
-  ctx.font = `900 ${sz.prod}px "Noto Sans KR",sans-serif`;
-  const prodLines = wrapText(ctx, sl.product || '', maxPW, 2);
-  const prodBlockH = prodLines.length * sz.prod * 1.28;
-
-  ctx.font = `400 ${sz.desc}px "Noto Sans KR",sans-serif`;
-  const descRaw = sl.desc || '';
-  const descLines = descRaw ? wrapText(ctx, descRaw, maxPW, 2) : [];
-  const descBlockH = descLines.length > 0 ? descLines.length * sz.desc * 1.4 : 0;
-
-  const divGap = sh * 0.032;
-  const priceBlockH = sl.price     ? sz.price * 1.0 : 0;
-  const hlBlockH    = sl.highlight ? sz.hl    * 1.0 : 0;
-
-  const G1 = sz.brand * 1.2;
-  const G2 = sz.prod  * 0.65;
-  const G3 = descBlockH > 0 ? sz.desc * 0.7 : 0;
-  const G4 = divGap;
-  const G5 = priceBlockH > 0 && hlBlockH > 0 ? sh * 0.052 : 0;
-
-  const totalH = sz.brand + G1 + prodBlockH +
-    (descBlockH > 0 ? G2 + descBlockH : 0) +
-    G3 + sh * 0.002 + G4 +
-    (priceBlockH > 0 ? priceBlockH : 0) +
-    (hlBlockH > 0 ? G5 + hlBlockH : 0);
-
-  let y = (sh - totalH) / 2 + sz.brand / 2;
-
-  // ── Brand / Logo ──
-  if (sl.brandMode === 'logo' && sl.logoImg) {
-    const logoH = (sl.logoSize || 80) * scale;
-    const logoAR = sl.logoImg.width / sl.logoImg.height;
-    const logoW = logoH * logoAR;
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.drawImage(sl.logoImg, cx2 - logoW / 2, y - logoH / 2, logoW, logoH);
-    ctx.restore();
-    y += logoH / 2 + G1;
-  } else {
-    ctx.font = `700 ${sz.brand}px "Noto Sans KR",sans-serif`;
-    ctx.fillStyle = c.brand;
-    ctx.fillText(sl.brand || '', cx2, y);
-    y += sz.brand / 2 + G1;
-  }
-
-  // Product
-  ctx.font = `900 ${sz.prod}px "Noto Sans KR",sans-serif`;
-  ctx.fillStyle = c.product;
-  prodLines.forEach((line, idx) => {
-    ctx.fillText(line, cx2, y + sz.prod * 0.64 + idx * sz.prod * 1.28);
-  });
-  y += prodBlockH + G2;
-
-  // Desc
-  if (descLines.length > 0) {
-    ctx.font = `400 ${sz.desc}px "Noto Sans KR",sans-serif`;
-    ctx.fillStyle = c.desc;
-    descLines.forEach((line, idx) => {
-      ctx.fillText(line, cx2, y + sz.desc * 0.5 + idx * sz.desc * 1.4);
-    });
-    y += descBlockH + G3;
-  }
-
-  // Divider
-  ctx.strokeStyle = c.line;
-  ctx.lineWidth = 1.5 * scale;
-  ctx.globalAlpha = alpha * 0.5;
-  ctx.beginPath();
-  ctx.moveTo(cx2 - textW * 0.3, y);
-  ctx.lineTo(cx2 + textW * 0.3, y);
-  ctx.stroke();
-  ctx.globalAlpha = alpha;
-  y += G4;
-
-  // ── Price with motion ──
-  if (sl.price) {
-    const priceY = y + sz.price * 0.5;
-    drawPriceWithMotion(ctx, sl, c, sz, cx2, priceY, scale, alpha, localT);
-    y += priceBlockH + G5;
-  }
-
-  // ── Highlight with motion ──
-  if (sl.highlight) {
-    const hlY = y + sz.hl * 0.5;
-    drawHighlightWithMotion(ctx, sl, c, sz, cx2, hlY, maxPW, scale, alpha, localT);
-  }
-
-  ctx.restore();
-}
-
-// ── Motion renderers ─────────────────────────────────
-// Fast pump oscillator: sharp attack, quick decay, 3Hz
-function pump(t) {
-  // Creates a sharp "thump" shape: quick rise, quick fall, repeat at ~3Hz
-  const cycle = (t * 3) % 1;           // 3 beats per second
-  return Math.pow(Math.sin(cycle * Math.PI), 2.5); // pow makes it snappier
-}
-
-function drawPriceWithMotion(ctx, sl, c, sz, cx2, cy, scale, globalAlpha, localT) {
-  // Always: countup — finishes in first 6% of slide (very fast)
-  const priceNum = parseFloat((sl.price || '0').replace(/,/g,'')) || 0;
-  const mt = easeOut(clamp(localT / 0.06, 0, 1));
-  const displayPrice = Math.round(priceNum * mt).toLocaleString('ko-KR');
-  const unitText = '원';
-
-  ctx.save();
-  ctx.globalAlpha = globalAlpha;
-  ctx.textBaseline = 'middle';
-
-  ctx.font = `900 ${sz.price}px "Noto Sans KR",sans-serif`;
-  const pW = ctx.measureText(displayPrice).width;
-  ctx.font = `700 ${sz.price * 0.52}px "Noto Sans KR",sans-serif`;
-  const uW = ctx.measureText(unitText).width;
-  const totalPW = pW + sz.price * 0.08 + uW;
-  const priceX = cx2 - totalPW / 2;
-
-  ctx.font = `900 ${sz.price}px "Noto Sans KR",sans-serif`;
-  ctx.fillStyle = c.price;
-  ctx.textAlign = 'left';
-  ctx.fillText(displayPrice, priceX, cy);
-  ctx.font = `700 ${sz.price * 0.52}px "Noto Sans KR",sans-serif`;
-  ctx.fillText(unitText, priceX + pW + sz.price * 0.08, cy);
-  ctx.textAlign = 'center';
-  ctx.restore();
-}
-
-function drawHighlightWithMotion(ctx, sl, c, sz, cx2, cy, maxPW, scale, globalAlpha, localT) {
-  const motion = sl.hlMotion || 'pulse';
-
-  ctx.save();
-  ctx.globalAlpha = globalAlpha;
-  ctx.textBaseline = 'alphabetic'; // 안정적인 baseline — 절대 움직이지 않음
-  ctx.textAlign = 'center';
-
-  const text = truncateText(ctx, sl.highlight || '', maxPW);
-  if (!text) { ctx.restore(); return; }
-
-  // alphabetic baseline 기준 cy 보정 (middle → alphabetic 오프셋)
-  ctx.font = `900 ${sz.hl}px "Noto Sans KR",sans-serif`;
-  const metrics = ctx.measureText(text);
-  const ascent  = metrics.actualBoundingBoxAscent  || sz.hl * 0.72;
-  const descent = metrics.actualBoundingBoxDescent || sz.hl * 0.18;
-  const midToBase = (ascent - descent) / 2; // middle → alphabetic 보정값
-  const baseY = cy + midToBase;
-
-  if (motion === 'pulse') {
-    // ctx.scale으로 확대 — baseY를 pivot으로 정확히 고정
-    const p  = Math.pow(0.5 + 0.5 * Math.sin(localT * Math.PI * 2 * 1.8), 2);
-    const sc = 1 + p * 0.13;
-    ctx.save();
-    ctx.translate(cx2, baseY);
-    ctx.scale(sc, sc);
-    ctx.translate(-cx2, -baseY);
-    ctx.fillStyle = c.htext;
-    ctx.fillText(text, cx2, baseY);
-    ctx.restore();
-
-  } else if (motion === 'shake') {
-    // 강한 수평 흔들기: 3Hz, 진폭 sz.hl * 0.18, 자연 감쇠 없이 지속
-    const shiftX = Math.sin(localT * Math.PI * 2 * 3.0) * sz.hl * 0.18;
-    ctx.fillStyle = c.htext;
-    ctx.fillText(text, cx2 + shiftX, baseY);
-
-  } else if (motion === 'blink') {
-    // opacity로 깜빡임 — 색상 변경 없음 → 배경색 무관
-    // 2.5Hz sharp square-ish wave: 불투명 ↔ 반투명 반복
-    const wave = 0.5 + 0.5 * Math.sin(localT * Math.PI * 2 * 2.5);
-    const minA = 0.35; // 최소 opacity — 완전 투명으로는 가지 않음
-    ctx.globalAlpha = globalAlpha * (minA + (1 - minA) * wave);
-    ctx.fillStyle = c.htext;
-    ctx.fillText(text, cx2, baseY);
-
-  } else {
-    // none
-    ctx.fillStyle = c.htext;
-    ctx.fillText(text, cx2, baseY);
-  }
-
-  ctx.restore();
-}
-
-function textWFromSz(sz) { return sz.price * 3; }
 
 // Wrap text into max N lines — last line gets ellipsis if overflow
 function wrapText(ctx, text, maxW, maxLines) {
@@ -1409,6 +1400,856 @@ function drawImgCover(ctx, img, x, y, w, h) {
   if(ar>tr){sh=img.height;sw=sh*tr;sy=0;sx=(img.width-sw)/2;}
   else{sw=img.width;sh=sw/tr;sx=0;sy=(img.height-sh)/2;}
   ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h);
+}
+
+// ═══════════════════════════════════════════════════
+// CATALOG TEMPLATES (editorial / showcase / carousel)
+// ═══════════════════════════════════════════════════
+let curTpl = 'showcase';
+
+function drawTemplate(ctx, sw, sh, t) {
+  if (curTpl === 'editorial') return drawEditorial(ctx, sw, sh, t);
+  if (curTpl === 'carousel')  return drawCarousel(ctx, sw, sh, t);
+  if (curTpl === 'hero')      return drawHero(ctx, sw, sh, t);
+  return drawShowcase(ctx, sw, sh, t);
+}
+function drawFrame(ctx, sw, sh, t) {
+  const ecT = t * DUR - (DUR - ECD);
+  const ec = endcardOn() && slides.length && ecT > 0;
+  const fadeIn = ec ? clamp(ecT / 0.45, 0, 1) : 0;
+  if (fadeIn < 1) drawTemplate(ctx, sw, sh, t);
+  if (ec) drawEndcard(ctx, sw, sh, ecT, fadeIn);
+}
+
+// ── End card: brand · product thumbnails · benefit, centred (corners stay clear) ──
+function drawEndcard(ctx, sw, sh, u, fade) {
+  const c = getColors(), s = sw / EW, sz = getSizes(s);
+  const ep = k => easeOut(clamp((u - 0.25 - k * 0.12) / 0.5, 0, 1));
+  ctx.save();
+  ctx.globalAlpha = fade;
+  ctx.fillStyle = c.bg; ctx.fillRect(0, 0, sw, sh);
+  const gl = ctx.createRadialGradient(sw / 2, sh * 0.5, 40 * s, sw / 2, sh * 0.5, 820 * s);
+  gl.addColorStop(0, rgba(c.highlight, 0.4)); gl.addColorStop(1, rgba(c.highlight, 0));
+  ctx.fillStyle = gl; ctx.fillRect(0, 0, sw, sh);
+  ctx.restore();
+
+  const sl0 = getSlideData(0), n = slides.length;
+  const thumb = 230 * s, tg = 34 * s, rowW = n * thumb + (n - 1) * tg;
+  const items = [
+    itBrand(ctx, sl0, c, sw / 2, sz.brand * 1.1, 'center', s, 0, 52 * s),
+    { h: thumb, gap: 56 * s, k: 1, draw: y => {
+      for (let i = 0; i < n; i++) {
+        const e = ep(1 + i * 0.6);
+        ctx.save(); ctx.globalAlpha *= e;
+        const tx = sw / 2 - rowW / 2 + i * (thumb + tg), ty = y + (1 - e) * 24 * s, r = 22 * s;
+        ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 40 * s; ctx.shadowOffsetY = 16 * s;
+        rrPath(ctx, tx, ty, thumb, thumb, r); ctx.fillStyle = '#ffffff'; ctx.fill();
+        ctx.shadowColor = 'transparent';
+        rrPath(ctx, tx, ty, thumb, thumb, r); ctx.clip();
+        drawImgFit(ctx, slides[i], tx, ty, thumb, thumb);
+        ctx.restore();
+      }
+    }},
+    itBenefit(ctx, c, sw / 2, 34 * s, 'center', null, 2, 0),
+  ].filter(Boolean);
+  const total = items.reduce((a, it, idx) => a + it.h + (idx < items.length - 1 ? it.gap : 0), 0);
+  let y = sh * 0.48 - total / 2;
+  items.forEach(it => {
+    const e = it.k === 1 ? 1 : ep(it.k);
+    ctx.save(); ctx.globalAlpha = fade * e; ctx.translate(0, (1 - e) * 20 * s);
+    it.draw(y); ctx.restore();
+    y += it.h + it.gap;
+  });
+}
+
+// ── Template guides (shown under the picker in the 스타일 tab) ──
+// fields: y = 표시, p = 일부만 표시, n = 표시 안 됨
+const TPL_FIELDS = ['브랜드/로고','제품명','설명','가격','정가·할인율','강조 문구','혜택 문구'];
+const TPL_GUIDE = {
+  editorial: {
+    icon: '◧', name: 'Editorial', one: '잡지 화보 같은 느낌이에요. 사진이 화면 반 이상을 꽉 채우고 천천히 확대돼요.',
+    fields: ['y','y','y','y','y','y','y'],
+    diff: [
+      '이미지가 오른쪽 58%를 <b>여백 없이 꽉</b> 채우고, 슬라이드마다 천천히 확대돼요',
+      '다음 이미지는 오른쪽에서 <b>커튼처럼 열리며</b> 바뀌어요',
+      '텍스트는 왼쪽 정렬이에요. 브랜드는 좌상단에 작게, 순서 표시(01 / 03)는 우상단에 있어요',
+      '강조 문구는 제품명 위에 <b>알약 모양 뱃지</b>로, 혜택 문구는 가격 아래 한 줄로 나와요',
+    ],
+    img: [
+      '<b>분위기 있는 연출컷·모델컷</b>에 가장 잘 어울려요 (배경까지 화면에 나와요)',
+      '이미지 칸이 거의 <b>정사각형(약 1:1)</b>이라 1:1이나 세로로 조금 긴 사진이 좋아요',
+      '천천히 확대되면서 <b>가장자리가 최대 10% 정도 잘려요</b>. 상품을 사진 가운데에 두세요',
+      '이미지 포커스 위치(좌우/상하)가 적용돼요',
+    ],
+    txt: [
+      '제품명이 가장 크게 나와요. <b>15자 안팎</b>(2줄 이내)이 보기 좋아요',
+      '설명은 1~2줄, <b>20자 안팎</b>을 권장해요',
+      '<b>정가</b>를 입력하면 취소선 정가와 할인율(예: 27%)이 가격 위아래에 함께 나와요',
+      '강조 문구는 뱃지라 <b>2~8자</b>가 좋아요 (예: 연말 한정 특가, 무료배송)',
+    ],
+    color: '<b>배경</b>은 왼쪽 텍스트 영역 색이에요. 진한 색 배경에 흰 글씨를 쓰면 가장 고급스러워요.',
+  },
+  showcase: {
+    icon: '▢', name: 'Showcase', one: '쇼핑몰 상품 페이지 같은 느낌이에요. 흰색 상품 카드가 떠 있고 옆에 정보가 정리돼요.',
+    fields: ['y','y','y','y','y','y','y'],
+    diff: [
+      '상품 이미지가 그림자가 있는 <b>흰색 카드 안에</b> 들어가요',
+      '이미지는 <b>잘리지 않고 전체가</b> 보여요. 정가를 입력하면 카드 왼쪽 위에 <b>-27% 태그</b>가 붙어요',
+      '카드는 옆으로 밀리며 넘어가고, 카드 아래에 페이지 점(●○○)이 있어요',
+      '오른쪽 정보 영역이 강조 뱃지 → 브랜드 → 제품명 → 설명 → 가격 → 혜택 문구 순으로 <b>모든 항목을 다 보여줘요</b>',
+    ],
+    img: [
+      '<b>누끼컷(배경 제거)이나 흰 배경 상품컷</b>이 가장 깔끔해요',
+      '카드가 정사각형이라 <b>1:1</b>을 권장해요. 다른 비율은 카드 안에 흰 여백이 생겨요',
+      '이미지를 자르지 않기 때문에 <b>이미지 포커스 위치는 적용되지 않아요</b>',
+    ],
+    txt: [
+      '제품명은 2줄까지, <b>20자 안팎</b>을 권장해요',
+      '설명은 2줄까지, <b>25자 안팎</b>이 좋아요',
+      '할인 상품이면 <b>정가를 꼭 입력하세요</b>. 카드 태그와 가격 옆, 두 군데에 할인율이 강조돼요',
+      '강조 문구 뱃지는 <b>2~8자</b>가 좋아요',
+    ],
+    color: '<b>강조/구분선</b> 색이 카드 뒤에 은은한 빛으로 깔려요. 배경보다 약간 밝은 같은 계열 색이 자연스러워요.',
+  },
+  carousel: {
+    icon: '▥', name: 'Carousel', one: '카탈로그처럼 상품 여러 개를 가로로 나란히 보여주고, 하나씩 가운데로 넘겨요.',
+    fields: ['y','p','n','y','y','y','y'],
+    diff: [
+      '업로드한 상품들이 <b>한 줄로 나란히</b> 놓이고, 지금 소개하는 상품이 가운데에 크게 나와요',
+      '양옆 상품은 작고 흐리게 보여서 <b>"상품이 더 있다"</b>는 느낌을 줘요',
+      '강조 문구는 카드 위에, 상품 정보는 카드 아래에 <b>가운데 정렬</b>로 나와요',
+      '공간이 좁아서 <b>설명 문구는 표시되지 않고, 제품명은 1줄</b>만 나와요',
+    ],
+    img: [
+      '<b>이미지를 3장 모두</b> 올려야 효과가 가장 좋아요 (1장이면 가운데 카드 하나만 보여요)',
+      '<b>누끼컷이나 흰 배경 상품컷, 1:1 비율</b>을 권장해요. 이미지는 잘리지 않아요',
+      '세 이미지의 <b>톤과 배경을 맞추면</b> 카탈로그 느낌이 훨씬 살아요',
+    ],
+    txt: [
+      '제품명은 1줄이라 <b>12자 안팎</b>으로 짧게 써 주세요 (넘치면 "…")',
+      '설명 문구는 화면에 나오지 않으니 비워 둬도 돼요',
+      '가격·정가·할인율은 정상적으로 표시돼요',
+      '상품마다 이름·가격이 달라야 하니 2·3번 슬라이드의 <b>"슬라이드 1의 텍스트 그대로 사용"</b>은 끄고 각각 입력하세요',
+    ],
+    color: '<b>강조/구분선</b> 색이 가운데 카드 뒤 조명처럼 깔려요.',
+  },
+  hero: {
+    icon: '▬', name: 'Hero', one: '영화 포스터나 OTT 메인 배너 같은 느낌이에요. 사진이 화면 전체를 채우고 그 위에 문구가 올라가요.',
+    fields: ['y','y','y','y','y','y','y'],
+    diff: [
+      '이미지가 <b>화면 전체(16:9)</b>를 꽉 채우고 천천히 확대돼요. 다음 이미지는 <b>부드럽게 겹치며</b> 바뀌어요',
+      '맨 위에 인스타그램 스토리 같은 <b>진행 바</b>가 있어서 몇 번째 상품인지 알 수 있어요',
+      '글씨가 잘 읽히도록 왼쪽과 아래에 <b>배경색 그라데이션</b>이 깔려요',
+      '상품 정보는 <b>왼쪽 가운데</b>에 크게 나와요. 플레이어 CTA가 뜨는 <b>우상단·좌하단은 비워 둬요</b>. 브랜드는 왼쪽 위에 있어요',
+    ],
+    img: [
+      '<b>가로형(16:9) 연출컷·모델컷·공간컷</b>이 가장 잘 어울려요',
+      '1:1 사진을 쓰면 <b>위아래가 많이 잘려요</b> (약 44%). ② 이미지 탭의 <b>포커스 위치(상하)</b>로 보여줄 부분을 맞추세요',
+      '왼쪽에 글씨가 올라가니 <b>상품이 사진 오른쪽</b>에 있는 컷이 좋아요',
+      '천천히 확대되면서 가장자리가 조금 더 잘리니 중요한 부분은 가운데 쪽에 두세요',
+    ],
+    txt: [
+      '제품명이 네 템플릿 중 <b>가장 크게</b> 나와요. <b>15자 안팎</b>(2줄 이내)이 보기 좋아요',
+      '설명은 사진을 가리지 않게 <b>20자 안팎, 1줄</b>을 권장해요',
+      '정가를 입력하면 할인율과 취소선 정가가 함께 나와요',
+      '강조 문구 뱃지는 <b>2~8자</b>가 좋아요',
+    ],
+    color: '<b>배경</b> 색이 사진 위 그라데이션 색이 돼요. 사진 톤과 비슷한 진한 색을 고르면 자연스럽고, 검정이나 짙은 남색이 무난해요.',
+  },
+};
+
+function renderTplGuide(name) {
+  const g = TPL_GUIDE[name], el = document.getElementById('tplGuide');
+  if (!g || !el) return;
+  const li = arr => '<ul>' + arr.map(x => `<li>${x}</li>`).join('') + '</ul>';
+  const chip = (f, v) => `<span class="tg-f ${v}">${f}${v === 'p' ? ' (1줄)' : ''}</span>`;
+  const mark = v => v === 'y' ? '<span style="color:var(--ok)">●</span>' : v === 'p' ? '<span style="color:var(--warn)">◐</span>' : '<span style="color:var(--muted)">–</span>';
+  const order = ['showcase', 'editorial', 'carousel', 'hero'];
+  const tabs = document.getElementById('tfTabs');
+  if (tabs) tabs.innerHTML = order.map(k => `<button class="tf-tab ${k === name ? 'on' : ''}" onclick="renderTplGuide('${k}')">${TPL_GUIDE[k].name}${k === curTpl ? '<span class="cur">사용 중</span>' : ''}</button>`).join('');
+  el.innerHTML = `
+    <div class="tg-head">${g.icon} ${g.name} 가이드</div>
+    <div class="tg-one">${g.one}</div>
+    ${exampleHTML(name)}
+    <div class="tg-sec"><b class="t">화면에 표시되는 항목</b>
+      <div class="tg-fields">${TPL_FIELDS.map((f, i) => chip(f, g.fields[i])).join('')}</div>
+      <div class="tg-legend">초록: 표시 · 주황: 일부만 표시 · 취소선: 표시 안 됨 (입력해도 화면에 안 나와요)</div>
+    </div>
+    <div class="tg-sec"><b class="t">✦ 이런 점이 달라요</b>${li(g.diff)}</div>
+    <div class="tg-sec"><b class="t">🖼 이미지는 이렇게 준비하세요</b>${li(g.img)}</div>
+    <div class="tg-sec"><b class="t">✏️ 텍스트는 이렇게 입력하세요</b>${li(g.txt)}</div>
+    <div class="tg-sec"><b class="t">🎨 색상 팁</b>${li([g.color,
+      '<b>강조 문구</b> 색은 강조 뱃지·할인율·혜택 문구 앞 막대에, <b>설명 문구</b> 색은 취소선 정가에도 쓰여요'])}</div>
+    <details>
+      <summary>템플릿 4종 한눈에 비교하기</summary>
+      <table class="tg-table">
+        <tr><th></th>${order.map(k => `<th>${TPL_GUIDE[k].name}</th>`).join('')}</tr>
+        ${TPL_FIELDS.map((f, i) => `<tr><td>${f}</td>${order.map(k => `<td>${mark(TPL_GUIDE[k].fields[i])}</td>`).join('')}</tr>`).join('')}
+        <tr><td>이미지 잘림</td><td>없음</td><td>약간</td><td>없음</td><td>많음</td></tr>
+        <tr><td>추천 이미지</td><td>누끼컷 1:1</td><td>연출컷 1:1</td><td>누끼컷 3장</td><td>가로 연출컷</td></tr>
+        <tr><td>분위기</td><td>상품 페이지</td><td>매거진</td><td>카탈로그</td><td>시네마틱</td></tr>
+      </table>
+    </details>
+    ${name !== curTpl ? `<button class="btn primary tg-use" onclick="useTplFromGuide('${name}')">이 템플릿(${g.name}) 사용하기</button>` : ''}`;
+  el.scrollTop = 0;
+  stopExample(); _exName = name;
+  (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => { if (_exName === name && !_exAnim) drawExample(name, 0.2); });
+}
+
+function openTplGuide() {
+  renderTplGuide(curTpl);
+  document.getElementById('tplFloat').style.display = 'flex';
+}
+function closeTplGuide() { stopExample(); document.getElementById('tplFloat').style.display = 'none'; }
+function useTplFromGuide(name) {
+  const btn = [...document.querySelectorAll('.tpl-btn')].find(b => b.getAttribute('onclick').includes(`'${name}'`));
+  if (btn) pickTpl(btn, name);
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTplGuide(); });
+
+// ── Best-example previews in the template guide ──
+// The real template renderers draw the example, so it always matches the actual output.
+let _exColors = null, _exAnim = null, _exName = null;
+const EX_COLORS = {
+  showcase:  { bg:'#f3efe8', highlight:'#b08d57', price:'#111111', brand:'#1b1b1b', desc:'#6e675e', htext:'#c8102e' },
+  editorial: { bg:'#1f2a24', highlight:'#d9b77a', price:'#ffffff', brand:'#f4efe6', desc:'#b9c2b8', htext:'#d9b77a' },
+  carousel:  { bg:'#101217', highlight:'#ff5a36', price:'#ffffff', brand:'#ffffff', desc:'#a4a9b4', htext:'#ff5a36' },
+  hero:      { bg:'#0b1020', highlight:'#e8c27a', price:'#ffffff', brand:'#ffffff', desc:'#c9cfdd', htext:'#e8c27a' },
+};
+Object.values(EX_COLORS).forEach(c => { c.line = c.highlight; c.product = c.brand; });
+const EX_TEXT = [
+  { product:'오드 퍼퓸 앰버 50ml', desc:'은은하게 오래가는 우디 앰버 향', origPrice:'128000', price:'89000', highlight:'연말 한정', kind:'perfume' },
+  { product:'비타C 브라이트닝 세럼', desc:'맑은 피부결을 위한 데일리 세럼', origPrice:'52000', price:'39000', highlight:'1+1', kind:'serum' },
+  { product:'수분 장벽 크림', desc:'하루 종일 촉촉한 72시간 보습', origPrice:'46000', price:'32000', highlight:'베스트', kind:'cream' },
+];
+const EX_CARO_NAME = ['오드 퍼퓸 앰버', '비타C 세럼', '수분 장벽 크림'];
+// 누끼컷(cut) for Showcase/Carousel, 1:1 연출컷(sq) for Editorial, 가로 연출컷(wide) for Hero
+const EX_IMG_KIND = { showcase:'cut', editorial:'sq', carousel:'cut', hero:'wide' };
+let _exImgs = null;
+
+function exPaintProduct(g, kind, cx, by, sc) {
+  g.save(); g.translate(cx, by); g.scale(sc, sc);
+  const lg = (x0, y0, x1, y1, stops) => { const gr = g.createLinearGradient(x0, y0, x1, y1); stops.forEach(([o, c]) => gr.addColorStop(o, c)); return gr; };
+  const shadow = g.createRadialGradient(0, 0, 10, 0, 0, 260);
+  shadow.addColorStop(0, 'rgba(0,0,0,.32)'); shadow.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = shadow; g.save(); g.scale(1, .14); g.beginPath(); g.arc(0, 0, 260, 0, Math.PI * 2); g.fill(); g.restore();
+  const label = (y, w, h, text, sub) => {
+    rrPath(g, -w / 2, y, w, h, 6); g.fillStyle = 'rgba(255,255,255,.9)'; g.fill();
+    g.fillStyle = '#2a2420'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.font = '600 30px "Playfair Display",Georgia,serif'; g.fillText(text, 0, y + h * .42);
+    g.font = '500 15px "DM Sans",sans-serif'; g.fillText(sub, 0, y + h * .78);
+  };
+  if (kind === 'perfume') {
+    rrPath(g, -175, -390, 350, 390, 64);
+    g.fillStyle = lg(-175, 0, 175, 0, [[0, 'rgba(214,150,70,.95)'], [.5, 'rgba(240,190,110,.92)'], [1, 'rgba(170,105,40,.95)']]); g.fill();
+    rrPath(g, -150, -300, 300, 280, 50); g.fillStyle = lg(0, -300, 0, -20, [[0, 'rgba(200,120,40,.55)'], [1, 'rgba(140,70,20,.75)']]); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.35)'; rrPath(g, -150, -370, 34, 330, 17); g.fill();
+    g.fillStyle = lg(-34, 0, 34, 0, [[0, '#9a9a9a'], [.5, '#f0f0f0'], [1, '#8a8a8a']]); g.fillRect(-34, -432, 68, 46);
+    rrPath(g, -70, -560, 140, 132, 16); g.fillStyle = lg(-70, 0, 70, 0, [[0, '#8a6a2a'], [.45, '#f3d488'], [1, '#7a5a20']]); g.fill();
+    label(-240, 200, 92, 'LUMIÈRE', 'EAU DE PARFUM');
+  } else if (kind === 'serum') {
+    rrPath(g, -115, -380, 230, 380, 44);
+    g.fillStyle = lg(-115, 0, 115, 0, [[0, '#7a3a0e'], [.5, '#c4702a'], [1, '#5e2a08']]); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.28)'; rrPath(g, -96, -360, 24, 330, 12); g.fill();
+    rrPath(g, -64, -462, 128, 92, 12); g.fillStyle = lg(-64, 0, 64, 0, [[0, '#111'], [.5, '#444'], [1, '#0a0a0a']]); g.fill();
+    g.beginPath(); g.ellipse(0, -520, 46, 72, 0, 0, Math.PI * 2); g.fillStyle = lg(-46, 0, 46, 0, [[0, '#151515'], [.5, '#3a3a3a'], [1, '#0c0c0c']]); g.fill();
+    label(-250, 176, 110, 'VITA C', 'BRIGHTENING SERUM');
+  } else {
+    rrPath(g, -215, -230, 430, 230, 46);
+    g.fillStyle = lg(-215, 0, 215, 0, [[0, '#d9d4cc'], [.5, '#ffffff'], [1, '#c9c3b9']]); g.fill();
+    rrPath(g, -232, -318, 464, 104, 32);
+    g.fillStyle = lg(-232, 0, 232, 0, [[0, '#a46a58'], [.45, '#ecc0ac'], [1, '#8e5848']]); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.4)'; g.fillRect(-200, -300, 400, 8);
+    g.fillStyle = '#5a4a40'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.font = '600 38px "Playfair Display",Georgia,serif'; g.fillText('BARRIER', 0, -128);
+    g.font = '500 17px "DM Sans",sans-serif'; g.fillText('MOISTURE CREAM · 50ml', 0, -82);
+  }
+  g.restore();
+}
+function exScene(kind, w, h, tone) {
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const g = cv.getContext('2d');
+  const floorY = h * .74, wide = w > h, cx = wide ? w * .68 : w / 2;
+  if (tone) {
+    let gr = g.createLinearGradient(0, 0, 0, floorY);
+    gr.addColorStop(0, tone[0]); gr.addColorStop(1, tone[1]);
+    g.fillStyle = gr; g.fillRect(0, 0, w, floorY);
+    gr = g.createLinearGradient(0, floorY, 0, h); gr.addColorStop(0, tone[2]); gr.addColorStop(1, tone[3]);
+    g.fillStyle = gr; g.fillRect(0, floorY, w, h - floorY);
+    const sun = g.createRadialGradient(cx, h * .38, 10, cx, h * .38, h * .55);
+    sun.addColorStop(0, 'rgba(255,240,215,.55)'); sun.addColorStop(1, 'rgba(255,240,215,0)');
+    g.fillStyle = sun; g.fillRect(0, 0, w, h);
+    // pedestal
+    const pw = h * .5, ph = h * .12, py = floorY - ph * .2;
+    g.fillStyle = tone[4]; g.fillRect(cx - pw / 2, py, pw, ph);
+    g.beginPath(); g.ellipse(cx, py, pw / 2, ph * .28, 0, 0, Math.PI * 2); g.fillStyle = tone[5]; g.fill();
+    exPaintProduct(g, kind, cx, py, h / 1000 * .95);
+  } else {
+    exPaintProduct(g, kind, w / 2, h * .86, w / 1000 * 1.15);
+  }
+  return cv;
+}
+function exImages() {
+  if (_exImgs) return _exImgs;
+  const tones = [
+    ['#e9dccb', '#d9c4a8', '#b99a78', '#9e7f60', '#efe6da', '#fbf6ef'],
+    ['#f1e2cf', '#e7c9a4', '#c69a6e', '#a87d55', '#f4ece2', '#fff9f2'],
+    ['#dfe3dc', '#c6cfc3', '#9fae9b', '#82917e', '#eef0ea', '#fafbf8'],
+  ];
+  _exImgs = {
+    cut:  EX_TEXT.map(e => exScene(e.kind, 1000, 1000)),
+    sq:   EX_TEXT.map((e, i) => exScene(e.kind, 1000, 1000, tones[i])),
+    wide: EX_TEXT.map((e, i) => exScene(e.kind, 1920, 1080, tones[i])),
+  };
+  return _exImgs;
+}
+function exSlides(name) {
+  const imgs = exImages()[EX_IMG_KIND[name]];
+  return EX_TEXT.map((e, i) => ({
+    img: imgs[i], brand: '메종 루미에르', product: name === 'carousel' ? EX_CARO_NAME[i] : e.product,
+    desc: name === 'carousel' ? '' : e.desc, price: e.price, origPrice: e.origPrice, highlight: e.highlight,
+    fit: 'cover', posX: name === 'hero' ? 62 : 50, posY: 50, brandMode: 'text',
+    logoImg: null, logoSrc: null, logoSize: 80, copyFrom: false, hlMotion: 'none',
+  }));
+}
+function drawExample(name, t) {
+  const cv = document.getElementById('tgExCv');
+  if (!cv) return;
+  const s0 = slides, t0 = curTpl;
+  slides = exSlides(name); curTpl = name; _exColors = EX_COLORS[name];
+  try { drawFrame(cv.getContext('2d'), cv.width, cv.height, t); }
+  finally { slides = s0; curTpl = t0; _exColors = null; }
+}
+function stopExample() {
+  if (_exAnim) cancelAnimationFrame(_exAnim);
+  _exAnim = null;
+  const b = document.getElementById('tgExPlay'); if (b) b.textContent = '▶ 예시 재생';
+}
+function toggleExample() {
+  if (_exAnim) { stopExample(); drawExample(_exName, 0.2); return; }
+  const start = performance.now();
+  const b = document.getElementById('tgExPlay'); if (b) b.textContent = '❚❚ 정지';
+  const tick = now => {
+    if (!document.getElementById('tgExCv')) { _exAnim = null; return; }
+    drawExample(_exName, ((now - start) / 1000 % DUR) / DUR);
+    _exAnim = requestAnimationFrame(tick);
+  };
+  _exAnim = requestAnimationFrame(tick);
+}
+function applyExColors(name) {
+  const c = EX_COLORS[name];
+  [['cBg', 'cBgL', c.bg], ['cHighlight', 'cHL', c.highlight], ['cPrice', 'cPL', c.price],
+   ['cHText', 'cHTL', c.htext], ['cBrand', 'cBrL', c.brand], ['cDesc', 'cDL', c.desc]].forEach(([id, lid, v]) => {
+    const el = document.getElementById(id); if (!el) return;
+    el.value = v; document.getElementById(lid).textContent = v;
+  });
+  const p = document.getElementById('cProduct'); if (p) p.value = c.brand;
+  render();
+  notify(`${TPL_GUIDE[name].name} 예시 색상을 적용했어요.`);
+}
+function exampleHTML(name) {
+  const e = EX_TEXT[0], fmt = v => (+v).toLocaleString('ko-KR');
+  const imgDesc = { cut:'흰 배경 누끼컷', sq:'1:1 연출컷', wide:'가로 16:9 연출컷' }[EX_IMG_KIND[name]];
+  return `
+    <div class="tg-ex">
+      <div class="tg-ex-tag">★ 예시</div>
+      <canvas id="tgExCv" width="768" height="432" onclick="toggleExample()" title="클릭하면 재생/정지"></canvas>
+      <div class="tg-ex-bar">
+        <button class="btn" id="tgExPlay" onclick="toggleExample()">▶ 예시 재생</button>
+        <button class="btn" onclick="applyExColors('${name}')">🎨 이 색상 조합 적용</button>
+      </div>
+      <div class="tg-ex-in"><b>예시 입력값</b> (슬라이드 1)<br>
+        이미지: ${imgDesc} 3장 · 브랜드: 메종 루미에르<br>
+        제품명: ${name === 'carousel' ? EX_CARO_NAME[0] : e.product}${name === 'carousel' ? '' : ` · 설명: ${e.desc}`}<br>
+        정가 ${fmt(e.origPrice)} → 판매가 ${fmt(e.price)} · 강조: ${e.highlight}</div>
+    </div>`;
+}
+
+function goTab(name) {
+  const btn = document.querySelector(`.ltab[data-tab="${name}"]`);
+  if (btn) switchTab(name, btn);
+  document.querySelector('.left').scrollTop = 0;
+}
+
+function pickTpl(btn, name) {
+  curTpl = name;
+  document.querySelectorAll('.tpl-btn').forEach(b => b.classList.toggle('on', b === btn));
+  renderTplGuide(name);
+  rebuildCards();
+  render();
+}
+
+// ── small helpers ──
+function hexRgb(h) {
+  h = (h || '#000').replace('#', '');
+  if (h.length === 3) h = h.split('').map(x => x + x).join('');
+  const n = parseInt(h, 16) || 0;
+  return [n >> 16 & 255, n >> 8 & 255, n & 255];
+}
+function rgba(h, a) { const [r, g, b] = hexRgb(h); return `rgba(${r},${g},${b},${a})`; }
+function onColor(h) { const [r, g, b] = hexRgb(h); return (0.299*r + 0.587*g + 0.114*b) > 150 ? '#111111' : '#ffffff'; }
+function rrPath(ctx, x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function setLS(ctx, px) { if ('letterSpacing' in ctx) ctx.letterSpacing = px + 'px'; }
+function getBenefit() { if (_exColors) return '12.31까지 · 무료배송'; const el = document.getElementById('benefitText'); return el ? el.value.trim() : ''; }
+// 엔드카드: 마지막 ECD초는 브랜드·상품·혜택을 모은 마무리 화면
+const ECD = 2;
+function endcardOn() { if (_exColors) return false; const el = document.getElementById('endcardOn'); return !!(el && el.checked); }
+function slidesDur() { return endcardOn() ? DUR - ECD : DUR; }
+function onEndcardToggle() { updateInfo(); rebuildCards(); updateTimeline(); render(); }
+// 플레이어 CTA가 뜨는 자리 (1920×1080 기준): 모바일앱·PC웹 = 우상단, CTV = 좌하단. 텍스트를 두지 않아요.
+const SAFE_ZONES = [
+  { x: 1440, y: 0,   w: 480, h: 190, label: '모바일·PC CTA' },
+  { x: 0,    y: 870, w: 560, h: 210, label: 'CTV CTA' },
+];
+function drawSafeZones(ctx, sw, sh) {
+  const s = sw / EW;
+  ctx.save();
+  SAFE_ZONES.forEach(z => {
+    const x = z.x * s, y = z.y * s, w = z.w * s, h = z.h * s;
+    ctx.fillStyle = 'rgba(255,95,135,0.12)'; ctx.fillRect(x, y, w, h);
+    ctx.setLineDash([6, 5]); ctx.strokeStyle = 'rgba(255,95,135,0.8)'; ctx.lineWidth = 1.2;
+    ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+    ctx.setLineDash([]);
+    ctx.font = `700 ${Math.max(9, 17 * s)}px "Noto Sans KR",sans-serif`;
+    ctx.fillStyle = 'rgba(255,170,190,0.95)'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(z.label + ' 영역', x + w / 2, y + h / 2);
+  });
+  ctx.restore();
+}
+function discountOf(sl) {
+  const p = +(sl.price || 0), o = +(String(sl.origPrice || '').replace(/,/g, '') || 0);
+  return (o > p && p > 0) ? Math.round((o - p) / o * 100) : 0;
+}
+function drawContain(ctx, img, x, y, w, h) {
+  if (!img) return;
+  const k = Math.min(w / img.width, h / img.height);
+  const dw = img.width * k, dh = img.height * k;
+  ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+}
+
+// Shared slide timing. appear(i) = second at which slide i starts entering.
+function segInfo(t) {
+  const n = slides.length, SD = slidesDur(), segDur = n ? SD / n : SD, tSec = Math.min(t * DUR, SD);
+  const curIdx = n ? Math.min(Math.floor(tSec / segDur), n - 1) : 0;
+  const localT = n ? (tSec - curIdx * segDur) / segDur : t;
+  const SW = 0.10, trans = SW * segDur;
+  const isTrans = localT > 1 - SW && curIdx < n - 1;
+  const ease = isTrans ? easeInOut((localT - (1 - SW)) / SW) : 0;
+  const appear = i => i * segDur - (i > 0 ? trans : 0);
+  return { n, segDur, tSec, curIdx, localT, isTrans, ease, appear, trans };
+}
+// Staggered entrance for element k of slide i (slide 0 is shown immediately)
+function enterP(st, i, k) {
+  if (i === 0) return 1;
+  return easeOut(clamp((st.tSec - st.appear(i) - st.trans * 0.45 - k * 0.06) / 0.4, 0, 1));
+}
+function emptyFrame(ctx, sw, sh, c) {
+  ctx.fillStyle = c.bg; ctx.fillRect(0, 0, sw, sh);
+  ctx.fillStyle = rgba(c.brand, 0.18);
+  ctx.font = `500 ${sw * 0.014}px "DM Sans","Noto Sans KR",sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('이미지를 추가하세요', sw / 2, sh / 2);
+}
+
+// Vertical stack: items = [{h, gap, k, draw(topY)}], centred on cy
+function drawStack(ctx, items, cy, alpha, st, i, s, anchor) {
+  items = items.filter(it => it && it.h > 0);
+  const total = items.reduce((a, it, idx) => a + it.h + (idx < items.length - 1 ? (it.gap || 0) : 0), 0);
+  let y = anchor === 'bottom' ? cy - total : cy - total / 2;
+  items.forEach(it => {
+    const e = enterP(st, i, it.k || 0);
+    if (e > 0.001) {
+      ctx.save();
+      ctx.globalAlpha = alpha * e;
+      ctx.translate(0, (1 - e) * 30 * s);
+      it.draw(y);
+      ctx.restore();
+    }
+    y += it.h + (it.gap || 0);
+  });
+}
+
+// ── stack item builders ──
+function itBrand(ctx, sl, c, x, size, align, s, k, gap) {
+  if (sl.brandMode === 'logo' && sl.logoImg) {
+    const h = (sl.logoSize || 80) * s * 0.8;
+    const w = h * sl.logoImg.width / sl.logoImg.height;
+    return { h, gap, k, draw: y => {
+      const lx = align === 'left' ? x : x - w / 2;
+      ctx.drawImage(sl.logoImg, lx, y, w, h);
+    }};
+  }
+  if (!sl.brand) return null;
+  return { h: size, gap, k, draw: y => {
+    ctx.font = `700 ${size}px "DM Sans","Noto Sans KR",sans-serif`;
+    setLS(ctx, size * (/[가-힣]/.test(sl.brand) ? 0.04 : 0.16)); // wide tracking only suits Latin caps
+    ctx.fillStyle = rgba(c.brand, 0.75); ctx.textAlign = align; ctx.textBaseline = 'middle';
+    ctx.fillText(sl.brand.toUpperCase(), x + (align === 'center' ? size * 0.08 : 0), y + size / 2);
+    setLS(ctx, 0);
+  }};
+}
+function itLines(ctx, text, font, size, lh, color, x, maxW, maxLines, align, k, gap) {
+  if (!text) return null;
+  ctx.font = font;
+  const lines = wrapText(ctx, text, maxW, maxLines);
+  return { h: lines.length * size * lh, gap, k, draw: y => {
+    ctx.font = font; ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = 'middle';
+    lines.forEach((ln, idx) => ctx.fillText(ln, x, y + size * lh * (idx + 0.5)));
+  }};
+}
+function itBadge(ctx, sl, c, x, size, align, st, k, gap) {
+  if (!sl.highlight) return null;
+  const h = size * 1.9;
+  return { h, gap, k, draw: y => drawBadge(ctx, sl.highlight, x, y + h / 2, size, c.htext, onColor(c.htext), align, sl.hlMotion || 'none', st.tSec) };
+}
+function itPrice(ctx, sl, c, x, size, align, maxW, st, i, k, gap) {
+  if (!sl.price) return null;
+  const hasOrig = discountOf(sl) > 0;
+  const origH = hasOrig ? size * 0.5 : 0;
+  return { h: origH + size, gap, k, draw: y => drawPriceRow(ctx, sl, c, x, y, size, align, maxW, st, i) };
+}
+function itBenefit(ctx, c, x, size, align, st, k, gap) {
+  const text = getBenefit();
+  if (!text) return null;
+  return { h: size * 1.3, gap, k, draw: y => drawBenefit(ctx, text, x, y + size * 0.65, size, c, align) };
+}
+function itRule(ctx, c, x, w, s, align, k, gap) {
+  return { h: 2 * s, gap, k, draw: y => {
+    ctx.fillStyle = rgba(c.brand, 0.22);
+    ctx.fillRect(align === 'center' ? x - w / 2 : x, y, w, 2 * s);
+  }};
+}
+
+// ── primitives ──
+function drawBadge(ctx, text, x, cy, size, bg, fg, align, motion, tSec) {
+  ctx.save();
+  ctx.font = `700 ${size}px "Noto Sans KR",sans-serif`;
+  const tw = ctx.measureText(text).width, h = size * 1.9, w = tw + size * 1.8;
+  let bx = align === 'left' ? x : x - w / 2;
+  let sc = 1;
+  // Gentle, slow motions (opt-in; default is none)
+  if (motion === 'pulse') sc = 1 + 0.035 * (0.5 - 0.5 * Math.cos(tSec * Math.PI * 2 * 0.6));            // slow breathing, ~1.7s
+  else if (motion === 'shake') { const p = tSec % 2.4; if (p < 0.5) bx += Math.sin(p / 0.5 * Math.PI * 4) * (1 - p / 0.5) * size * 0.12; } // short wiggle every 2.4s
+  else if (motion === 'blink') ctx.globalAlpha *= 0.65 + 0.35 * (0.5 + 0.5 * Math.cos(tSec * Math.PI * 2 * 0.8));  // soft fade
+  const ox = bx + w / 2;
+  ctx.translate(ox, cy); ctx.scale(sc, sc); ctx.translate(-ox, -cy);
+  rrPath(ctx, bx, cy - h / 2, w, h, h / 2);
+  ctx.fillStyle = bg; ctx.fill();
+  ctx.fillStyle = fg; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, ox, cy + size * 0.04);
+  ctx.restore();
+}
+
+// 혜택 문구: 버튼처럼 보이지 않게 액센트 바 + 텍스트 한 줄 (클릭 오인 방지)
+function drawBenefit(ctx, text, x, cy, size, c, align) {
+  ctx.save();
+  ctx.font = `600 ${size}px "Noto Sans KR",sans-serif`;
+  ctx.textBaseline = 'middle';
+  const tw = ctx.measureText(text).width, barW = Math.max(2, size * 0.14), gap = size * 0.55;
+  const total = barW + gap + tw;
+  const bx = align === 'left' ? x : align === 'right' ? x - total : x - total / 2;
+  ctx.fillStyle = c.htext;
+  ctx.fillRect(bx, cy - size * 0.55, barW, size * 1.1);
+  ctx.fillStyle = rgba(c.brand, 0.92); ctx.textAlign = 'left';
+  ctx.fillText(text, bx + barW + gap, cy + size * 0.04);
+  ctx.restore();
+}
+
+// Strike-through original price (optional) + [discount%] price 원, with count-up
+function drawPriceRow(ctx, sl, c, x, topY, size, align, maxW, st, i) {
+  const price = +(sl.price || 0);
+  const disc = discountOf(sl);
+  const cp = easeOut(clamp((st.tSec - st.appear(i) - (i > 0 ? st.trans * 0.45 : 0)) / 0.5, 0, 1));
+  const shown = Math.round(price * cp).toLocaleString('ko-KR');
+  const full = price.toLocaleString('ko-KR');
+  const NUM = (sz) => `800 ${sz}px "DM Sans","Noto Sans KR",sans-serif`;
+
+  // measure with final value so layout doesn't jitter during count-up
+  const measure = (sz) => {
+    ctx.font = `800 ${sz * 0.62}px "DM Sans","Noto Sans KR",sans-serif`;
+    const dW = disc ? ctx.measureText(disc + '%').width + sz * 0.22 : 0;
+    ctx.font = NUM(sz); const pW = ctx.measureText(full).width;
+    ctx.font = `700 ${sz * 0.42}px "Noto Sans KR",sans-serif`; const uW = ctx.measureText('원').width;
+    return { dW, pW, uW, total: dW + pW + sz * 0.06 + uW };
+  };
+  let m = measure(size);
+  if (m.total > maxW) { size *= maxW / m.total; m = measure(size); }
+
+  ctx.save();
+  ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+  const origH = disc ? size * 0.5 : 0;
+  if (disc) {
+    const os = size * 0.3;
+    ctx.font = `500 ${os}px "DM Sans","Noto Sans KR",sans-serif`;
+    const ot = (+String(sl.origPrice).replace(/,/g, '')).toLocaleString('ko-KR') + '원';
+    const ow = ctx.measureText(ot).width;
+    const ox = align === 'left' ? x : x - ow / 2, oy = topY + os;
+    ctx.fillStyle = rgba(c.desc, 0.75);
+    ctx.fillText(ot, ox, oy);
+    ctx.fillRect(ox, oy - os * 0.32, ow, Math.max(1, size * 0.018));
+  }
+  const base = topY + origH + size * 0.86;
+  let px = align === 'left' ? x : x - m.total / 2;
+  if (disc) {
+    ctx.font = `800 ${size * 0.62}px "DM Sans","Noto Sans KR",sans-serif`;
+    ctx.fillStyle = c.htext;
+    ctx.fillText(disc + '%', px, base);
+    px += m.dW;
+  }
+  ctx.font = NUM(size); ctx.fillStyle = c.price;
+  // right-align the counting number inside its final width so it doesn't jump
+  const sW = ctx.measureText(shown).width;
+  ctx.fillText(shown, px + (m.pW - sW), base);
+  px += m.pW + size * 0.06;
+  ctx.font = `700 ${size * 0.42}px "Noto Sans KR",sans-serif`;
+  ctx.fillText('원', px, base);
+  ctx.restore();
+}
+
+// White product card with shadow; image contained inside, discount tag top-left
+function drawProductCard(ctx, sl, x, y, w, h, s, c, zoom) {
+  const r = 36 * s * (w / (800 * s));
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 60 * s; ctx.shadowOffsetY = 24 * s;
+  rrPath(ctx, x, y, w, h, r); ctx.fillStyle = '#ffffff'; ctx.fill();
+  ctx.restore();
+  ctx.save();
+  rrPath(ctx, x, y, w, h, r); ctx.clip();
+  const pad = w * 0.05, z = zoom || 1;
+  const iw = (w - pad * 2) * z, ih = (h - pad * 2) * z;
+  drawContain(ctx, sl.img, x + (w - iw) / 2, y + (h - ih) / 2, iw, ih);
+  ctx.restore();
+  const d = discountOf(getSlideData(slides.indexOf(sl)));
+  if (d) {
+    const fs = w * 0.045, th = fs * 1.9;
+    ctx.save();
+    ctx.font = `800 ${fs}px "DM Sans","Noto Sans KR",sans-serif`;
+    const tw = ctx.measureText(`-${d}%`).width + fs * 1.4;
+    rrPath(ctx, x + w * 0.045, y + w * 0.045, tw, th, th / 2);
+    ctx.fillStyle = c.htext; ctx.fill();
+    ctx.fillStyle = onColor(c.htext); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(`-${d}%`, x + w * 0.045 + tw / 2, y + w * 0.045 + th / 2 + fs * 0.04);
+    ctx.restore();
+  }
+}
+
+// ── Template: Editorial (split, full-bleed image on the right, magazine-style text left) ──
+function drawEditorial(ctx, sw, sh, t) {
+  const c = getColors(), s = sw / EW, st = segInfo(t), sz = getSizes(s);
+  if (!st.n) return emptyFrame(ctx, sw, sh, c);
+  ctx.fillStyle = c.bg; ctx.fillRect(0, 0, sw, sh);
+
+  const ix = sw * 0.42, iw = sw - ix;
+  const drawImg = (i, clipX, parallax) => {
+    const u = clamp((st.tSec - st.appear(i)) / (st.segDur + 0.5), 0, 1);
+    const z = 1.02 + 0.08 * u;
+    const w = iw * z, h = sh * z;
+    ctx.save(); ctx.beginPath(); ctx.rect(clipX, 0, sw - clipX, sh); ctx.clip();
+    drawImgFit(ctx, slides[i], ix - (w - iw) / 2 + parallax, -(h - sh) / 2, w, h);
+    ctx.restore();
+  };
+  drawImg(st.curIdx, ix, -st.ease * iw * 0.15);
+  if (st.isTrans) {
+    drawImg(st.curIdx + 1, ix + iw * (1 - st.ease), 0);
+    // reveal edge line
+    ctx.fillStyle = rgba(c.brand, 0.9 * (1 - Math.abs(st.ease * 2 - 1)));
+    ctx.fillRect(ix + iw * (1 - st.ease) - 3 * s, 0, 3 * s, sh);
+  }
+
+  const L = 120 * s, maxW = ix - L - 90 * s;
+  const drawContent = (i, alpha, dx) => {
+    const sl = getSlideData(i);
+    ctx.save(); ctx.translate(dx, 0);
+    // top: brand
+    const b = itBrand(ctx, sl, c, L, sz.brand * 0.72, 'left', s, 0, 0);
+    if (b) { const e = enterP(st, i, 0); ctx.save(); ctx.globalAlpha = alpha * e; b.draw(110 * s - b.h / 2); ctx.restore(); }
+    // middle stack
+    drawStack(ctx, [
+      itBadge(ctx, sl, c, L, sz.hl * 0.72, 'left', st, 1, 34 * s),
+      itLines(ctx, sl.product, `800 ${sz.prod * 1.05}px "Noto Sans KR",sans-serif`, sz.prod * 1.05, 1.22, c.product, L, maxW, 2, 'left', 1, 22 * s),
+      itLines(ctx, sl.desc, `400 ${sz.desc}px "Noto Sans KR",sans-serif`, sz.desc, 1.5, c.desc, L, maxW, 2, 'left', 2, 48 * s),
+      itPrice(ctx, sl, c, L, sz.price * 0.82, 'left', maxW, st, i, 3, 44 * s),
+      itBenefit(ctx, c, L, 26 * s, 'left', st, 4, 0),
+    ], sh * 0.47, alpha, st, i, s);
+    ctx.restore();
+  };
+  drawContent(st.curIdx, st.isTrans ? clamp(1 - st.ease * 2.2, 0, 1) : 1, -st.ease * 40 * s);
+  if (st.isTrans) drawContent(st.curIdx + 1, 1, 0);
+
+  // counter 01 / 03 + progress line
+  if (st.n > 1) {
+    const idx = st.isTrans && st.ease > 0.5 ? st.curIdx + 1 : st.curIdx;
+    ctx.save();
+    ctx.font = `600 ${20 * s}px "DM Sans",sans-serif`; setLS(ctx, 3 * s);
+    ctx.fillStyle = rgba(c.brand, 0.55); ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText(`${String(idx + 1).padStart(2, '0')} / ${String(st.n).padStart(2, '0')}`, ix - 90 * s, 110 * s);
+    setLS(ctx, 0);
+    const lw = 120 * s, lx = ix - 90 * s - lw, ly = 140 * s;
+    ctx.fillStyle = rgba(c.brand, 0.15); ctx.fillRect(lx, ly, lw, 2 * s);
+    ctx.fillStyle = rgba(c.brand, 0.7); ctx.fillRect(lx, ly, lw * clamp(st.tSec / slidesDur(), 0, 1), 2 * s);
+    ctx.restore();
+  }
+}
+
+// ── Template: Showcase (white product card + info column) ──
+function drawShowcase(ctx, sw, sh, t) {
+  const c = getColors(), s = sw / EW, st = segInfo(t), sz = getSizes(s);
+  if (!st.n) return emptyFrame(ctx, sw, sh, c);
+  ctx.fillStyle = c.bg; ctx.fillRect(0, 0, sw, sh);
+
+  const cw = 720 * s, cx = 170 * s, cy = 96 * s;   // card bottom ≈ 830 → 좌하단 CTV 영역 비움
+  // soft glow behind card
+  const gl = ctx.createRadialGradient(cx + cw / 2, cy + cw / 2, cw * 0.1, cx + cw / 2, cy + cw / 2, cw * 0.9);
+  gl.addColorStop(0, rgba(c.highlight, 0.55)); gl.addColorStop(1, rgba(c.highlight, 0));
+  ctx.fillStyle = gl; ctx.fillRect(0, 0, sw, sh);
+
+  ctx.save(); ctx.beginPath(); ctx.rect(0, 0, 1010 * s, sh); ctx.clip();
+  const zoomOf = i => 1 + 0.035 * clamp((st.tSec - st.appear(i)) / st.segDur, 0, 1);
+  const off = 960 * s;
+  ctx.save(); ctx.globalAlpha = 1 - st.ease * 0.6;
+  drawProductCard(ctx, slides[st.curIdx], cx - st.ease * off, cy, cw, cw, s, c, zoomOf(st.curIdx));
+  ctx.restore();
+  if (st.isTrans) drawProductCard(ctx, slides[st.curIdx + 1], cx + (1 - st.ease) * off, cy, cw, cw, s, c, zoomOf(st.curIdx + 1));
+  ctx.restore();
+
+  // pagination dots
+  if (st.n > 1) {
+    const p = st.curIdx + st.ease, dy = cy + cw + 30 * s, gap = 44 * s;
+    const x0 = cx + cw / 2 - gap * (st.n - 1) / 2;
+    for (let i = 0; i < st.n; i++) {
+      const a = 1 - Math.min(1, Math.abs(i - p));
+      const w = (10 + 22 * a) * s, h = 10 * s;
+      rrPath(ctx, x0 + i * gap - w / 2, dy - h / 2, w, h, h / 2);
+      ctx.fillStyle = rgba(c.brand, 0.25 + 0.65 * a); ctx.fill();
+    }
+  }
+
+  const X = 1090 * s, maxW = sw - X - 120 * s;
+  const drawContent = (i, alpha, dx) => {
+    const sl = getSlideData(i);
+    ctx.save(); ctx.translate(dx, 0);
+    drawStack(ctx, [
+      itBadge(ctx, sl, c, X, sz.hl * 0.68, 'left', st, 0, 30 * s),
+      itBrand(ctx, sl, c, X, sz.brand * 0.66, 'left', s, 0, 18 * s),
+      itLines(ctx, sl.product, `800 ${sz.prod}px "Noto Sans KR",sans-serif`, sz.prod, 1.22, c.product, X, maxW, 2, 'left', 1, 18 * s),
+      itLines(ctx, sl.desc, `400 ${sz.desc * 0.92}px "Noto Sans KR",sans-serif`, sz.desc * 0.92, 1.5, c.desc, X, maxW, 2, 'left', 2, 36 * s),
+      itRule(ctx, c, X, 64 * s, s, 'left', 2, 34 * s),
+      itPrice(ctx, sl, c, X, sz.price * 0.78, 'left', maxW, st, i, 3, 40 * s),
+      itBenefit(ctx, c, X, 24 * s, 'left', st, 4, 0),
+    ], sh * 0.5, alpha, st, i, s);
+    ctx.restore();
+  };
+  drawContent(st.curIdx, st.isTrans ? clamp(1 - st.ease * 2.2, 0, 1) : 1, -st.ease * 40 * s);
+  if (st.isTrans) drawContent(st.curIdx + 1, 1, 0);
+}
+
+// ── Template: Carousel (product cards in a row, active one centred) ──
+function drawCarousel(ctx, sw, sh, t) {
+  const c = getColors(), s = sw / EW, st = segInfo(t), sz = getSizes(s);
+  if (!st.n) return emptyFrame(ctx, sw, sh, c);
+  const bg = ctx.createLinearGradient(0, 0, 0, sh);
+  bg.addColorStop(0, c.bg); bg.addColorStop(1, rgba('#000000', 1));
+  ctx.fillStyle = c.bg; ctx.fillRect(0, 0, sw, sh);
+  ctx.save(); ctx.globalAlpha = 0.35; ctx.fillStyle = bg; ctx.fillRect(0, 0, sw, sh); ctx.restore();
+  // floor glow under the active card
+  const fg = ctx.createRadialGradient(sw / 2, 420 * s, 40 * s, sw / 2, 420 * s, 620 * s);
+  fg.addColorStop(0, rgba(c.highlight, 0.5)); fg.addColorStop(1, rgba(c.highlight, 0));
+  ctx.fillStyle = fg; ctx.fillRect(0, 0, sw, sh);
+
+  const p = st.curIdx + st.ease, CW = 520 * s, cyc = 400 * s, spacing = 640 * s;
+  const order = slides.map((_, i) => i).sort((a, b) => Math.abs(b - p) - Math.abs(a - p));
+  order.forEach(i => {
+    const d = i - p, ad = Math.min(1.4, Math.abs(d));
+    const sc = 1 - 0.24 * Math.min(1, ad);
+    const w = CW * sc, x = sw / 2 + d * spacing - w / 2, y = cyc - w / 2;
+    ctx.save(); ctx.globalAlpha = 1 - 0.55 * Math.min(1, ad);
+    drawProductCard(ctx, slides[i], x, y, w, w, s, c, 1);
+    ctx.restore();
+  });
+
+  const drawContent = (i, alpha) => {
+    const sl = getSlideData(i);
+    const hb = itBadge(ctx, sl, c, sw / 2, sz.hl * 0.62, 'center', st, 0, 0);
+    if (hb) { const e = enterP(st, i, 0); ctx.save(); ctx.globalAlpha = alpha * e; hb.draw(cyc - CW / 2 - 40 * s - hb.h); ctx.restore(); }
+    const maxW = 820 * s;   // 가운데 정렬 폭을 줄여 좌하단 CTV 영역과 겹치지 않게
+    ctx.font = `800 ${sz.prod * 0.82}px "Noto Sans KR",sans-serif`;
+    const items = [
+      itBrand(ctx, sl, c, sw / 2, sz.brand * 0.6, 'center', s, 1, 16 * s),
+      sl.product ? { h: sz.prod * 0.82 * 1.2, gap: 20 * s, k: 1, draw: y => {
+        ctx.font = `800 ${sz.prod * 0.82}px "Noto Sans KR",sans-serif`;
+        ctx.fillStyle = c.product; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(truncateText(ctx, sl.product, maxW), sw / 2, y + sz.prod * 0.82 * 0.6);
+      }} : null,
+      itPrice(ctx, sl, c, sw / 2, sz.price * 0.68, 'center', maxW, st, i, 2, 26 * s),
+      itBenefit(ctx, c, sw / 2, 22 * s, 'center', st, 3, 0),
+    ];
+    drawStack(ctx, items, 850 * s, alpha, st, i, s);
+  };
+  drawContent(st.curIdx, st.isTrans ? clamp(1 - st.ease * 2.2, 0, 1) : 1);
+  if (st.isTrans) drawContent(st.curIdx + 1, 1);
+}
+
+
+// ── Template: Hero (full-screen cinematic image, story bars, text over gradient) ──
+function drawHero(ctx, sw, sh, t) {
+  const c = getColors(), s = sw / EW, st = segInfo(t), sz = getSizes(s);
+  if (!st.n) return emptyFrame(ctx, sw, sh, c);
+  ctx.fillStyle = c.bg; ctx.fillRect(0, 0, sw, sh);
+
+  // full-bleed image with slow push-in; next image cross-fades in while zooming
+  const drawImg = (i, alpha) => {
+    const u = clamp((st.tSec - st.appear(i)) / (st.segDur + 0.5), 0, 1);
+    const z = 1.04 + 0.08 * u, w = sw * z, h = sh * z;
+    ctx.save(); ctx.globalAlpha = alpha;
+    drawImgFit(ctx, slides[i], -(w - sw) / 2, -(h - sh) / 2, w, h);
+    ctx.restore();
+  };
+  drawImg(st.curIdx, 1);
+  if (st.isTrans) drawImg(st.curIdx + 1, st.ease);
+
+  // readability gradients tinted with the background colour
+  const gl = ctx.createLinearGradient(0, 0, sw * 0.62, 0);
+  gl.addColorStop(0, rgba(c.bg, 0.86)); gl.addColorStop(0.55, rgba(c.bg, 0.45)); gl.addColorStop(1, rgba(c.bg, 0));
+  ctx.fillStyle = gl; ctx.fillRect(0, 0, sw, sh);
+  const gb = ctx.createLinearGradient(0, sh * 0.6, 0, sh);
+  gb.addColorStop(0, rgba(c.bg, 0)); gb.addColorStop(1, rgba(c.bg, 0.5));
+  ctx.fillStyle = gb; ctx.fillRect(0, sh * 0.6, sw, sh * 0.4);
+  const gt = ctx.createLinearGradient(0, 0, 0, 200 * s);
+  gt.addColorStop(0, 'rgba(0,0,0,0.35)'); gt.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = gt; ctx.fillRect(0, 0, sw, 200 * s);
+
+  // story-style progress bars
+  const bx0 = 110 * s, bw = 760 * s, gap = 12 * s, bh = 4 * s, by = 56 * s;   // 우상단(모바일·PC CTA) 비움
+  const segW = (bw - gap * (st.n - 1)) / st.n;
+  for (let i = 0; i < st.n; i++) {
+    const f = clamp((st.tSec - i * st.segDur) / st.segDur, 0, 1);
+    const x = bx0 + i * (segW + gap);
+    rrPath(ctx, x, by, segW, bh, bh / 2); ctx.fillStyle = 'rgba(255,255,255,0.28)'; ctx.fill();
+    if (f > 0) { rrPath(ctx, x, by, Math.max(bh, segW * f), bh, bh / 2); ctx.fillStyle = 'rgba(255,255,255,0.95)'; ctx.fill(); }
+  }
+
+  const L = 110 * s, maxW = 820 * s;
+  const drawContent = (i, alpha, dy) => {
+    const sl = getSlideData(i);
+    ctx.save(); ctx.translate(0, dy);
+    const b = itBrand(ctx, sl, c, L, sz.brand * 0.66, 'left', s, 0, 0);
+    if (b) { const e = enterP(st, i, 0); ctx.save(); ctx.globalAlpha = alpha * e; b.draw(118 * s); ctx.restore(); }
+    drawStack(ctx, [
+      itBadge(ctx, sl, c, L, sz.hl * 0.7, 'left', st, 1, 28 * s),
+      itLines(ctx, sl.product, `800 ${sz.prod * 1.25}px "Noto Sans KR",sans-serif`, sz.prod * 1.25, 1.18, c.product, L, maxW, 2, 'left', 1, 18 * s),
+      itLines(ctx, sl.desc, `400 ${sz.desc}px "Noto Sans KR",sans-serif`, sz.desc, 1.5, c.desc, L, maxW * 0.8, 2, 'left', 2, 40 * s),
+      itPrice(ctx, sl, c, L, sz.price * 0.82, 'left', maxW, st, i, 3, 36 * s),
+      itBenefit(ctx, c, L, 26 * s, 'left', st, 4, 0),
+    ], sh * 0.5, alpha, st, i, s);   // 세로 가운데 → 좌하단(CTV CTA) 비움
+    ctx.restore();
+  };
+  drawContent(st.curIdx, st.isTrans ? clamp(1 - st.ease * 2.2, 0, 1) : 1, -st.ease * 30 * s);
+  if (st.isTrans) drawContent(st.curIdx + 1, 1, 0);
 }
 
 // ═══════════════════════════════════════════════════
@@ -1674,7 +2515,7 @@ function autoColor() {
     { bg:'#1f0a12', hl:'#be185d', price:'#ffffff', htext:'#f472b6', brand:'#ffffff', desc:'#fbcfe8', label:'로즈 다크' },
     { bg:'#0f172a', hl:'#3b82f6', price:'#ffffff', htext:'#60a5fa', brand:'#ffffff', desc:'#bfdbfe', label:'슬레이트 블루' },
     { bg:'#1e1b4b', hl:'#4338ca', price:'#ffffff', htext:'#fb923c', brand:'#ffffff', desc:'#c7d2fe', label:'인디고 오렌지' },
-    { bg:'#05050f', hl:'#2563eb', price:'#ffffff', htext:'#7c6bff', brand:'#ffffff', desc:'#c7d2fe', label:'일렉트릭 블루' },
+    { bg:'#05050f', hl:'#2563eb', price:'#ffffff', htext:'#FF1F4C', brand:'#ffffff', desc:'#c7d2fe', label:'일렉트릭 블루' },
     { bg:'#0d1117', hl:'#164e63', price:'#ffffff', htext:'#06b6d4', brand:'#ffffff', desc:'#a5f3fc', label:'건메탈 사이언' },
     { bg:'#2e1065', hl:'#7e22ce', price:'#ffffff', htext:'#bef264', brand:'#ffffff', desc:'#e9d5ff', label:'플럼 라임' },
     // ── Light backgrounds + dark text ──
@@ -1753,6 +2594,9 @@ function getMp4RecordingMime() {
 }
 
 async function generateVideo() {
+  if (!slides.length) { notify('먼저 ② 이미지 탭에서 상품 이미지를 추가해 주세요.'); goTab('image'); return; }
+  const issues = preflightIssues();
+  if (issues.length && !confirm('영상을 만들기 전에 확인해 주세요.\n\n• ' + issues.join('\n• ') + '\n\n그래도 영상을 생성할까요?')) { goTab('text'); return; }
   const btn = document.getElementById('genBtn');
   videoBlob = null;
   videoMime = 'video/mp4';
@@ -1863,245 +2707,6 @@ function downloadVideo() {
 }
 
 // ═══════════════════════════════════════════════════
-// VIDEO MERGE (영상 합치기)
-// ═══════════════════════════════════════════════════
-function formatDuration(sec) {
-  sec = Math.round(sec || 0);
-  const m = Math.floor(sec / 60), s = sec % 60;
-  return `${m}:${String(s).padStart(2, '0')}`;
-}
-function formatBytes(bytes) {
-  if (!bytes) return '0MB';
-  return (bytes / (1024 * 1024)).toFixed(1) + 'MB';
-}
-
-function onMergeDragOver(e) {
-  e.preventDefault();
-  document.getElementById('mergeUploadZone').classList.add('drag');
-}
-function onMergeDragLeave() {
-  document.getElementById('mergeUploadZone').classList.remove('drag');
-}
-function onMergeDrop(e) {
-  e.preventDefault();
-  document.getElementById('mergeUploadZone').classList.remove('drag');
-  processMergeFiles(Array.from(e.dataTransfer.files));
-}
-function onMergeFileInput(input) {
-  processMergeFiles(Array.from(input.files));
-  input.value = '';
-}
-
-async function processMergeFiles(files) {
-  const vidFiles = files.filter(f => f.type.startsWith('video/'));
-  const remaining = MERGE_MAX_CLIPS - mergeClips.length;
-  if (remaining <= 0) { notify(`영상은 최대 ${MERGE_MAX_CLIPS}개까지 추가할 수 있어요.`); return; }
-  const toAdd = vidFiles.slice(0, remaining);
-  if (vidFiles.length > remaining) notify(`최대 ${MERGE_MAX_CLIPS}개까지 가능해 ${vidFiles.length - remaining}개는 건너뛰었어요.`);
-
-  let curTotal = mergeClips.reduce((s, c) => s + c.file.size, 0);
-  for (const file of toAdd) {
-    if (file.size > MERGE_MAX_FILE_SIZE) { notify(`${file.name}: ${Math.round(MERGE_MAX_FILE_SIZE / 1024 / 1024)}MB 초과 파일은 업로드할 수 없어요.`); continue; }
-    if (curTotal + file.size > MERGE_MAX_TOTAL_SIZE) { notify(`전체 용량 한도(${Math.round(MERGE_MAX_TOTAL_SIZE / 1024 / 1024)}MB)를 초과해 ${file.name}은 건너뛰었어요.`); continue; }
-    curTotal += file.size;
-    await addMergeClip(file);
-  }
-}
-
-function addMergeClip(file) {
-  return new Promise(resolve => {
-    const url = URL.createObjectURL(file);
-    const v = document.createElement('video');
-    v.preload = 'metadata';
-    v.muted = true;
-    v.src = url;
-    const finish = (duration, thumb) => {
-      mergeClips.push({ file, name: file.name, url, duration: duration || 0, thumb: thumb || '' });
-      rebuildMergeCards();
-      updateMergeInfo();
-      resolve();
-    };
-    v.onloadedmetadata = () => { v.currentTime = Math.min(0.3, (v.duration || 0) / 2); };
-    v.onseeked = () => {
-      const tc = document.createElement('canvas');
-      tc.width = 160; tc.height = 90;
-      let thumb = '';
-      try { tc.getContext('2d').drawImage(v, 0, 0, 160, 90); thumb = tc.toDataURL('image/jpeg', 0.7); } catch (e) {}
-      finish(v.duration, thumb);
-    };
-    v.onerror = () => finish(0, '');
-  });
-}
-
-function rebuildMergeCards() {
-  const container = document.getElementById('mergeCards');
-  document.getElementById('mergeEmptyHint').style.display = mergeClips.length === 0 ? '' : 'none';
-  container.innerHTML = '';
-
-  mergeClips.forEach((c, i) => {
-    const upDis = i === 0 ? 'disabled style="opacity:.3;cursor:not-allowed"' : '';
-    const downDis = i === mergeClips.length - 1 ? 'disabled style="opacity:.3;cursor:not-allowed"' : '';
-    const card = document.createElement('div');
-    card.className = 'slide-card active';
-    card.innerHTML = `
-      <div class="sc-header" style="cursor:default">
-        <span class="mc-order">${i + 1}</span>
-        ${c.thumb ? `<img class="sc-thumb" src="${c.thumb}" alt="">` : `<div class="sc-thumb-empty">🎞️</div>`}
-        <div class="sc-info">
-          <span class="sc-name">${c.name}</span>
-          <span class="sc-sub">${formatDuration(c.duration)} · ${formatBytes(c.file.size)}</span>
-        </div>
-        <div class="sc-actions">
-          <button class="sc-btn" onclick="moveMergeClip(${i},-1)" ${upDis} title="위로">▲</button>
-          <button class="sc-btn" onclick="moveMergeClip(${i},1)" ${downDis} title="아래로">▼</button>
-          <button class="sc-btn" onclick="removeMergeClip(${i})" title="삭제">✕</button>
-        </div>
-      </div>
-    `;
-    container.appendChild(card);
-  });
-}
-
-function moveMergeClip(idx, dir) {
-  const j = idx + dir;
-  if (j < 0 || j >= mergeClips.length) return;
-  [mergeClips[idx], mergeClips[j]] = [mergeClips[j], mergeClips[idx]];
-  rebuildMergeCards();
-}
-function removeMergeClip(idx) {
-  const [removed] = mergeClips.splice(idx, 1);
-  if (removed) URL.revokeObjectURL(removed.url);
-  rebuildMergeCards();
-  updateMergeInfo();
-}
-
-function updateMergeInfo() {
-  const n = mergeClips.length;
-  document.getElementById('mergeInfoN').textContent = n + '개';
-  const totalDur = mergeClips.reduce((s, c) => s + (c.duration || 0), 0);
-  const totalSize = mergeClips.reduce((s, c) => s + c.file.size, 0);
-  document.getElementById('mergeInfoDur').textContent = n === 0 ? '—' : formatDuration(totalDur);
-  document.getElementById('mergeInfoSize').textContent = n === 0 ? '—' : formatBytes(totalSize);
-  document.getElementById('mergeGenBtn').disabled = n < 2;
-}
-
-function updateMergeProgress(pct, sub) {
-  const p = clamp(Math.round(pct), 0, 100);
-  document.getElementById('mergeProgPct').textContent = p + '%';
-  document.getElementById('mergeProgFill').style.width = p + '%';
-  document.getElementById('mergeProgSub').textContent = sub;
-}
-
-async function getFFmpeg() {
-  if (ffmpegInstance) return ffmpegInstance;
-  const { FFmpeg } = FFmpegWASM;
-  const ffmpeg = new FFmpeg();
-  ffmpeg.on('progress', ({ progress }) => {
-    updateMergeProgress(Math.round((progress || 0) * 100), '영상 합치는 중...');
-  });
-  const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd';
-  await ffmpeg.load({
-    coreURL: await FFmpegUtil.toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-    wasmURL: await FFmpegUtil.toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-  });
-  ffmpegInstance = ffmpeg;
-  return ffmpeg;
-}
-
-function extForClip(clip) {
-  const m = /\.([a-z0-9]+)$/i.exec(clip.name);
-  return m ? m[1].toLowerCase() : 'mp4';
-}
-
-function resetMergeBtn() {
-  const b = document.getElementById('mergeGenBtn');
-  b.disabled = mergeClips.length < 2;
-  b.innerHTML = '🔗 합치기 시작';
-}
-
-async function startMerge() {
-  if (mergeClips.length < 2) { notify('영상을 2개 이상 업로드해주세요.'); return; }
-
-  const btn = document.getElementById('mergeGenBtn');
-  mergedBlob = null;
-  document.getElementById('mergeDlBtn').disabled = true;
-  btn.disabled = true;
-  btn.innerHTML = '<div class="spinner"></div> 처리 중...';
-  document.getElementById('mergeProgOv').classList.add('show');
-  updateMergeProgress(0, 'FFmpeg 엔진 로딩 중...');
-
-  const written = [];
-  try {
-    const ffmpeg = await getFFmpeg();
-
-    const exts = mergeClips.map(extForClip);
-    for (let i = 0; i < mergeClips.length; i++) {
-      updateMergeProgress(0, `클립 ${i + 1}/${mergeClips.length} 불러오는 중...`);
-      const fname = `clip${i}.${exts[i]}`;
-      await ffmpeg.writeFile(fname, await FFmpegUtil.fetchFile(mergeClips[i].file));
-      written.push(fname);
-    }
-    const listText = written.map(f => `file '${f}'`).join('\n');
-    await ffmpeg.writeFile('concat.txt', new TextEncoder().encode(listText));
-
-    updateMergeProgress(0, '영상 합치는 중...');
-    let success = false;
-    try {
-      await ffmpeg.exec(['-f', 'concat', '-safe', '0', '-i', 'concat.txt', '-c', 'copy', 'output.mp4']);
-      const check = await ffmpeg.readFile('output.mp4');
-      if (check && check.length > 1000) success = true;
-    } catch (e) { success = false; }
-
-    if (!success) {
-      updateMergeProgress(0, '형식이 달라 재인코딩하는 중...');
-      const inputs = [];
-      written.forEach(f => inputs.push('-i', f));
-      const filterParts = mergeClips.map((_, i) => `[${i}:v:0][${i}:a:0]`).join('');
-      const filter = `${filterParts}concat=n=${mergeClips.length}:v=1:a=1[outv][outa]`;
-      await ffmpeg.exec([
-        ...inputs,
-        '-filter_complex', filter,
-        '-map', '[outv]', '-map', '[outa]',
-        '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20',
-        '-c:a', 'aac',
-        'output.mp4'
-      ]);
-    }
-
-    const data = await ffmpeg.readFile('output.mp4');
-    mergedBlob = new Blob([data.buffer], { type: 'video/mp4' });
-
-    const video = document.getElementById('mergePreview');
-    video.src = URL.createObjectURL(mergedBlob);
-    video.style.display = '';
-    document.getElementById('mergePlaceholder').style.display = 'none';
-    document.getElementById('mergeDlBtn').disabled = false;
-    notify('✅ 영상 합치기 완료!');
-
-    for (const f of [...written, 'concat.txt', 'output.mp4']) {
-      try { await ffmpeg.deleteFile(f); } catch (e) {}
-    }
-  } catch (e) {
-    console.error(e);
-    notify('❌ 영상 합치기에 실패했어요. 형식을 확인하고 다시 시도해주세요.');
-  } finally {
-    document.getElementById('mergeProgOv').classList.remove('show');
-    resetMergeBtn();
-  }
-}
-
-function downloadMergedVideo() {
-  if (!mergedBlob) return;
-  const url = URL.createObjectURL(mergedBlob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `merged_${Date.now()}.mp4`;
-  a.click();
-  URL.revokeObjectURL(url);
-  notify('✅ MP4 다운로드를 시작했어요.');
-}
-
-// ═══════════════════════════════════════════════════
 // UI HELPERS
 // ═══════════════════════════════════════════════════
 function switchTab(name, btn) {
@@ -2109,27 +2714,28 @@ function switchTab(name, btn) {
   btn.classList.add('on');
   document.querySelectorAll('.ltab-panel').forEach(p => p.classList.remove('on'));
   document.getElementById('tp-'+name).classList.add('on');
+  _visited[name] = true;
+  updateSteps();
 }
 
 function switchWorkspace(name, btn) {
   document.querySelectorAll('.ws-tab').forEach(t => t.classList.remove('on'));
   btn.classList.add('on');
+  const isAd = name === 'ad';
+  document.getElementById('wsAd').classList.toggle('on', isAd);
+  document.getElementById('wsDa').classList.toggle('on', !isAd);
+  document.getElementById('specBadgesAd').style.display = isAd ? 'flex' : 'none';
 
-  document.getElementById('wsAd').classList.toggle('on', name === 'ad');
-  document.getElementById('wsMerge').classList.toggle('on', name === 'merge');
-  document.getElementById('specBadgesAd').style.display = name === 'ad' ? 'flex' : 'none';
-  document.getElementById('specBadgesMerge').style.display = name === 'merge' ? 'flex' : 'none';
-  document.getElementById('topRightAd').style.display = name === 'ad' ? 'flex' : 'none';
-  document.getElementById('topRightMerge').style.display = name === 'merge' ? 'flex' : 'none';
-
-  if (name !== 'ad') {
+  document.getElementById('topRightAd').style.display = isAd ? 'flex' : 'none';
+  if (!isAd) {
+    document.getElementById('tourWrap').classList.add('tour-hidden');
     if (isPlaying) togglePreview();
     stopMusic();
+    closeTplGuide();
+    const f = document.getElementById('daFrame');
+    if (!f.src) f.src = 'da/index.html';   // lazy-load once; state is kept while switching tabs
   }
-  if (name !== 'merge') {
-    const v = document.getElementById('mergePreview');
-    if (v) v.pause();
-  }
+  try { history.replaceState(null, '', isAd ? location.pathname : '#da'); } catch (e) {}
 }
 
 function updateC(input, labelId) {
@@ -2140,27 +2746,35 @@ function updateC(input, labelId) {
 function updateInfo() {
   const n = slides.length;
   document.getElementById('infoN').textContent = n + '장';
-  document.getElementById('infoDur').textContent = n === 0 ? '—' : n === 1 ? '15초' : n === 2 ? '각 7.5초' : '각 5초';
+  document.getElementById('infoDur').textContent = n === 0 ? '—' : (n === 1 ? '' : '각 ') + (Math.round(slidesDur() / n * 10) / 10) + '초' + (endcardOn() ? ' + 엔드카드 2초' : '');
 }
 
 function updateTimeline() {
   const bar = document.getElementById('tlBar');
   const n = Math.max(slides.length, 1);
-  const colors = ['#7c6bff','#ff5f87','#4ade80'];
+  const colors = ['#FF1F4C','#D81B60','#8E3AAF'];
   bar.innerHTML = '';
   for (let i = 0; i < Math.min(slides.length, 3); i++) {
     const seg = document.createElement('div');
     seg.className = 'tl-seg';
-    seg.style.width = (100/n)+'%';
+    seg.style.width = (100 / n * slidesDur() / DUR) + '%';
     seg.style.background = colors[i];
     seg.textContent = `슬라이드 ${i+1}`;
+    bar.appendChild(seg);
+  }
+  if (slides.length && endcardOn()) {
+    const seg = document.createElement('div');
+    seg.className = 'tl-seg';
+    seg.style.width = (100 * ECD / DUR) + '%';
+    seg.style.background = '#f59e0b';
+    seg.textContent = '엔드';
     bar.appendChild(seg);
   }
   if (slides.length === 0) {
     const seg = document.createElement('div');
     seg.className = 'tl-seg';
     seg.style.width = '100%';
-    seg.style.background = '#1e1e2e';
+    seg.style.background = '#D5D5DB'; seg.style.color = '#77777F';
     seg.textContent = '이미지 없음';
     bar.appendChild(seg);
   }
@@ -2183,21 +2797,21 @@ function clamp(v,a,b)  { return Math.max(a, Math.min(b, v)); }
 // GUIDED TOUR
 // ═══════════════════════════════════════════════════
 const TOUR_STEPS = [
-  { sel: '#uploadZone',         tip: 'right',  pad: 8,
-    title: '📁 이미지 업로드',
+  { sel: '.ltabs',              tip: 'right',  pad: 6, tab: 'style',
+    title: '🗂 4단계로 만들어요',
+    desc: '① 스타일에서 템플릿과 색상을 고르고\n② 이미지에서 상품 사진을 올리고\n③ 텍스트에서 상품 정보를 넣고\n④ 음악에서 배경음악을 고르면 끝이에요.' },
+  { sel: '.tpl-grid',           tip: 'right',  pad: 6, tab: 'style',
+    title: '① 템플릿 선택',
+    desc: '광고 레이아웃을 4가지 중에서 골라요.\n제목 옆 "📖 가이드"를 누르면 템플릿별 예시와\n이미지·문구 작성법을 볼 수 있어요.' },
+  { sel: '#uploadZone',         tip: 'right',  pad: 8, tab: 'image',
+    title: '② 이미지 업로드',
     desc: '여기에 광고 이미지를 올려주세요.\nJPG · PNG · WEBP, 최대 3장까지 드래그 앤 드롭도 가능해요.' },
-  { sel: '.ltabs',              tip: 'right',  pad: 6,
-    title: '🗂 탭 전환',
-    desc: '소재 입력 탭에서 슬라이드별 텍스트를 입력하고,\n스타일 탭에서 색상 · 폰트 크기,\n음악 탭에서 배경음악을 설정해요.' },
   { sel: '.cwrap',              tip: 'right',  pad: 10,
     title: '▶ 미리보기',
     desc: '재생 버튼(▶)을 눌러 15초 광고 영상을 미리 볼 수 있어요.\n슬라이더로 원하는 시점으로 이동도 가능해요.' },
   { sel: '#genBtn',             tip: 'bottom', pad: 6,
     title: '🎬 영상 생성',
     desc: '설정이 끝나면 이 버튼을 눌러 MP4 영상을 렌더링해요.\nChrome 또는 Edge 최신 버전을 권장합니다.' },
-  { sel: '.topbar-right a.btn', tip: 'bottom', pad: 6,
-    title: '📄 상세 가이드 PDF',
-    desc: '자세한 사용법과 팁이 정리된 PDF 가이드를\n여기서 다운받을 수 있어요.' },
 ];
 
 let _tourStep = 0;
@@ -2210,6 +2824,7 @@ function tourShow() {
 function _tourGoTo(i) {
   _tourStep = i;
   const step = TOUR_STEPS[i];
+  if (step.tab) goTab(step.tab);
   const el = document.querySelector(step.sel);
   if (!el) { i < TOUR_STEPS.length - 1 ? _tourGoTo(i + 1) : tourClose(); return; }
 
@@ -2255,6 +2870,7 @@ function tourPrev() {
 }
 function tourClose() {
   document.getElementById('tourWrap').classList.add('tour-hidden');
+  goTab('style');
 }
 function tourSkipToday() {
   localStorage.setItem('tourHiddenDate', new Date().toDateString());
