@@ -538,25 +538,25 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 10px 34px rgba(
 
       <div class="cgrid">
         <div class="ci"><label>배경</label>
-          <div class="crow"><input type="color" id="cBg" value="#0d1b4b" oninput="updateC(this,'cBgL')"><span id="cBgL">#0d1b4b</span></div></div>
+          <div class="crow"><input type="color" id="cBg" value="#f3efe8" oninput="updateC(this,'cBgL')"><span id="cBgL">#f3efe8</span></div></div>
         <div class="ci"><label>강조 / 구분선</label>
-          <div class="crow"><input type="color" id="cHighlight" value="#3a4a8a" oninput="updateC(this,'cHL')"><span id="cHL">#3a4a8a</span></div></div>
+          <div class="crow"><input type="color" id="cHighlight" value="#b08d57" oninput="updateC(this,'cHL')"><span id="cHL">#b08d57</span></div></div>
         <div class="ci"><label>가격 색상</label>
-          <div class="crow"><input type="color" id="cPrice" value="#ffffff" oninput="updateC(this,'cPL')"><span id="cPL">#ffffff</span></div></div>
+          <div class="crow"><input type="color" id="cPrice" value="#111111" oninput="updateC(this,'cPL')"><span id="cPL">#111111</span></div></div>
         <div class="ci"><label>강조 문구</label>
-          <div class="crow"><input type="color" id="cHText" value="#00e5a0" oninput="updateC(this,'cHTL')"><span id="cHTL">#00e5a0</span></div></div>
+          <div class="crow"><input type="color" id="cHText" value="#c8102e" oninput="updateC(this,'cHTL')"><span id="cHTL">#c8102e</span></div></div>
       </div>
 
       <div class="hdiv"></div>
       <div class="sh" style="margin-top:0">텍스트 색상</div>
       <div class="cgrid">
         <div class="ci"><label>브랜드명 · 제품명</label>
-          <div class="crow"><input type="color" id="cBrand" value="#ffffff" oninput="updateC(this,'cBrL');document.getElementById('cProduct').value=this.value;render()"><span id="cBrL">#ffffff</span></div></div>
+          <div class="crow"><input type="color" id="cBrand" value="#1b1b1b" oninput="updateC(this,'cBrL');document.getElementById('cProduct').value=this.value;render()"><span id="cBrL">#1b1b1b</span></div></div>
         <div class="ci"><label>설명 문구</label>
-          <div class="crow"><input type="color" id="cDesc" value="#c8d0e8" oninput="updateC(this,'cDL')"><span id="cDL">#c8d0e8</span></div></div>
+          <div class="crow"><input type="color" id="cDesc" value="#6e675e" oninput="updateC(this,'cDL')"><span id="cDL">#6e675e</span></div></div>
       </div>
       <!-- hidden product color synced with brand -->
-      <input type="color" id="cProduct" value="#ffffff" style="display:none">
+      <input type="color" id="cProduct" value="#1b1b1b" style="display:none">
       <!-- hidden line color synced with highlight -->
 
 
@@ -1736,7 +1736,8 @@ function toggleExample() {
   };
   _exAnim = requestAnimationFrame(tick);
 }
-function applyExColors(name) {
+let _colorsTouched = false;   // 사용자가 색을 직접 바꾸면 템플릿 변경 시 덮어쓰지 않음
+function applyExColors(name, silent) {
   const c = EX_COLORS[name];
   [['cBg', 'cBgL', c.bg], ['cHighlight', 'cHL', c.highlight], ['cPrice', 'cPL', c.price],
    ['cHText', 'cHTL', c.htext], ['cBrand', 'cBrL', c.brand], ['cDesc', 'cDL', c.desc]].forEach(([id, lid, v]) => {
@@ -1745,7 +1746,7 @@ function applyExColors(name) {
   });
   const p = document.getElementById('cProduct'); if (p) p.value = c.brand;
   render();
-  notify(`${TPL_GUIDE[name].name} 예시 색상을 적용했어요.`);
+  if (!silent) { _colorsTouched = false; notify(`${TPL_GUIDE[name].name} 예시 색상을 적용했어요.`); }
 }
 function exampleHTML(name) {
   const e = EX_TEXT[0], fmt = v => (+v).toLocaleString('ko-KR');
@@ -1773,6 +1774,7 @@ function goTab(name) {
 
 function pickTpl(btn, name) {
   curTpl = name;
+  if (!_colorsTouched) applyExColors(name, true);   // 기본 색 = 템플릿 베스트 예시 색
   document.querySelectorAll('.tpl-btn').forEach(b => b.classList.toggle('on', b === btn));
   renderTplGuide(name);
   rebuildCards();
@@ -2502,6 +2504,7 @@ function buildMusic(name, ac, dest, st, dur) {
 
 // ── Auto Color from first uploaded image ──────────
 function autoColor() {
+  _colorsTouched = true;
   // Curated palette library: [bg, highlight, price, htext, brand, desc]
   // Includes dark bg, light bg + dark text, and gradient-style suggestions
   const PALETTES = [
@@ -2739,6 +2742,7 @@ function switchWorkspace(name, btn) {
 }
 
 function updateC(input, labelId) {
+  _colorsTouched = true;
   document.getElementById(labelId).textContent = input.value;
   render();
 }
