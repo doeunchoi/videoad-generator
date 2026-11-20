@@ -532,9 +532,10 @@ canvas#c{border-radius:10px;box-shadow:0 0 0 1px var(--border),0 10px 34px rgba(
       <div class="sh" style="margin-top:0">색상 설정</div>
 
       <!-- Auto color button -->
-      <button class="btn" style="width:100%;justify-content:center;font-size:11px;margin-bottom:12px" onclick="autoColor()">
-        🎲 랜덤 색상 조합 적용
-      </button>
+      <div style="display:flex;gap:6px;margin-bottom:12px">
+        <button class="btn" style="flex:1;justify-content:center;font-size:11px" onclick="autoColor()">🎲 랜덤 색상 조합 적용</button>
+        <button class="btn" style="flex:0 0 auto;justify-content:center;font-size:11px" onclick="resetColors()" title="지금 템플릿의 기본(베스트 예시) 색상으로 되돌려요">↺ 기본 색으로</button>
+      </div>
 
       <div class="cgrid">
         <div class="ci"><label>배경</label>
@@ -1716,7 +1717,9 @@ function drawExample(name, t) {
   const cv = document.getElementById('tgExCv');
   if (!cv) return;
   const s0 = slides, t0 = curTpl;
-  slides = exSlides(name); curTpl = name; _exColors = EX_COLORS[name];
+  // 색을 직접 정했으면(랜덤 조합 포함) 예시도 그 색으로, 아니면 템플릿 기본(예시) 색으로
+  const col = _colorsTouched ? Object.assign({}, getColors()) : EX_COLORS[name];
+  slides = exSlides(name); curTpl = name; _exColors = col;
   try { drawFrame(cv.getContext('2d'), cv.width, cv.height, t); }
   finally { slides = s0; curTpl = t0; _exColors = null; }
 }
@@ -1757,7 +1760,6 @@ function exampleHTML(name) {
       <canvas id="tgExCv" width="768" height="432" onclick="toggleExample()" title="클릭하면 재생/정지"></canvas>
       <div class="tg-ex-bar">
         <button class="btn" id="tgExPlay" onclick="toggleExample()">▶ 예시 재생</button>
-        <button class="btn" onclick="applyExColors('${name}')">🎨 이 색상 조합 적용</button>
       </div>
       <div class="tg-ex-in"><b>예시 입력값</b> (슬라이드 1)<br>
         이미지: ${imgDesc} 3장 · 브랜드: 메종 루미에르<br>
@@ -2554,6 +2556,7 @@ function autoColor() {
   set('cDesc',      'cDL',   p.desc);
 
   render();
+  refreshExample();
   notify(`🎨 "${p.label}" 팔레트 적용됐어요!`);
 }
 function toHex(n) { return Math.max(0,Math.min(255,Math.round(n))).toString(16).padStart(2,'0'); }
@@ -2745,6 +2748,18 @@ function updateC(input, labelId) {
   _colorsTouched = true;
   document.getElementById(labelId).textContent = input.value;
   render();
+  refreshExample();
+}
+// 현재 템플릿의 기본(예시) 색으로 되돌리고, 이후 템플릿을 바꾸면 다시 기본 색을 따라감
+function resetColors() {
+  _colorsTouched = false;
+  applyExColors(curTpl, true);
+  refreshExample();
+  notify(`${TPL_GUIDE[curTpl].name} 기본 색상으로 되돌렸어요.`);
+}
+// 템플릿 가이드가 열려 있으면 예시도 현재 색으로 다시 그림 (재생 중이면 다음 프레임에 자동 반영)
+function refreshExample() {
+  if (_exName && !_exAnim && document.getElementById('tgExCv')) drawExample(_exName, 0.2);
 }
 
 function updateInfo() {
